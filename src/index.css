@@ -13,17 +13,43 @@
   .card {    
     width: 60%;
     border: 3px solid #d50017;
-    aspect-ratio: 1.8 /  1;
+    aspect-ratio: 1.8 / 1;
     border-top-left-radius: 999px;
     border-top-right-radius: 999px;
     margin-top: 300px;
     box-shadow:
       0 0 0.2rem #fff,
-      0 0 0.2rem #fff,
       0 0 2rem #d50017,
       0 0 0.8rem #d50017,
       0 0 2.8rem #d50017,
       inset 0 0 1.3rem #d50017;
-  
+    animation: card-red-glow 5s ease-in-out infinite;
+  }
+
+  @keyframes card-red-glow {
+    0% {    
+      box-shadow:
+        0 0 0.2rem #fff,
+        0 0 2rem #d50017,
+        0 0 0.8rem #d50017,
+        0 0 2.8rem #d50017,
+        inset 0 0 1.3rem #d50017;
+    }
+    50% {
+      box-shadow:
+        0 0 0.2rem #fff,
+        0 0 4rem #d50017,
+        0 0 0.8rem #d50017,
+        0 0 2.8rem #d50017,
+        inset 0 0 4rem #d50017;
+    }
+    100% {    
+      box-shadow:
+        0 0 0.2rem #fff,
+        0 0 2rem #d50017,
+        0 0 0.8rem #d50017,
+        0 0 2.8rem #d50017,
+        inset 0 0 1.3rem #d50017;
+    }
   }
 }
