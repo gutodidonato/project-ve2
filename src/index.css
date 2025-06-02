@@ -1,0 +1,29 @@
+@import "tailwindcss";
+
+
+@theme {
+    --color-vermelho: #d50017;
+    --color-escuro-vermelho: #1d0000;
+    --background-color: #f5f7fa;
+    --text-color: #333333;
+
+}
+
+@layer components {
+  .card {    
+    width: 60%;
+    border: 3px solid #d50017;
+    aspect-ratio: 1.8 /  1;
+    border-top-left-radius: 999px;
+    border-top-right-radius: 999px;
+    margin-top: 300px;
+    box-shadow:
+      0 0 0.2rem #fff,
+      0 0 0.2rem #fff,
+      0 0 2rem #d50017,
+      0 0 0.8rem #d50017,
+      0 0 2.8rem #d50017,
+      inset 0 0 1.3rem #d50017;
+  
+  }
+}
