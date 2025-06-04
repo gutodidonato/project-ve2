@@ -4,6 +4,7 @@
 @theme {
     --color-vermelho: #d50017;
     --color-escuro-vermelho: #1d0000;
+    --color-fundo-card: #05132bbf;
     --background-color: #f5f7fa;
     --text-color: #333333;
 
@@ -11,12 +12,12 @@
 
 @layer components {
   .card {    
-    width: 60%;
+    width: 65%;
     border: 3px solid #d50017;
     aspect-ratio: 1.8 / 1;
     border-top-left-radius: 999px;
     border-top-right-radius: 999px;
-    margin-top: 300px;
+    margin-top: 330px;
     box-shadow:
       0 0 0.2rem #fff,
       0 0 2rem #d50017,
@@ -24,6 +25,10 @@
       0 0 2.8rem #d50017,
       inset 0 0 1.3rem #d50017;
     animation: card-red-glow 5s ease-in-out infinite;
+  }
+
+  .radiant-vermelho{
+    background: radial-gradient(circle,rgba(122, 0, 0, 1) 0%, rgba(84, 0, 0, 1) 26%, rgba(40, 0, 0, 1) 52%, rgba(17, 0, 0, 1) 73%, rgba(0, 0, 0, 1) 100%);
   }
 
   @keyframes card-red-glow {
