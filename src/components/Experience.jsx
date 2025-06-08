@@ -1,7 +1,9 @@
 import { useGLTF, useScroll } from '@react-three/drei';
+import { OrbitControls } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect } from 'react';
 import gsap from 'gsap';
+import * as THREE from 'three';
 
 const Model = () => {
   const { scene } = useGLTF('/models/delorean_dmc12__retro_wave_art.glb');
@@ -10,76 +12,105 @@ const Model = () => {
     scene.traverse((child) => {
       if (child.isMesh) {
         child.material.emissiveIntensity = 1.5;
-        child.material.toneMapped = false; 
+        child.material.toneMapped = false;
       }
     });
   }, [scene]);
 
   return <primitive object={scene} scale={1.0} />;
 };
-
 export const Experience = () => {
   const meshRef = useRef();
   const lightRef = useRef();
   const scroll = useScroll();
-  const [animated, setAnimated] = useState(false);
+  const fadePlaneRef = useRef();
 
-  useFrame((state, delta) => {
-    const y = scroll.offset; 
 
-    if (meshRef.current && !animated) {
-      meshRef.current.rotation.y += delta * 0;
+  const lightAnimatedRef = useRef(false);
+
+  const cameraStages = [
+    {
+      start: 0.0,
+      end: 0.25,
+      from: new THREE.Vector3(12, -0.78, -7),
+      to: new THREE.Vector3(15.66, -0.83, -6.31),
+      lookFrom: new THREE.Vector3(0, 0, 0),
+      lookTo: new THREE.Vector3(1, 0, 0),
+    },
+    {
+      start: 0.25,
+      end: 0.5,
+      from: new THREE.Vector3(15.66, -0.83, -6.31),
+      to: new THREE.Vector3(0.62, 0.62, 15.58),
+      lookFrom: new THREE.Vector3(1, 0, 0),
+      lookTo: new THREE.Vector3(0, 0, 0),
+    },
+    {
+      start: 0.5,
+      end: 0.75,
+      from: new THREE.Vector3(0.62, 0.62, 15.58),
+      to: new THREE.Vector3(-7.41, -0.57, 4.47),
+      lookFrom: new THREE.Vector3(0, 0, 0),
+      lookTo: new THREE.Vector3(0, 1, 0),
+    },
+    {
+      start: 0.75,
+      end: 1.0,
+      from: new THREE.Vector3(-7.41, -0.57, 4.47),
+      to: new THREE.Vector3(-30, 3, -7),
+      lookFrom: new THREE.Vector3(0, 1, 0),
+      lookTo: new THREE.Vector3(10, 3, 3),
+    },
+  ];
+
+  useFrame((state) => {
+    const y = scroll.offset;
+
+    for (const stage of cameraStages) {
+      if (y >= stage.start && y <= stage.end) {
+        const t = (y - stage.start) / (stage.end - stage.start);
+
+        const newPosition = new THREE.Vector3().lerpVectors(stage.from, stage.to, t);
+        const newLookAt = new THREE.Vector3().lerpVectors(stage.lookFrom, stage.lookTo, t);
+
+        state.camera.position.copy(newPosition);
+        state.camera.lookAt(newLookAt);
+        break;
+      }
     }
 
 
-    state.camera.position.set(2, 4 - y * 10, 10);
-    state.camera.lookAt(0, 0, 0);
-
-
-    if (y > 0.4 && !animated) {
-      setAnimated(true); 
-
-      gsap.to(meshRef.current.position, {
-        x: 1,
-        duration: 1.5,
-        ease: 'power2.out',
-      });
-
-      // Anima a luz
-      gsap.to(lightRef.current.position, {
-        x: -2,
-        y: 8,
-        duration: 1.2,
-        ease: 'power2.out',
-      });
-
-      // Opcional: mudar cor ou intensidade da luz
-      gsap.to(lightRef.current, {
-        intensity: 2,
-        duration: 1.5,
-        ease: 'power2.out',
-      });
+    if (y > 0.3 && !lightAnimatedRef.current) {
+      lightAnimatedRef.current = true;
+      gsap.to(lightRef.current.position, { x: -2, y: 8, duration: 1.2, ease: 'power2.out' });
+      gsap.to(lightRef.current, { intensity: 2, duration: 1.5, ease: 'power2.out' });
+    }
+    if (y < 0.3 && lightAnimatedRef.current) {
+      lightAnimatedRef.current = false;
+      gsap.to(lightRef.current.position, { x: 3, y: 5, duration: 1.2, ease: 'power2.inOut' });
+      gsap.to(lightRef.current, { intensity: 1, duration: 1.2, ease: 'power2.inOut' });
     }
 
-    // Se quiser resetar quando voltar:
-    if (y < 0.45 && animated) {
-      setAnimated(false);
 
-      gsap.to(meshRef.current.position, { x: 0, duration: 1 });
-      gsap.to(lightRef.current.position, { x: 3, y: 5, duration: 1 });
-      gsap.to(lightRef.current, { intensity: 1, duration: 1 });
+    if (fadePlaneRef.current) {
+      const camera = state.camera;
+      fadePlaneRef.current.position.copy(camera.position).add(camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(1));
+      fadePlaneRef.current.quaternion.copy(camera.quaternion);
+
+      // fade de 0 até 1 conforme o scroll chega em 1
+      fadePlaneRef.current.material.opacity = THREE.MathUtils.clamp((y - 0.8) / 0.2, 0, 1);
     }
-  });
+
+  })
 
   return (
     <>
       <ambientLight intensity={1} />
-      <directionalLight
-        ref={lightRef}
-        position={[0, 10, 1]}
-        intensity={1}
-        castShadow
-      />
+      <directionalLight ref={lightRef} position={[3, 5, 1]} intensity={1} castShadow />
+      <mesh ref={fadePlaneRef} position={[0, 0, 0]}>
+        <planeGeometry args={[100, 100]} />
+        <meshBasicMaterial color="black" transparent opacity={0} />
+      </mesh>
       <group ref={meshRef} position={[0, -1.5, 0]}>
         <Model />
       </group>
