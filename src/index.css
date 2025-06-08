@@ -11,50 +11,12 @@
 }
 
 @layer components {
-  .card {    
-    width: 65%;
-    border: 3px solid #d50017;
-    aspect-ratio: 1.8 / 1;
-    border-top-left-radius: 999px;
-    border-top-right-radius: 999px;
-    margin-top: 330px;
-    box-shadow:
-      0 0 0.2rem #fff,
-      0 0 2rem #d50017,
-      0 0 0.8rem #d50017,
-      0 0 2.8rem #d50017,
-      inset 0 0 1.3rem #d50017;
-    animation: card-red-glow 5s ease-in-out infinite;
+  #root {
+    width: 100vw;
+    height: 100vh;
   }
 
-  .radiant-vermelho{
-    background: radial-gradient(circle,rgba(122, 0, 0, 1) 0%, rgba(84, 0, 0, 1) 26%, rgba(40, 0, 0, 1) 52%, rgba(17, 0, 0, 1) 73%, rgba(0, 0, 0, 1) 100%);
-  }
-
-  @keyframes card-red-glow {
-    0% {    
-      box-shadow:
-        0 0 0.2rem #fff,
-        0 0 2rem #d50017,
-        0 0 0.8rem #d50017,
-        0 0 2.8rem #d50017,
-        inset 0 0 1.3rem #d50017;
-    }
-    50% {
-      box-shadow:
-        0 0 0.2rem #fff,
-        0 0 4rem #d50017,
-        0 0 0.8rem #d50017,
-        0 0 2.8rem #d50017,
-        inset 0 0 4rem #d50017;
-    }
-    100% {    
-      box-shadow:
-        0 0 0.2rem #fff,
-        0 0 2rem #d50017,
-        0 0 0.8rem #d50017,
-        0 0 2.8rem #d50017,
-        inset 0 0 1.3rem #d50017;
-    }
+  body {
+    margin: 0;
   }
 }
