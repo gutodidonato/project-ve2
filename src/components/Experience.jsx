@@ -4,6 +4,7 @@ import { useRef, useEffect, useState } from 'react';
 import gsap from 'gsap';
 import * as THREE from 'three';
 import {Car} from "./Car";
+import {ProjectsModel} from "./ProjectsModel";
 
 export const Experience = () => {
   const meshRef = useRef();
@@ -56,7 +57,15 @@ export const Experience = () => {
       from: new THREE.Vector3(-7.41, 10, 10),
       to: new THREE.Vector3(2, 1, 0),
       lookFrom: new THREE.Vector3(0, 1, 0),
-      lookTo: new THREE.Vector3(6, -5, -3),
+      lookTo: new THREE.Vector3(5, -4, -3),
+    },
+    {
+      start: (1.00)/2,
+      end:(3.00)/2,
+      from: new THREE.Vector3(2, 1, 0),
+      to: new THREE.Vector3(2, 1, 0),
+      lookFrom: new THREE.Vector3(5, -4, -3),
+      lookTo: new THREE.Vector3(5, -4, -3),
     },
 
   ];
@@ -105,6 +114,8 @@ export const Experience = () => {
         fadePlaneRef.current.material.opacity = THREE.MathUtils.clamp(1 - (y - 0.5) / 0.2, 0, 1);
       }
     }
+
+
   
       
 
@@ -121,6 +132,9 @@ export const Experience = () => {
       </mesh>
       <group ref={meshRef} position={[0, -1.5, 0]}>
         <Car opacity={modelOpacity} />
+      </group>
+      <group position={[5, -4, -3]}>
+        <ProjectsModel/>
       </group>
     </>
   );
