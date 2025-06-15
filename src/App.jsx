@@ -6,7 +6,6 @@ import ScrollManager from "./components/ScrollManager";
 import Menu from "./components/Menu"
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import CardCarrossel from "./components/CardCarrossel";
-import { Wall } from "./components/Wall";
 import Experience from './components/Experience';
 import Navbar from './components/Navbar';
 
@@ -15,7 +14,7 @@ function App() {
   const [menuOpened, setMenuOpened] = useState(false);
   const [page, setPage] = useState(0)
 
-  let intensity = (section == 0 || section == 1)? 0 : 2;
+  let intensity = (section == 0 || section == 1)? 0 : section/3;
 
   return (
     <>
