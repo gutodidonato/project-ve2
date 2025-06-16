@@ -41,14 +41,14 @@ export const ProjectsModel = (props) => {
     if (!meshRef.current) return;
 
     const scrollY = scroll.offset;
-    const targetScale = scrollY/1.9;
+    const targetScale = (scrollY < 0.7/2)? ((scrollY - 0.5/2)*5) : 0.5;
 
     scaleRef.current = targetScale;
      if (meshRef.current) {
-      meshRef.current.rotation.y = Math.PI * 1.83;
-      meshRef.current.rotation.x =  Math.PI * 1.69;
-      meshRef.current.rotation.z =  Math.PI * 1.8;
-    }
+        meshRef.current.rotation.y = Math.PI * 1.83;
+        meshRef.current.rotation.x =  Math.PI * 1.69;
+        meshRef.current.rotation.z =  Math.PI * 1.8;
+      }
     meshRef.current.scale.setScalar(scaleRef.current); 
     });
 

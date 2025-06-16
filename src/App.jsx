@@ -18,9 +18,10 @@ function App() {
 
   return (
     <>
+      <div className="relative w-screen h-screen bg-gradient-to-b from-red-500 to-black">
+
       <Canvas shadows camera={{ position: [3, 3, 3], fov: 30 }}>
-        <color attach="background" args={['#000000']}/>
-        <ScrollControls pages={8} damping={0.1}>
+        <ScrollControls pages={16} damping={0.1}>
           <ScrollManager section={section} onSectionChange={setSection}/>
           <EffectComposer>
           <Experience/>
@@ -39,6 +40,7 @@ function App() {
             menuOpened = {menuOpened}
             setMenuOpened = {setMenuOpened}
             />
+            </div>
     </>
   );
     
