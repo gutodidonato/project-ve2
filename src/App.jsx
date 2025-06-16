@@ -12,13 +12,14 @@ import Navbar from './components/Navbar';
 function App() {
   const [section, setSection] = useState(0);
   const [menuOpened, setMenuOpened] = useState(false);
-  const [page, setPage] = useState(0)
+  const [color, setColor] = useState("bg-black")
+
 
   let intensity = (section == 0 || section == 1)? 0 : section/3;
 
   return (
     <>
-      <div className="relative w-screen h-screen bg-gradient-to-b from-red-500 to-black">
+      <div className={`relative w-screen h-screen bg-gradient-to-b ${color}`}>
 
       <Canvas shadows camera={{ position: [3, 3, 3], fov: 30 }}>
         <ScrollControls pages={16} damping={0.1}>
