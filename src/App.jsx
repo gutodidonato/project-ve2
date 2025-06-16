@@ -12,7 +12,7 @@ import Navbar from './components/Navbar';
 function App() {
   const [section, setSection] = useState(0);
   const [menuOpened, setMenuOpened] = useState(false);
-  const [color, setColor] = useState("bg-black")
+  const [color, setColor] = useState("bg-black");
 
 
   let intensity = (section == 0 || section == 1)? 0 : section/3;
