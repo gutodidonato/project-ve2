@@ -12,6 +12,7 @@ export const Experience = () => {
   const scroll = useScroll();
   const fadePlaneRef = useRef();
   const [modelOpacity, setModelOpacity] = useState(1);
+  const [screenOpacity, setScreenOpacity] = useState(0)
 
   const cameraStages = [
     {
@@ -77,6 +78,9 @@ export const Experience = () => {
     const targetUseModel = y <= 1/4;
 
     setModelOpacity(prev => THREE.MathUtils.lerp(prev, targetUseModel ? 1 : 0, 0.1));
+    setScreenOpacity(prev => THREE.MathUtils.lerp(prev, targetUseModel ? 0: 1, 0.1));
+
+    console.log(`opacidade: ${screenOpacity}`)
 
     for (const stage of cameraStages) {
       if (y >= stage.start && y <= stage.end) {
@@ -113,13 +117,7 @@ export const Experience = () => {
       } if (y >= 1/4) {
         fadePlaneRef.current.material.opacity = 0
       }
-    }
-
-
-  
-      
-
-  })
+    }})
 
 
     return (
@@ -134,7 +132,7 @@ export const Experience = () => {
         <Car opacity={modelOpacity} />
       </group>
       <group position={[5, -4, -3]}>
-        <ProjectsModel/>
+        <ProjectsModel opacity={screenOpacity} />
       </group>
     </>
   );

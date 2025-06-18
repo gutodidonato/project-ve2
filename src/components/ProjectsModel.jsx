@@ -1,17 +1,17 @@
-import { useScroll } from '@react-three/drei';
+import { useRef, useState, useEffect, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { useEffect, useRef, useState } from 'react';
+import { useScroll } from '@react-three/drei';
 import * as THREE from 'three';
 
-export const ProjectsModel = (props) => {
+export const ProjectsModel = ({ opacity }) => {
   const meshRef = useRef();
-  const videoRef = useRef(null); 
+  const videoRef = useRef(null);
   const scroll = useScroll();
   const [videoTexture, setVideoTexture] = useState(null);
-  const scaleRef = useRef(1);
 
   const video_1 = '/video/sample1.mp4';
 
+  const edgeGeometry = useMemo(() => new THREE.PlaneGeometry(4, 2.25), []);
 
   useEffect(() => {
     const video = document.createElement('video');
@@ -32,40 +32,42 @@ export const ProjectsModel = (props) => {
 
     return () => {
       video.pause();
-      video.removeAttribute('src'); 
+      video.removeAttribute('src');
       video.load();
     };
   }, []);
 
-    useFrame(() => {
+  useFrame(() => {
     if (!meshRef.current) return;
 
     const scrollY = scroll.offset;
-    const targetScale = (scrollY < 0.7/2)? ((scrollY - 0.5/2)*5) : 0.5;
+    const targetScale = (scrollY < 0.35) ? ((scrollY - 0.25) * 5) : 0.5;
 
-    scaleRef.current = targetScale;
-     if (meshRef.current) {
-
-        meshRef.current.rotation.y = Math.min(scrollY * 15, Math.PI * 1.83);
-        meshRef.current.rotation.x =  Math.min(scrollY * 15, Math.PI * 1.69);
-        meshRef.current.rotation.z =  Math.min(scrollY * 15, Math.PI * 1.8);
-      }
-    meshRef.current.scale.setScalar(scaleRef.current); 
-    });
+    meshRef.current.scale.setScalar(targetScale);
+    meshRef.current.rotation.y = Math.min(scrollY * 15, Math.PI * 1.83);
+    meshRef.current.rotation.x = Math.min(scrollY * 15, Math.PI * 1.69);
+    meshRef.current.rotation.z = Math.min(scrollY * 15, Math.PI * 1.8);
+  });
 
   if (!videoTexture) return null;
 
   return (
     <mesh ref={meshRef}>
       <planeGeometry args={[4, 2.25]} />
-      <meshBasicMaterial map={videoTexture} toneMapped={false} />
-      {/* Borda branca */}
-      <lineSegments>
-        <edgesGeometry args={[new THREE.PlaneGeometry(4, 2.25)]} />
-        <lineBasicMaterial color="white" />
-      </lineSegments>
+      <meshBasicMaterial
+        map={videoTexture}
+        transparent={(opacity > 0.5)? false : true}
+        toneMapped={false}
+        opacity={opacity}
+      />
+        {opacity > 0.5 && (
+          <lineSegments>
+            <edgesGeometry args={[edgeGeometry]} />
+            <lineBasicMaterial color="#ececec" />
+          </lineSegments>
+        )}
     </mesh>
   );
-}
+};
 
 export default ProjectsModel;

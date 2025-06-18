@@ -8,6 +8,7 @@ import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import CardCarrossel from "./components/CardCarrossel";
 import Experience from './components/Experience';
 import Navbar from './components/Navbar';
+import BloobHtml from './components/scenes/BloobHtml';
 
 function App() {
   const [section, setSection] = useState(0);
@@ -19,7 +20,17 @@ function App() {
 
   return (
     <>
-      <div className={`relative w-screen h-screen bg-gradient-to-b ${color}`}>
+        <div className="relative w-screen h-screen">
+        {/* BloobHtml como background */}
+        {section < 5 && (
+          <div className="absolute top-0 left-0 w-full h-full z-0 bg-black"></div>
+        )}
+        {section >= 5 && (
+          <div className="absolute top-0 left-0 w-full h-full z-0">
+            <BloobHtml />
+          </div>
+        )}
+      
 
       <Canvas shadows camera={{ position: [3, 3, 3], fov: 30 }}>
         <ScrollControls pages={16} damping={0.1}>
