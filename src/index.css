@@ -1,5 +1,17 @@
 @import "tailwindcss";
 
+:root {
+  --color-bg1: rgb(170, 0, 255);
+  --color-bg2: rgb(0, 17, 82);
+  --color1: 18, 113, 255;
+  --color2: 221, 74, 255;
+  --color3: 100, 220, 255;
+  --color4: 200, 50, 50;
+  --color5: 180, 180, 50;
+  --color-interactive: 140, 100, 255;
+  --circle-size: 80%;
+  --blending: hard-light;
+}
 
 @theme {
     --color-vermelho: #d50017;
@@ -10,6 +22,7 @@
 
 }
 
+
 @layer components {
   #root {
     width: 100vw;
@@ -19,19 +32,6 @@
   body {
     margin: 0;
   }
-
-  :root {
-    --color-bg1: rgb(170, 0, 255);
-    --color-bg2: rgb(0, 17, 82);
-    --color1: 18, 113, 255;
-    --color2: 221, 74, 255;
-    --color3: 100, 220, 255;
-    --color4: 200, 50, 50;
-    --color5: 180, 180, 50;
-    --color-interactive: 140, 100, 255;
-    --circle-size: 80%;
-    --blending: hard-light;
-}
 
 @layer{
     @keyframes moveInCircle {
