@@ -74,13 +74,11 @@ export const Experience = () => {
   useFrame((state) => {
     const y = scroll.offset;
 
-    console.log(y)
     const targetUseModel = y <= 1/4;
 
     setModelOpacity(prev => THREE.MathUtils.lerp(prev, targetUseModel ? 1 : 0, 0.1));
     setScreenOpacity(prev => THREE.MathUtils.lerp(prev, targetUseModel ? 0: 1, 0.1));
 
-    console.log(`opacidade: ${screenOpacity}`)
 
     for (const stage of cameraStages) {
       if (y >= stage.start && y <= stage.end) {

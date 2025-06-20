@@ -12,7 +12,6 @@ const ScrollManager = (props) => {
     useFrame(() =>{
         const curSection = (data.scroll.current * data.pages);
         onSectionChange(curSection)
-        console.log(section)
     })
 
   return null;

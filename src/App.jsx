@@ -7,7 +7,7 @@ import Menu from "./components/Menu"
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import CardCarrossel from "./components/CardCarrossel";
 import Experience from './components/Experience';
-import Navbar from './components/Navbar';
+
 import BloobHtml from './components/scenes/BloobHtml';
 
 function App() {
@@ -22,12 +22,12 @@ function App() {
     <>
         <div className="relative w-screen h-screen">
         {/* BloobHtml como background */}
-        {section < 5 && (
+        {section < 4 && (
           <div className="absolute top-0 left-0 w-full h-full z-0 bg-black"></div>
         )}
-        {section >= 5 && (
+        {section >= 4 && (
           <div className="absolute top-0 left-0 w-full h-full z-0">
-            <BloobHtml />
+            <BloobHtml section={section}/>
           </div>
         )}
       
@@ -44,7 +44,6 @@ function App() {
             <Interface/>
             <div className="h-screen w-screen"></div>
             <div className="h-screen w-screen"></div>
-            <CardCarrossel/>
           </Scroll>
         </ScrollControls>
       </Canvas>

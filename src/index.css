@@ -1,16 +1,30 @@
 @import "tailwindcss";
 
 :root {
-  --color-bg1: rgb(170, 0, 255);
-  --color-bg2: rgb(0, 17, 82);
-  --color1: 18, 113, 255;
-  --color2: 221, 74, 255;
-  --color3: 100, 220, 255;
-  --color4: 200, 50, 50;
-  --color5: 180, 180, 50;
-  --color-interactive: 140, 100, 255;
+  --color-bg1: rgb(0, 0, 0);
+  --color-bg2: rgb(0, 0, 0);
+  --color1-80: rgba(255, 255, 255, 0.8);
+  --color1-00: rgba(18, 113, 255, 0);
+  --color2-80: rgba(255, 255, 255, 0.8);
+  --color2-00: rgba(221, 74, 255, 0);
+  --color3-80: rgba(255, 255, 255, 0.8);
+  --color3-00: rgba(100, 220, 255, 0);
+  --color4-80: rgba(255, 255, 255, 0.8);
+  --color4-00: rgba(200, 50, 50, 0);
+  --color5-80: rgba(255, 255, 255, 0.8);
+  --color5-00: rgba(180, 180, 50, 0);
+  --color-interactive-80: rgba(255, 255, 255, 0.8);
+  --color-interactive-00: rgba(255, 255, 255, 0.0);
   --circle-size: 80%;
   --blending: hard-light;
+
+
+  --color1-t1: rgba(18, 113, 255, 0.801);
+  --color2-t1: rgba(221, 74, 255, 0.801);
+  --color3-t1: rgba(100, 220, 255, 0.801);
+  --color4-t1: rgba(200, 50, 50, 0.801);
+  --color5-t1: rgba(180, 180, 50, 0.801);
+
 }
 
 @theme {
@@ -19,6 +33,7 @@
     --color-fundo-card: #05132bbf;
     --background-color: #f5f7fa;
     --text-color: #333333;
+    --font-open-sans : "Open Sans", sans-serif;
 
 }
 
@@ -69,6 +84,16 @@
         transform: translateX(-50%) translateY(-10%);
     }
     }
+    @keyframes startOpacity {
+        0%{
+          opacity: 0;
+        }      
+        100%{
+          opacity: 1;
+        }      
+    }
+
+
 
 
 .gradient-bg {
@@ -77,6 +102,7 @@
   position: relative;
   overflow: hidden;
   background: linear-gradient(40deg, var(--color-bg1), var(--color-bg2));
+  transition: background 1s;
   top: 0;
   left: 0;
 }
@@ -100,11 +126,11 @@
     mix-blend-mode: var(--blending);
     width: var(--circle-size);
     height: var(--circle-size);
-
   }
+
   .bloob_1 {
     position: absolute;
-    background: radial-gradient(circle at center, rgba(var(--color1), 0.8) 0, rgba(var(--color1), 0) 50%) no-repeat;
+    background: radial-gradient(circle at center, var(--color1-80) 0%, var(--color1-00) 50%) no-repeat;
     top: calc(50% - var(--circle-size) / 2);
     left: calc(50% - var(--circle-size) / 2);
 
@@ -116,7 +142,7 @@
 
   .bloob_2 {
     position: absolute;
-    background: radial-gradient(circle at center, rgba(var(--color2), 0.8) 0, rgba(var(--color2), 0) 50%) no-repeat;
+    background: radial-gradient(circle at center, var(--color2-80) 0, var(--color2-00) 50%) no-repeat;
 
     top: calc(50% - var(--circle-size) / 2);
     left: calc(50% - var(--circle-size) / 2);
@@ -129,7 +155,7 @@
 
   .bloob_3 {
     position: absolute;
-    background: radial-gradient(circle at center, rgba(var(--color3), 0.8) 0, rgba(var(--color3), 0) 50%) no-repeat;
+    background: radial-gradient(circle at center, var(--color3-80) 0, var(--color3-00) 50%) no-repeat;
 
     top: calc(50% - var(--circle-size) / 2 + 200px);
     left: calc(50% - var(--circle-size) / 2 - 500px);
@@ -142,7 +168,7 @@
 
   .bloob_4 {
     position: absolute;
-    background: radial-gradient(circle at center, rgba(var(--color4), 0.8) 0, rgba(var(--color4), 0) 50%) no-repeat;
+    background: radial-gradient(circle at center, var(--color4-80) 0, var(--color4-00) 50%) no-repeat;
 
     top: calc(50% - var(--circle-size) / 2);
     left: calc(50% - var(--circle-size) / 2);
@@ -155,7 +181,7 @@
 
   .bloob_5 {
     position: absolute;
-    background: radial-gradient(circle at center, rgba(var(--color5), 0.8) 0, rgba(var(--color5), 0) 50%) no-repeat;
+    background: radial-gradient(circle at center, var(--color5-80) 0, var(--color5-00) 50%) no-repeat;
     mix-blend-mode: var(--blending);
 
     width: calc(var(--circle-size) * 2);
@@ -165,13 +191,14 @@
 
     transform-origin: calc(50% - 800px) calc(50% + 200px);
     animation: moveInCircle 20s ease infinite;
+    transition: background 1s ease;
 
     opacity: 1;
   }
 
   .interactive {
     position: absolute;
-    background: radial-gradient(circle at center, rgba(var(--color-interactive), 0.8) 0, rgba(var(--color-interactive), 0) 50%) no-repeat;
+    background: radial-gradient(circle at center, var(--color-interactive-80) 0, var(--color-interactive-00) 50%) no-repeat;
     mix-blend-mode: var(--blending);
 
     width: 100%;
@@ -181,7 +208,42 @@
 
     opacity: 0.7;
   }
+  .bloob_change_1{
+    background: radial-gradient(circle at center, var(--color1-t1) 0, var(--color1-00) 50%);
+    animation-play-state: running;
+
+  }
+
+  }
+  .bloob_change_2{
+    background: radial-gradient(circle at center, var(--color2-t1) 0, var(--color1-00) 50%);
+
+  }
+  .bloob_change_3{
+    background: radial-gradient(circle at center, var(--color3-t1) 0, var(--color1-00) 50%);
+
+  }
+  .bloob_change_4{
+    background: radial-gradient(circle at center, var(--color4-t1) 0, var(--color1-00) 50%);
+
+  }
+  .bloob_change_5{
+    background: radial-gradient(circle at center, var(--color5-t1) 0, var(--color1-00) 50%);
+
+  }
+  .bloob_change_6{
+    background: radial-gradient(circle at center, var(--color5-t1) 0, var(--color1-00) 50%);
+
+  }
+  
+  
+  .fade_in{
+    opacity: 1;
+    transition: startOpacity;
+  }
+
+  
 
 }
 
-}
+

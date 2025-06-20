@@ -43,47 +43,36 @@ export const Interface = () => {
 const AboutSection = () => {
   return (
     <Section>
-      <h1 className="text-6xl font-extrabold leading-snug">
+      <div className="bg-gray-200/80 p-5 rounded-2xl">
+      <h1 className="text-5xl font-extrabold leading-snug">
         Hi, I'm
         <br />
-        <span className="bg-white px-1 italic">Luis Didonato</span>
+        <span className=" px-1 italic text-5xl font-open-sans ">Luis Didonato</span>
       </h1>
-      <motion.p
-        className="text-lg text-gray-600 mt-4"
-        initial={{
-          opacity: 0,
-          y: 25,
-        }}
-        whileInView={{
-          opacity: 1,
-          y: 0,
-        }}
-        transition={{
-          duration: 1,
-          delay: 1.5,
-        }}
-      >
-        I am a fullstack developer
-        <br />
-      </motion.p>
+      <div className="overflow-hidden h-28 mt-3">
+        <p className="text-5xl text-gray-900 mt-10 capitalize">Fullstack Developer</p>
+        <p className="text-5xl text-gray-900 mt-10 capitalize">Mobile Developer</p>
+        <p className="text-5xl text-gray-900 mt-10 capitalize">AI Engineer</p>
+      </div>
       <motion.button
         className={`bg-indigo-600 text-white py-4 px-8 
-      rounded-lg font-bold text-lg mt-16`}
-        initial={{
-          opacity: 0,
-          y: 25,
-        }}
-        whileInView={{
-          opacity: 1,
-          y: 0,
-        }}
-        transition={{
-          duration: 1,
-          delay: 2,
-        }}
-      >
+          rounded-lg font-bold text-lg mt-16`}
+          initial={{
+            opacity: 0,
+            y: 25,
+          }}
+          whileInView={{
+            opacity: 1,
+            y: 0,
+          }}
+          transition={{
+            duration: 1,
+            delay: 2,
+          }}
+          >
         Contact me
       </motion.button>
+      </div>
     </Section>
   );
 };
@@ -128,7 +117,7 @@ const languages = [
 const SkillsSection = () => {
   return (
     <Section>
-      <motion.div whileInView={"visible"}>
+      <motion.div whileInView={"visible"} className="bg-white p-10">
         <h2 className="text-5xl font-bold">Skills</h2>
         <div className=" mt-8 space-y-4">
           {skills.map((skill, index) => (
