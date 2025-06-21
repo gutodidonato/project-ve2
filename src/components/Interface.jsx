@@ -43,35 +43,40 @@ export const Interface = () => {
 const AboutSection = () => {
   return (
     <Section>
-      <div className="bg-gray-200/80 p-5 rounded-2xl">
-      <h1 className="text-5xl font-extrabold leading-snug">
+      <div className=" bg-gradient-to-br from-blue-500/80 to-purple-600/80 p-5 rounded-2xl border-amber-50 border-1">
+      <h1 className="text-xl text-white leading-snug text-shadow-2xs">
         Hi, I'm
         <br />
-        <span className=" px-1 italic text-5xl font-open-sans ">Luis Didonato</span>
       </h1>
-      <div className="overflow-hidden h-28 mt-3">
-        <p className="text-5xl text-gray-900 mt-10 capitalize">Fullstack Developer</p>
-        <p className="text-5xl text-gray-900 mt-10 capitalize">Mobile Developer</p>
-        <p className="text-5xl text-gray-900 mt-10 capitalize">AI Engineer</p>
+      <div className="w-full flex justify-center">
+        <span className="text-7xl font-orbitron2
+         text-center text-white font-extrabold text-shadow-lg/30 text-shadow-black">Luis <br/> Didonato</span>
       </div>
+      <div className="overflow-hidden h-15 mt-3 bg-purple-600/60 rounded-lg">
+        <p className="text-4xl capitalize text-center font-sans font-bold text-sky-500 text-shadow-lg/30 text-shadow-black">Fullstack Developer</p>
+        <p className="text-4xl capitalize text-center font-sans font-bold text-sky-500 text-shadow-lg/30 text-shadow-black">Mobile Developer</p>
+        <p className="text-4xl capitalize text-center font-sans font-bold text-sky-500 text-shadow-lg/30 text-shadow-black">AI Engineer</p>
+      </div>
+      <div className="w-full flex justify-center">
       <motion.button
         className={`bg-indigo-600 text-white py-4 px-8 
-          rounded-lg font-bold text-lg mt-16`}
+          rounded-lg font-bold text-lg mt-16 hover:bg-indigo-900 transition-colors duration-75 ease-in cursor-pointer`}
           initial={{
             opacity: 0,
             y: 25,
           }}
           whileInView={{
             opacity: 1,
-            y: 0,
+            y: 10,
           }}
           transition={{
             duration: 1,
-            delay: 2,
+            delay: 1,
           }}
           >
         Contact me
       </motion.button>
+      </div>
       </div>
     </Section>
   );
@@ -79,37 +84,38 @@ const AboutSection = () => {
 
 const skills = [
   {
-    title: "Threejs / React Three Fiber",
-    level: 80,
+    title: "Python / Django / FastAPI",
+    level: 90, 
   },
   {
-    title: "React / React Native",
-    level: 90,
+    title: "React / React Native / Next.js",
+    level: 90, 
   },
   {
-    title: "Nodejs",
-    level: 90,
+    title: "Pandas / Selenium / Scrapy",
+    level: 85, 
   },
   {
-    title: "Typescript",
-    level: 60,
+    title: "Kotlin / Java / C#",
+    level: 70, 
   },
   {
-    title: "3D Modeling",
-    level: 40,
+    title: "Node.js / Express / Go",
+    level: 50, 
   },
 ];
+
 const languages = [
   {
-    title: "🇫🇷 French",
+    title: "BR - Português",
     level: 100,
   },
   {
-    title: "🇺🇸 English",
+    title: "US - Inglês",
     level: 80,
   },
   {
-    title: "🇯🇵 Japanese",
+    title: "ES  - Espanhol",
     level: 20,
   },
 ];
@@ -117,13 +123,14 @@ const languages = [
 const SkillsSection = () => {
   return (
     <Section>
-      <motion.div whileInView={"visible"} className="bg-white p-10">
-        <h2 className="text-5xl font-bold">Skills</h2>
+      <motion.div whileInView={"visible"} 
+      className="bg-gradient-to-br from-blue-500/80 to-purple-600/80 p-10 border-amber-50 border-1 rounded-2xl">
+        <h2 className="text-5xl font-bold text-white text-shadow-lg/50 text-shadow-black">Skills</h2>
         <div className=" mt-8 space-y-4">
           {skills.map((skill, index) => (
             <div className="w-64" key={index}>
               <motion.h3
-                className="text-xl font-bold text-gray-800"
+                className="text-xl font-bold text-white text-shadow-2xs text-shadow-black"
                 initial={{
                   opacity: 0,
                 }}
@@ -141,7 +148,7 @@ const SkillsSection = () => {
               </motion.h3>
               <div className="h-2 w-full bg-gray-200 rounded-full mt-2">
                 <motion.div
-                  className="h-full bg-indigo-500 rounded-full "
+                  className="h-full bg-purple-400 rounded-full"
                   style={{ width: `${skill.level}%` }}
                   initial={{
                     scaleX: 0,
@@ -162,12 +169,12 @@ const SkillsSection = () => {
           ))}
         </div>
         <div>
-          <h2 className="text-5xl font-bold mt-10">Languages</h2>
+          <h2 className="text-5xl font-bold mt-10 text-white text-shadow-lg/50 text-shadow-black">Languages</h2>
           <div className=" mt-8 space-y-4">
             {languages.map((lng, index) => (
               <div className="w-64" key={index}>
                 <motion.h3
-                  className="text-xl font-bold text-gray-800"
+                  className="text-xl font-bold text-white text-shadow-2xs text-shadow-black"
                   initial={{
                     opacity: 0,
                   }}
@@ -185,7 +192,7 @@ const SkillsSection = () => {
                 </motion.h3>
                 <div className="h-2 w-full bg-gray-200 rounded-full mt-2">
                   <motion.div
-                    className="h-full bg-indigo-500 rounded-full "
+                    className="h-full bg-purple-400 rounded-full "
                     style={{ width: `${lng.level}%` }}
                     initial={{
                       scaleX: 0,
