@@ -90,15 +90,15 @@ export const Experience = () => {
         break;
     }}
 
-    if (y < 1/8)
+    if (y < 1/16)
       gsap.to(lightRef.current.position, { x: 15, y: 0, z: 0, duration: 1.2, ease: 'power2.out' });
       gsap.to(lightRef.current, { intensity: 2, duration: 1.2 });
 
-    if (y > 1/8 && y < 1/4) {
+    if (y > 1/16 && y < 1/8) {
       gsap.to(lightRef.current.position, { x: 15, y: 30, z: 3, duration: 5 });
       gsap.to(lightRef.current, { intensity: 1.2, duration: 1.2 });
     }
-    if (y > 1/4) {
+    if (y > 1/8) {
       gsap.to(lightRef.current.position,{ x: -5, y: 8, z: 3, duration: 5 });
       gsap.to(lightRef.current, { intensity: 2, duration: 1.2 });
     }

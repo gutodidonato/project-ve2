@@ -32,9 +32,7 @@ export const Interface = () => {
     <div className="flex flex-col items-center w-screen">
       <AboutSection />
       <SkillsSection />
-      <Section>
-        <h1>Projects</h1>
-      </Section>
+      <StartAboutMe />
       <ContactSection />
     </div>
   );
@@ -52,15 +50,15 @@ const AboutSection = () => {
         <span className="text-7xl font-orbitron2
          text-center text-white font-extrabold text-shadow-lg/30 text-shadow-black">Luis <br/> Didonato</span>
       </div>
-      <div className="overflow-hidden h-15 mt-3 bg-purple-600/60 rounded-lg">
-        <p className="text-4xl capitalize text-center font-sans font-bold text-sky-500 text-shadow-lg/30 text-shadow-black">Fullstack Developer</p>
-        <p className="text-4xl capitalize text-center font-sans font-bold text-sky-500 text-shadow-lg/30 text-shadow-black">Mobile Developer</p>
-        <p className="text-4xl capitalize text-center font-sans font-bold text-sky-500 text-shadow-lg/30 text-shadow-black">AI Engineer</p>
+      <div className="overflow-hidden h-15 mt-5 bg-purple-600/60 rounded-lg">
+        <p className="text-4xl capitalize text-center font-sans font-bold text-sky-400 text-shadow-lg/30 text-shadow-black">Fullstack Developer</p>
+        <p className="text-4xl capitalize text-center font-sans font-bold text-sky-400 text-shadow-lg/30 text-shadow-black">Mobile Developer</p>
+        <p className="text-4xl capitalize text-center font-sans font-bold text-sky-400 text-shadow-lg/30 text-shadow-black">AI Engineer</p>
       </div>
       <div className="w-full flex justify-center">
       <motion.button
         className={`bg-indigo-600 text-white py-4 px-8 
-          rounded-lg font-bold text-lg mt-16 hover:bg-indigo-900 transition-colors duration-75 ease-in cursor-pointer`}
+          rounded-lg font-bold text-lg mt-5 hover:bg-indigo-900 transition-colors duration-75 ease-in cursor-pointer`}
           initial={{
             opacity: 0,
             y: 25,
@@ -217,6 +215,35 @@ const SkillsSection = () => {
     </Section>
   );
 };
+
+
+const StartAboutMe = () => {
+  return (
+    <Section>
+      <div className="bg-gradient-to-br from-blue-500/80 to-purple-600/80 p-10
+       border-amber-50 border-1 rounded-2xl z-[-9]">
+      <div className="w-64 h-64 bg-gray-800 absolute
+       border-cyan-500 border-6 rounded-full b-30 z--10 mt-[-260px] z-[-10] shadow-[inset_4px_5px_13px_#00bcda99] ">
+      </div>
+      <img className="w-70 h-auto absolute mt-[-240px] z-[-9]" 
+      src="/imgs/profile2.png" alt="" />
+      <div className="z-[-8]">
+        <p className="text-5xl font-bold text-white text-shadow-lg/50 text-shadow-black">
+          About me
+        </p>
+        <p className="mt-4 text-lg text-white">
+          I am a Fullstack Developer with a passion for creating innovative solutions. 
+          <br />
+          Lorem ipsum dolor sit amet consectetur adipisicing elit. Neque, delectus!
+        </p>
+        <p>
+          Já trabalhei na empresa redbit/ valiant group, onde desenvolvi aplicações web e mobile utilizando React, React Native, Next.js, Python, Django e FastAPI.
+        </p>
+      </div>
+      </div>
+    </Section>
+  );
+}
 
 const ContactSection = () => {
   return (
