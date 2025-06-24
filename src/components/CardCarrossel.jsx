@@ -3,8 +3,8 @@ import Card from "./Card";
 export default function CardCarrossel() {
 
   return (
-    <div className=" overflow-hidden w-screen h-screen flex justify-center top-10 fixed" style={{ transformStyle: 'preserve-3d' }}>
-        <div className="runner absolute transform-3d w-3/5 ">
+    <div className=" overflow-hidden w-screen h-screen justify-center top-10 fixed" style={{ transformStyle: 'preserve-3d' }}>
+        <div className="runner absolute transform-3d w-3/5 flex">
             <div className="item" style={{ '--position': 1 }}>
                 <Card title="hero" img='https://upload.wikimedia.org/wikipedia/commons/c/c3/Python-logo-notext.svg'></Card>
             </div>

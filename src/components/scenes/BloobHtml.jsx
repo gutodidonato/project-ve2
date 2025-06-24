@@ -24,7 +24,7 @@ function BloobHtml(props) {
 
 
   function bg_transition(element){
-    if (section > 7 && section < 9){
+    if (section > 9 && section < 12){
       return `bloob_change_${element}`
     }
   }
@@ -61,7 +61,7 @@ function BloobHtml(props) {
   }, [interBloobRef]);
 
   useEffect(() => {
-    if (section >= 7 && section <= 9 && needAnimateA.current == true) {
+    if (section >= 9 && section <= 12 && needAnimateA.current == true) {
       needAnimateA.current = false;
       needAnimateB.current = true;
 
@@ -72,7 +72,7 @@ function BloobHtml(props) {
       });
     }
 
-  if ((section < 7 || section > 9) && needAnimateB.current == true){
+  if ((section < 9 || section > 12) && needAnimateB.current == true){
     needAnimateA.current = true;
     needAnimateB.current = false;
 
@@ -113,7 +113,7 @@ function BloobHtml(props) {
           <div ref={interBloobRef} className={`interactive ${bg_transition(6)}`}></div>
         </div>
       </div>
-      <CardCarrossel/>
+      {(section > 9)? (<CardCarrossel/>): null}
     </>
   );
 }

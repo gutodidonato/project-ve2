@@ -1,4 +1,5 @@
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
+import { use, useEffect, useState } from "react";
 
 const Section = (props) => {
   const { children } = props;
@@ -33,12 +34,74 @@ export const Interface = () => {
       <AboutSection />
       <SkillsSection />
       <StartAboutMe />
+      <NullRole />
+      <NullRole />
+      <NullRole />
+      <NullRole />
       <ContactSection />
     </div>
   );
 };
 
 const AboutSection = () => {
+  const [index, setIndex] = useState(0);
+
+  const palavra1 = ['F', 'U', 'L', 'L', '\u00A0', 'S', 'T', 'A', 'C', 'K'];
+  const palavra2 = ['A', 'I', '\u00A0', 'E', 'N', 'G', 'I', 'N', 'E', 'E', 'R'];
+  const palavra3 = ['D','E','V','\u00A0','S','O','B','E','R','B','O'];
+  const palavra4 = ['S','Ó','\u00A0','F','A','Z','\u00A0','F','R','O','N','T'];
+  const palavra5 = ['S','Ó', '\u00A0', 'P', 'Y', 'T','H','O', 'N'];
+  const palavra6 = ['C','O','M','I','T','\u00A0','F','I','N','A','L'];
+  const palavra7 = ['D','E','V','\u00A0','M', 'O', 'B', 'I', 'L', 'E'];
+  const palavra8 = ['P','U','S','H','\u00A0','N','A','\u00A0','M','A','I','N'];
+  const palavra9 = ['C', 'A', 'F', 'É', '+', 'C', 'A', 'F', 'É'];
+  const palavra10 = ['F', 'R', 'A', 'N', 'G', 'O'];
+
+  let condicoes_boas = (index == 0 || index == 1 || index == 3 || index == 6 || index == 8 || index == 9)
+
+
+  const palavras = [ palavra1, palavra2, palavra3, palavra4, palavra5, palavra6, palavra7, palavra8, palavra9, palavra10 ]
+
+
+
+const palavraAnimada = (palavra, certo) => {
+  return (
+    <div className="flex gap-1">
+      {palavra.map((letra, index) => {
+        const isPar = index % 2 === 0;
+        return (
+          <motion.span
+            key={index}
+            initial={{ opacity: 0, y: isPar ? 30 : -30 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: isPar ? 30 : -30 }}
+            transition={{
+              duration: 1,
+              delay: index * 0.05,
+              ease: "easeOut",
+            }}
+            className={`text-4xl capitalize text-center font-sans font-bold 
+              ${(certo)? `text-sky-400`: `text-red-400` }
+              ${isPar ? `par_${Math.floor(index / 2)}` : `inpar_${Math.floor(index / 2)}`}
+              `}
+          >
+            {letra}
+          </motion.span>
+        );
+      })}
+    </div>
+  );
+};
+
+  useEffect(() => {
+    const intervalo = setInterval(() => {
+      setIndex((prevIndex) => (prevIndex + 1) % palavras.length);
+    }, 5000); 
+
+    return () => clearInterval(intervalo);
+  }, []);
+
+
   return (
     <Section>
       <div className=" bg-gradient-to-br from-blue-500/80 to-purple-600/80 p-5 rounded-2xl border-amber-50 border-1">
@@ -50,10 +113,26 @@ const AboutSection = () => {
         <span className="text-7xl font-orbitron2
          text-center text-white font-extrabold text-shadow-lg/30 text-shadow-black">Luis <br/> Didonato</span>
       </div>
-      <div className="overflow-hidden h-15 mt-5 bg-purple-600/60 rounded-lg">
-        <p className="text-4xl capitalize text-center font-sans font-bold text-sky-400 text-shadow-lg/30 text-shadow-black">Fullstack Developer</p>
-        <p className="text-4xl capitalize text-center font-sans font-bold text-sky-400 text-shadow-lg/30 text-shadow-black">Mobile Developer</p>
-        <p className="text-4xl capitalize text-center font-sans font-bold text-sky-400 text-shadow-lg/30 text-shadow-black">AI Engineer</p>
+      <div className="overflow-hidden h-15 mt-5 bg-purple-900/60 rounded-lg border-amber-50 border-1 flex items-center justify-center">
+          {      
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={index}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="flex"
+            >
+          {palavraAnimada(palavras[index], (condicoes_boas)? true : false)}
+          {
+            <span className="text-2xl flex items-center justify-center text-white font-bold ml-2">
+              {(condicoes_boas) ? '✅' : '❌'}
+            </span> 
+          }
+          </motion.div>
+        </AnimatePresence>
+        }
       </div>
       <div className="w-full flex justify-center">
       <motion.button
@@ -78,7 +157,7 @@ const AboutSection = () => {
       </div>
     </Section>
   );
-};
+}
 
 const skills = [
   {
@@ -216,12 +295,21 @@ const SkillsSection = () => {
   );
 };
 
+const NullRole = () => {
+  return(
+    <Section>
+    
+    </Section>
+  )
+
+}
+
 
 const StartAboutMe = () => {
   return (
     <Section>
       <div className="bg-gradient-to-br from-blue-500/80 to-purple-600/80 p-10
-       border-amber-50 border-1 rounded-2xl z-[-9]">
+       border-amber-50 border-1 rounded-2xl z-[-9] mt-100">
       <div className="w-64 h-64 bg-gray-800 absolute
        border-cyan-500 border-6 rounded-full b-30 z--10 mt-[-260px] z-[-10] shadow-[inset_4px_5px_13px_#00bcda99] ">
       </div>
@@ -229,16 +317,14 @@ const StartAboutMe = () => {
       src="/imgs/profile2.png" alt="" />
       <div className="z-[-8]">
         <p className="text-5xl font-bold text-white text-shadow-lg/50 text-shadow-black">
-          About me
+          Sobre mim
         </p>
-        <p className="mt-4 text-lg text-white">
-          I am a Fullstack Developer with a passion for creating innovative solutions. 
-          <br />
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Neque, delectus!
-        </p>
-        <p>
-          Já trabalhei na empresa redbit/ valiant group, onde desenvolvi aplicações web e mobile utilizando React, React Native, Next.js, Python, Django e FastAPI.
-        </p>
+        <ul>
+          <li className="mt-4 text-lg text-white list-disc">Desenvolvedor Full Stack apaixonado por transformar ideias em soluções reais.</li>
+          <li className="mt-4 text-lg text-white list-disc">Curioso por natureza, estudo IA, linguagens, dados e automações.</li>
+          <li className="mt-4 text-lg text-white list-disc">Estou sempre aprendendo — tecnologia muda, e eu evoluo com ela.</li>
+        </ul>
+
       </div>
       </div>
     </Section>
