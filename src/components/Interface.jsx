@@ -43,6 +43,7 @@ export const Interface = () => {
   );
 };
 
+
 const AboutSection = () => {
   const [index, setIndex] = useState(0);
 
@@ -57,7 +58,7 @@ const AboutSection = () => {
   const palavra9 = ['C', 'A', 'F', 'É', '+', 'C', 'A', 'F', 'É'];
   const palavra10 = ['F', 'R', 'A', 'N', 'G', 'O'];
 
-  let condicoes_boas = (index == 0 || index == 1 || index == 3 || index == 6 || index == 8 || index == 9)
+  let condicoes_boas = (index == 0 || index == 1 || index == 6 || index == 8 || index == 9)
 
 
   const palavras = [ palavra1, palavra2, palavra3, palavra4, palavra5, palavra6, palavra7, palavra8, palavra9, palavra10 ]
