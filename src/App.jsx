@@ -5,8 +5,8 @@ import Interface  from './components/Interface'
 import ScrollManager from "./components/ScrollManager";
 import Menu from "./components/Menu"
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
-import CardCarrossel from "./components/CardCarrossel";
 import Experience from './components/Experience';
+import Fixed from "./components/Fixed";
 
 import BloobHtml from './components/scenes/BloobHtml';
 
@@ -51,7 +51,8 @@ function App() {
             menuOpened = {menuOpened}
             setMenuOpened = {setMenuOpened}
             />
-            </div>
+      <Fixed section={section} />
+      </div>
     </>
   );
     

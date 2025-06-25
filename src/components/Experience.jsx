@@ -14,6 +14,8 @@ export const Experience = () => {
   const [modelOpacity, setModelOpacity] = useState(1);
   const [screenOpacity, setScreenOpacity] = useState(0)
 
+  
+
   const cameraStages = [
     {
       //traseira

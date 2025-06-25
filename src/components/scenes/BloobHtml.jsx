@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import CardCarrossel  from "../CardCarrossel";
+import CardCarrossel  from "../components/CardCarrossel";
 import gsap from "gsap";
 
 function BloobHtml(props) {

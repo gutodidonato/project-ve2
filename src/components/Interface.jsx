@@ -38,7 +38,7 @@ export const Interface = () => {
       <NullRole />
       <NullRole />
       <NullRole />
-      <ContactSection />
+      <NullRole />
     </div>
   );
 };
@@ -299,10 +299,8 @@ const SkillsSection = () => {
 const NullRole = () => {
   return(
     <Section>
-    
     </Section>
   )
-
 }
 
 
