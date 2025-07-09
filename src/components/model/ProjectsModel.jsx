@@ -63,7 +63,7 @@ export const ProjectsModel = ({ opacity }) => {
         {opacity > 0.5 && (
           <lineSegments>
             <edgesGeometry args={[edgeGeometry]} />
-            <lineBasicMaterial color="#ececec" />
+            <lineBasicMaterial color="#c4c2c2" />
           </lineSegments>
         )}
     </mesh>

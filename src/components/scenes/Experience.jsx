@@ -3,14 +3,17 @@ import { useFrame } from '@react-three/fiber';
 import { useRef, useEffect, useState } from 'react';
 import gsap from 'gsap';
 import * as THREE from 'three';
-import {Car} from "./Car";
-import {ProjectsModel} from "./ProjectsModel";
+import {Car} from "../model/Car";
+import {ProjectsModel} from "../model/ProjectsModel";
 
 export const Experience = () => {
   const meshRef = useRef();
   const lightRef = useRef();
   const scroll = useScroll();
+
   const fadePlaneRef = useRef();
+  const projectsModelRef = useRef();
+
   const [modelOpacity, setModelOpacity] = useState(1);
   const [screenOpacity, setScreenOpacity] = useState(0)
 
@@ -115,7 +118,21 @@ export const Experience = () => {
       } if (y >= 1/4) {
         fadePlaneRef.current.material.opacity = 0
       }
-    }})
+    }
+  
+  if (projectsModelRef.current) {
+    if (targetUseModel) {
+      projectsModelRef.current.position.set(-100, -100, -100);
+    } else {
+      const cameraDirection = new THREE.Vector3();
+      state.camera.getWorldDirection(cameraDirection);
+      projectsModelRef.current.position.copy(state.camera.position).add(cameraDirection.multiplyScalar(10));
+    }
+  }
+  
+  
+  
+  })
 
 
     return (
@@ -129,7 +146,7 @@ export const Experience = () => {
       <group ref={meshRef} position={[0, -1.5, 0]}>
         <Car opacity={modelOpacity} />
       </group>
-      <group position={[5, -4, -3]}>
+      <group ref={projectsModelRef}>
         <ProjectsModel opacity={screenOpacity} />
       </group>
     </>

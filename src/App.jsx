@@ -1,14 +1,12 @@
 import { useState } from "react";
 import { ScrollControls, Scroll} from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
-import Interface  from './components/Interface'
-import ScrollManager from "./components/ScrollManager";
-import Menu from "./components/Menu"
+import Interface  from './components/assets/Interface'
+import ScrollManager from "./components/assets/ScrollManager";
+import Menu from "./components/assets/Menu"
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
-import CardCarrossel from "./components/CardCarrossel";
-import Experience from './components/Experience';
+import Experience from './components/scenes/Experience';
 
-import BloobHtml from './components/scenes/BloobHtml';
 
 function App() {
   const [section, setSection] = useState(0);
@@ -26,9 +24,7 @@ function App() {
           <div className="absolute top-0 left-0 w-full h-full z-0 bg-black"></div>
         )}
         {section >= 4 && (
-          <div className="absolute top-0 left-0 w-full h-full z-0">
-            <BloobHtml section={section}/>
-          </div>
+          <div className="absolute top-0 left-0 w-full h-full z-0 bg-black"></div>
         )}
       
 
