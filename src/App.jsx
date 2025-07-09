@@ -5,7 +5,12 @@ import Interface  from './components/assets/Interface'
 import ScrollManager from "./components/assets/ScrollManager";
 import Menu from "./components/assets/Menu"
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
+<<<<<<< HEAD
 import Experience from './components/scenes/Experience';
+=======
+import Experience from './components/Experience';
+import Fixed from "./components/Fixed";
+>>>>>>> 16002350f511a0e827af8108ed68abf181bf0c80
 
 
 function App() {
@@ -47,7 +52,8 @@ function App() {
             menuOpened = {menuOpened}
             setMenuOpened = {setMenuOpened}
             />
-            </div>
+      <Fixed section={section} />
+      </div>
     </>
   );
     
