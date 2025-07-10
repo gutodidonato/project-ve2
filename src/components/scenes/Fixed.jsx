@@ -35,7 +35,7 @@ export default function Fixed({ section }) {
       className="fixed w-screen h-screen top-0 z-20 pointer-events-none"
     >
       {/* Faixa superior central */}
-      <div className="bg-radial-[at_25%_25%] from-gray-300/70 to-zinc-900/50 to-75% h-1/8 w-1/3 mx-auto mt-10 border-2 border-gray-400 rounded-lg flex justify-center items-center">
+      <div className="h-1/8 w-1/3 mx-auto mt-10 flex justify-center items-center">
         <p className="text-white text-shadow-lg shadow-black">Desenvolvimento Mobile</p>
       </div>
 

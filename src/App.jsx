@@ -23,17 +23,17 @@ function App() {
     <>
         <div className="relative w-screen h-screen">
         {/* BloobHtml como background */}
-        {section < 4 && (
+        {section < 3.9 && (
           <div className="absolute top-0 left-0 w-full h-full z-0 bg-black"></div>
         )}
-        {section >= 4 && (
+        {section >= 3.9 && (
           <div className="absolute top-0 left-0 w-full h-full z-0">
             <Beams
               beamWidth={1}
               beamHeight={30}
               beamNumber={200}
               lightColor="#ffffff"
-              speed={10}
+              speed={1.5}
               noiseIntensity={1}
               scale={0.2}
               rotation={30}

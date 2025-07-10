@@ -23,9 +23,25 @@
     margin: 0;
   }
 
-.rotating-text{
-  
+  @keyframes rotateSteps {
+    0% { transform: translateY(0); }
+
+    10% { transform: translateY(-120px); }
+    25% { transform: translateY(-120px); }
+
+    35% { transform: translateY(-240px); }
+    50% { transform: translateY(-240px); }
+
+    55% { transform: translateY(-360px); }
+    75% { transform: translateY(-360px); }
+
+    100% { transform: translateY(0); }
+  }
+
+.animate-rotateSteps {
+  animation: rotateSteps 40s 4s infinite;
 }
+
 
 
 
