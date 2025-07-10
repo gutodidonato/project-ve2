@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { use, useEffect, useState } from "react";
+import ProfileCard from '../ui/ProfileCard'
 
 const Section = (props) => {
   const { children } = props;
@@ -33,15 +34,7 @@ export const Interface = () => {
     <div className="flex flex-col items-center w-screen">
       <AboutSection />
       <SkillsSection />
-      <StartAboutMe />
-<<<<<<< HEAD:src/components/assets/Interface.jsx
-=======
-      <NullRole />
-      <NullRole />
-      <NullRole />
-      <NullRole />
-      <NullRole />
->>>>>>> 16002350f511a0e827af8108ed68abf181bf0c80:src/components/Interface.jsx
+      <MyRole/>
     </div>
   );
 };
@@ -108,7 +101,7 @@ const palavraAnimada = (palavra, certo) => {
 
   return (
     <Section>
-      <div className=" bg-gradient-to-br from-blue-500/80 to-purple-600/80 p-5 rounded-2xl border-amber-50 border-1">
+      <div className=" bg-gradient-to-br from-[#172436] to-purple-600/80 p-5 rounded-2xl border-[#0dbaf5] border-1">
       <h1 className="text-xl text-white leading-snug text-shadow-2xs">
         Hi, I'm
         <br />
@@ -117,7 +110,7 @@ const palavraAnimada = (palavra, certo) => {
         <span className="text-7xl font-orbitron2
          text-center text-white font-extrabold text-shadow-lg/30 text-shadow-black">Luis <br/> Didonato</span>
       </div>
-      <div className="overflow-hidden h-15 mt-5 bg-purple-900/60 rounded-lg border-amber-50 border-1 flex items-center justify-center">
+      <div className="overflow-hidden h-15 mt-5 bg-purple-900/60 rounded-lg flex items-center justify-center">
           {      
           <AnimatePresence mode="wait">
             <motion.div
@@ -139,24 +132,6 @@ const palavraAnimada = (palavra, certo) => {
         }
       </div>
       <div className="w-full flex justify-center">
-      <motion.button
-        className={`bg-indigo-600 text-white py-4 px-8 
-          rounded-lg font-bold text-lg mt-5 hover:bg-indigo-900 transition-colors duration-75 ease-in cursor-pointer`}
-          initial={{
-            opacity: 0,
-            y: 25,
-          }}
-          whileInView={{
-            opacity: 1,
-            y: 10,
-          }}
-          transition={{
-            duration: 1,
-            delay: 1,
-          }}
-          >
-        Contact me
-      </motion.button>
       </div>
       </div>
     </Section>
@@ -205,7 +180,7 @@ const SkillsSection = () => {
   return (
     <Section>
       <motion.div whileInView={"visible"} 
-      className="bg-gradient-to-br from-blue-500/80 to-purple-600/80 p-10 border-amber-50 border-1 rounded-2xl">
+      className="bg-gradient-to-br from-[#172436] to-purple-600/80 p-10 border-[#0dbaf5] border-1 rounded-2xl">
         <h2 className="text-5xl font-bold text-white text-shadow-lg/50 text-shadow-black">Skills</h2>
         <div className=" mt-8 space-y-4">
           {skills.map((skill, index) => (
@@ -299,6 +274,7 @@ const SkillsSection = () => {
   );
 };
 
+
 const NullRole = () => {
   return(
     <Section>
@@ -306,32 +282,40 @@ const NullRole = () => {
   )
 }
 
-
-const StartAboutMe = () => {
-  return (
+const MyRole = () => {
+  return(
     <Section>
-      <div className="bg-gradient-to-br from-blue-500/80 to-purple-600/80 p-10
-       border-amber-50 border-1 rounded-2xl z-[-9] mt-100">
-      <div className="w-64 h-64 bg-gray-800 absolute
-       border-cyan-500 border-6 rounded-full b-30 z--10 mt-[-260px] z-[-10] shadow-[inset_4px_5px_13px_#00bcda99] ">
+      <div className="w-96 mt-200 ml-2 opacity-95">
+      <ProfileCard
+        name="Luis Didonato"
+        title="Fullstack"
+        handle="luishtml"
+        status="Online"
+        contactText="Contact Me"
+        avatarUrl="/imgs/profile1.png"
+        showUserInfo={true}
+        enableTilt={true}
+        onContactClick={() => console.log('Contact clicked')}
+      />
       </div>
-      <img className="w-70 h-auto absolute mt-[-240px] z-[-9]" 
-      src="/imgs/profile2.png" alt="" />
-      <div className="z-[-8]">
-        <p className="text-5xl font-bold text-white text-shadow-lg/50 text-shadow-black">
-          Sobre mim
-        </p>
-        <ul>
-          <li className="mt-4 text-lg text-white list-disc">Desenvolvedor Full Stack apaixonado por transformar ideias em soluções reais.</li>
-          <li className="mt-4 text-lg text-white list-disc">Curioso por natureza, estudo IA, linguagens, dados e automações.</li>
-          <li className="mt-4 text-lg text-white list-disc">Estou sempre aprendendo — tecnologia muda, e eu evoluo com ela.</li>
-        </ul>
+      <div className="bg-[#172436] opacity-92 p-7 border-[#0dbaf5] border-1 rounded-2xl z-[-9] mt-10 w-98 ml-2">
+        <div className="rotating-text-container h-24 overflow-hidden relative">
+          <div className="rotating-text absolute w-full">
+            <p className="mt-2 inline-block text-xl text-white animate-fadeInOut">Desenvolvedor Full Stack apaixonado por transformar ideias em soluções reais.</p>
+            <p className="mt-2 inline-block text-xl text-white animate-fadeInOut">Curioso por natureza, estudo IA, linguagens, dados e automações.</p>
+            <p className="mt-2 inline-block text-xl text-white animate-fadeInOut">Comprometido com soluções inovadoras e código de qualidade.</p>
+            <p className="mt-2 inline-block text-xl text-white animate-fadeInOut">Sempre aprendendo e evoluindo como profissional de tecnologia.</p>
+          </div>
+        </div>
+      </div>
+          {//<li className="mt-4 text-lg text-white list-disc">Curioso por natureza, estudo IA, linguagens, dados e automações.</li>
+          //<li className="mt-4 text-lg text-white list-disc">Estou sempre aprendendo — tecnologia muda, e eu evoluo com ela.</li>
+          }
 
-      </div>
-      </div>
     </Section>
-  );
+  )
 }
+
 
 
 export default Interface;

@@ -1,16 +1,14 @@
 import { useState } from "react";
 import { ScrollControls, Scroll} from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
-import Interface  from './components/assets/Interface'
+import Interface  from './components/scenes/Interface'
 import ScrollManager from "./components/assets/ScrollManager";
 import Menu from "./components/assets/Menu"
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
-<<<<<<< HEAD
 import Experience from './components/scenes/Experience';
-=======
-import Experience from './components/Experience';
-import Fixed from "./components/Fixed";
->>>>>>> 16002350f511a0e827af8108ed68abf181bf0c80
+import Fixed from "./components/scenes/Fixed";
+import Beams from "./components/ui/Beams"
+import { div } from "motion/react-client";
 
 
 function App() {
@@ -29,7 +27,18 @@ function App() {
           <div className="absolute top-0 left-0 w-full h-full z-0 bg-black"></div>
         )}
         {section >= 4 && (
-          <div className="absolute top-0 left-0 w-full h-full z-0 bg-black"></div>
+          <div className="absolute top-0 left-0 w-full h-full z-0">
+            <Beams
+              beamWidth={1}
+              beamHeight={30}
+              beamNumber={200}
+              lightColor="#ffffff"
+              speed={10}
+              noiseIntensity={1}
+              scale={0.2}
+              rotation={30}
+            />
+          </div>
         )}
       
 

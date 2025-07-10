@@ -3,13 +3,9 @@ import { useFrame } from '@react-three/fiber';
 import { useRef, useEffect, useState } from 'react';
 import gsap from 'gsap';
 import * as THREE from 'three';
-<<<<<<< HEAD:src/components/scenes/Experience.jsx
 import {Car} from "../model/Car";
 import {ProjectsModel} from "../model/ProjectsModel";
-=======
-import {Car} from "./model/Car";
-import {ProjectsModel} from "./model/ProjectsModel";
->>>>>>> 16002350f511a0e827af8108ed68abf181bf0c80:src/components/Experience.jsx
+
 
 export const Experience = () => {
   const meshRef = useRef();
