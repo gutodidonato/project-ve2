@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ScrollControls, Scroll} from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import Interface  from './components/scenes/Interface'
@@ -7,14 +7,68 @@ import Menu from "./components/assets/Menu"
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import Experience from './components/scenes/Experience';
 import Fixed from "./components/scenes/Fixed";
-import Beams from "./components/ui/Beams"
-import { div } from "motion/react-client";
+import Beams from "./components/ui/Beams";
+import gsap from "gsap";
 
 
 function App() {
+  const tweenRef = useRef()
+  const [shouldAnimate, setShouldAnimate] = useState([true, false])
+
   const [section, setSection] = useState(0);
   const [menuOpened, setMenuOpened] = useState(false);
-  const [color, setColor] = useState("bg-black");
+  const [beamChange, setBeamChange] = useState({
+    rotation: 30,
+    color: "#ffffff",
+  });
+
+  
+  const updateShouldAnimate = (indexToSetTrue) => {
+    setShouldAnimate(prev =>
+      prev.map((_, idx) => idx === indexToSetTrue ? true : false)
+    );
+  };
+
+
+  useEffect(() => {
+    console.log(shouldAnimate)
+    const target = {
+      rotation: beamChange.rotation,
+      color: beamChange.color,
+    };
+    if (section > 8 && shouldAnimate[0]) {
+      updateShouldAnimate(1);
+      tweenRef.current = gsap.to(target, {
+        rotation: 180,
+        color: "#ff0000",
+        duration: 1.0,
+        ease: "power2.out",
+        onUpdate: () => {
+          setBeamChange({
+            rotation: target.rotation,
+            color: target.color,
+          });
+        },
+      });
+    } 
+    if (section < 8 && shouldAnimate[1]){
+      updateShouldAnimate(0);
+      tweenRef.current = gsap.to(target, {
+        rotation: 30,
+        color: "#ffffff",
+        duration: 1.0,
+        ease: "power2.out",
+        onUpdate: () => {
+          setBeamChange({
+            rotation: target.rotation,
+            color: target.color,
+          });
+        },
+      });
+    }
+    
+
+  }, [section]);
 
 
   let intensity = (section == 0 || section == 1)? 0 : section/3;
@@ -22,22 +76,25 @@ function App() {
   return (
     <>
         <div className="relative w-screen h-screen">
-        {/* BloobHtml como background */}
+          
+        {/* fundo generalista*/}
         {section < 3.9 && (
           <div className="absolute top-0 left-0 w-full h-full z-0 bg-black"></div>
         )}
+
+        {/*Fundo Beams */}
         {section >= 3.9 && (
           <div className="absolute top-0 left-0 w-full h-full z-0">
-            <Beams
-              beamWidth={1}
-              beamHeight={30}
-              beamNumber={200}
-              lightColor="#ffffff"
-              speed={1.5}
-              noiseIntensity={1}
-              scale={0.2}
-              rotation={30}
-            />
+          <Beams
+            beamWidth={1}
+            beamHeight={30}
+            beamNumber={200}
+            lightColor={beamChange.color}
+            speed={1.5}
+            noiseIntensity={1}
+            scale={0.2}
+            rotation={beamChange.rotation}
+          />
           </div>
         )}
       
