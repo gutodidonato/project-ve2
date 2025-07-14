@@ -1,0 +1,29 @@
+.slider-elements ul{
+    width: 100%;
+    min-width: calc(160px * var(--quantity));
+    position: relative;
+    display: flex;
+}
+
+.slider-elements ul li{
+    width: 250px;
+    left: 100%;
+    position: absolute;
+    animation: AutoRun var(--time) linear infinite;
+    animation-delay: calc(var(--time)/var(--quantity) * (var(--position) - 1) );
+    list-style: none;
+}
+
+.slider-elements ul .reverse{
+    animation: AutoRun var(--time) linear infinite reverse;
+    animation-delay: calc(var(--time)/var(--quantity) * (var(--index) - 1) - var(--time));
+    display: flex;
+    justify-content: center;
+}
+
+
+@keyframes AutoRun{
+    to{
+        left: -250px;
+    }
+}

@@ -7,7 +7,7 @@ import {Car} from "../model/Car";
 import {ProjectsModel} from "../model/ProjectsModel";
 
 
-export const Experience = () => {
+export const Experience = ({ section }) => {
   const meshRef = useRef();
   const lightRef = useRef();
   const scroll = useScroll();
@@ -18,6 +18,7 @@ export const Experience = () => {
   const [modelOpacity, setModelOpacity] = useState(1);
   const [screenOpacity, setScreenOpacity] = useState(0)
 
+  console.log(section)
   
 
   const cameraStages = [
@@ -126,7 +127,14 @@ export const Experience = () => {
   if (projectsModelRef.current) {
     if (targetUseModel) {
       projectsModelRef.current.position.set(-100, -100, -100);
-    } else {
+    } else if(section > 14) {
+      const cameraDirection = new THREE.Vector3();
+      state.camera.getWorldDirection(cameraDirection);
+      projectsModelRef.current.position.copy(state.camera.position).add(cameraDirection.multiplyScalar(
+        Math.min(Math.min((18*3 -section*3) / 3, 3), 1)
+      ));
+    }
+    else{
       const cameraDirection = new THREE.Vector3();
       state.camera.getWorldDirection(cameraDirection);
       projectsModelRef.current.position.copy(state.camera.position).add(cameraDirection.multiplyScalar(10));

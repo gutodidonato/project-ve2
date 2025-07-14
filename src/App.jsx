@@ -11,9 +11,10 @@ import Beams from "./components/ui/Beams";
 import gsap from "gsap";
 
 
+
 function App() {
   const tweenRef = useRef()
-  const [shouldAnimate, setShouldAnimate] = useState([true, false])
+  const [shouldAnimate, setShouldAnimate] = useState([false, true, false])
 
   const [section, setSection] = useState(0);
   const [menuOpened, setMenuOpened] = useState(false);
@@ -25,38 +26,25 @@ function App() {
   
   const updateShouldAnimate = (indexToSetTrue) => {
     setShouldAnimate(prev =>
-      prev.map((_, idx) => idx === indexToSetTrue ? true : false)
+      prev.map((_, idx) => idx === indexToSetTrue ? false : true)
     );
   };
 
 
   useEffect(() => {
-    console.log(shouldAnimate)
     const target = {
       rotation: beamChange.rotation,
       color: beamChange.color,
     };
-    if (section > 8 && shouldAnimate[0]) {
-      updateShouldAnimate(1);
-      tweenRef.current = gsap.to(target, {
-        rotation: 180,
-        color: "#ff0000",
-        duration: 1.0,
-        ease: "power2.out",
-        onUpdate: () => {
-          setBeamChange({
-            rotation: target.rotation,
-            color: target.color,
-          });
-        },
-      });
-    } 
-    if (section < 8 && shouldAnimate[1]){
+
+    if (section < 8 && shouldAnimate[0]){
+
       updateShouldAnimate(0);
+
       tweenRef.current = gsap.to(target, {
         rotation: 30,
         color: "#ffffff",
-        duration: 1.0,
+        duration: 2.0,
         ease: "power2.out",
         onUpdate: () => {
           setBeamChange({
@@ -66,6 +54,41 @@ function App() {
         },
       });
     }
+
+    else if (section > 8 && section <= 11 && shouldAnimate[1]) {
+
+      updateShouldAnimate(1);
+
+      tweenRef.current = gsap.to(target, {
+        rotation: 180,
+        color: "#ff0000",
+        duration: 2.0,
+        ease: "power2.out",
+        onUpdate: () => {
+          setBeamChange({
+            rotation: target.rotation,
+            color: target.color,
+          });
+        },
+      });
+    } 
+      else if (section > 11  && shouldAnimate[2]) {
+
+      updateShouldAnimate(2);
+
+      tweenRef.current = gsap.to(target, {
+        rotation: 90,
+        color: "#313131",
+        duration: 2.0,
+        ease: "power2.out",
+        onUpdate: () => {
+          setBeamChange({
+            rotation: target.rotation,
+            color: target.color,
+          });
+        },
+      });
+    } 
     
 
   }, [section]);
@@ -99,11 +122,13 @@ function App() {
         )}
       
 
-      <Canvas shadows camera={{ position: [3, 3, 3], fov: 30 }}>
+      <Canvas 
+        shadows 
+        camera={{ position: [3, 3, 3], fov: 30 }}>
         <ScrollControls pages={16} damping={0.1}>
           <ScrollManager section={section} onSectionChange={setSection}/>
           <EffectComposer>
-          <Experience/>
+          <Experience section={section}/>
           
             <Bloom intensity={intensity} luminanceThreshold={0.1} luminanceSmoothing={0.9}/>
           </EffectComposer>

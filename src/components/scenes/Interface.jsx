@@ -77,7 +77,8 @@ const palavraAnimada = (palavra, certo) => {
               delay: index * 0.05,
               ease: "easeOut",
             }}
-            className={`text-3xl capitalize text-center font-sans font-bold 
+            className={`text-3xl capitalize text-center font-sans font-bold text-shadow-2xs
+              text-shadow-black
               ${(certo)? `text-sky-400`: `text-red-400` }
               ${isPar ? `par_${Math.floor(index / 2)}` : `inpar_${Math.floor(index / 2)}`}
               `}
@@ -289,6 +290,7 @@ const MyRole = () => {
       <div className="w-96 mt-200 ml-2 opacity-95">
       <ProfileCard
         name="Luis Didonato"
+        iconUrl="https://upload.wikimedia.org/wikipedia/commons/c/c3/Python-logo-notext.svg"
         title="Fullstack"
         handle="luishtml"
         status="Online"

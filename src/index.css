@@ -20,19 +20,27 @@
 
   body {
     margin: 0;
+    overflow: hidden;
   }
+
+  /* Track */
+
+
+::-webkit-scrollbar{
+  opacity: 0;
+}
 
   @keyframes rotateSteps {
     0% { transform: translateY(0); }
 
-    10% { transform: translateY(-120px); }
-    25% { transform: translateY(-120px); }
+    10% { transform: translateY(-130px); }
+    25% { transform: translateY(-130px); }
 
-    35% { transform: translateY(-240px); }
-    50% { transform: translateY(-240px); }
+    35% { transform: translateY(-250px); }
+    50% { transform: translateY(-250px); }
 
-    55% { transform: translateY(-360px); }
-    75% { transform: translateY(-360px); }
+    55% { transform: translateY(-370px); }
+    75% { transform: translateY(-370px); }
 
     100% { transform: translateY(0); }
   }
