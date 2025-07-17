@@ -111,7 +111,7 @@
     }
 }
 
-.row {
+.run-row {
   animation: rowScroll 20s linear infinite;
 }
 

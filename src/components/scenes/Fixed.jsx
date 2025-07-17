@@ -258,7 +258,7 @@ export default function Fixed({ section }) {
       <div ref={gridLayout} 
         style={{opacity: 0}}
         className="h-full w-full z-10 absolute top-0 overflow-visible">
-        <GridUi/>
+        <GridUi section={section}/>
       </div>
 
 

@@ -2,13 +2,44 @@ import { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import './GridMotion.css';
 
-const GridMotion = ({ items = [], gradientColor = 'black' }) => {
+const GridMotion = ({ items = [], gradientColor = 'black', section }) => {
   const gridRef = useRef(null);
   const rowRefs = useRef([]);
+
 
   const totalItems = 28;
   const defaultItems = Array.from({ length: totalItems }, (_, index) => `Item ${index + 1}`);
   const combinedItems = items.length > 0 ? items.slice(0, totalItems) : defaultItems;
+
+  const [recovered, setRecovered] = useState(false)
+
+useEffect(() => {
+  if (section > 14) {
+    rowRefs.current.forEach((row, index) => {
+      if (!row) return;
+
+      row.classList.remove('run-row', 'reverse-row');
+
+      const direction = index % 2 === 0 ? 1 : -1; 
+      setRecovered(true)
+
+      gsap.to(row, {
+        x: `${200 * direction}px`,
+        opacity: 0.5,
+        duration: 2,
+        ease: "power3.out",
+      });
+    });
+  }
+  else if(section <= 14 && recovered){
+    rowRefs.current.forEach((row, index) => {
+      if (!row) return;
+
+      index % 2 === 0 ? row.classList.add('run-row') : row.classList.add('reverse-row')
+      
+    })
+  }
+}, [section]);
 
   return (
     <div className="noscroll loading" ref={gridRef}>
@@ -22,7 +53,7 @@ const GridMotion = ({ items = [], gradientColor = 'black' }) => {
           {[...Array(4)].map((_, rowIndex) => (
             <div
               key={rowIndex}
-              className={`row ${(rowIndex % 2 === 0) ? "" : "reverse-row"}`}
+              className={`row ${(rowIndex % 2 === 0) ? "run-row" : "reverse-row"}`}
               ref={(el) => (rowRefs.current[rowIndex] = el)}
             >
               {[...Array(7)].map((_, itemIndex) => {

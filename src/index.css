@@ -27,7 +27,7 @@
 
 
 ::-webkit-scrollbar{
-  opacity: 0;
+    opacity: 0;
 }
 
   @keyframes rotateSteps {
