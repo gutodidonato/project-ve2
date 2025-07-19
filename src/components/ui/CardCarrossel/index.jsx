@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import Card from "../Card/Index";
+import Card from "../Card";
 import "./style.css";
 
 export default function CardCarrossel(props) {
