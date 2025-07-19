@@ -123,25 +123,37 @@ export const Experience = ({ section }) => {
         fadePlaneRef.current.material.opacity = 0
       }
     }
+
+
   
-  if (projectsModelRef.current) {
-    if (targetUseModel) {
-      projectsModelRef.current.position.set(-100, -100, -100);
-    } else if(section > 14) {
+    if (projectsModelRef.current) {
       const cameraDirection = new THREE.Vector3();
       state.camera.getWorldDirection(cameraDirection);
-      projectsModelRef.current.position.copy(state.camera.position).add(cameraDirection.multiplyScalar(
-        Math.min(Math.min((18*3 -section*3) / 3, 3), 1)
-      ));
+
+      const targetPosition = new THREE.Vector3();
+      
+      if (section < 1) {
+        targetPosition.set(-100, -100, -100);
+      }
+      else if (section > 8 && section < 11){
+        targetPosition.copy(state.camera.position).add(cameraDirection.multiplyScalar(7));
+      }
+      else if (section >= 11 && section <= 14) {
+        targetPosition.copy(state.camera.position).add(cameraDirection.multiplyScalar(10));
+      }
+      else {
+        targetPosition.copy(state.camera.position).add(cameraDirection.multiplyScalar(10));
+      }
+
+      gsap.to(projectsModelRef.current.position, {
+        x: targetPosition.x,
+        y: targetPosition.y,
+        z: targetPosition.z,
+        duration: 4,
+        ease: "power3.out",
+        overwrite: "auto"
+      });
     }
-    else{
-      const cameraDirection = new THREE.Vector3();
-      state.camera.getWorldDirection(cameraDirection);
-      projectsModelRef.current.position.copy(state.camera.position).add(cameraDirection.multiplyScalar(10));
-    }
-  }
-  
-  
   
   })
 

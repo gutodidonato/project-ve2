@@ -27,10 +27,10 @@ const items = [
   'Item 14',
   // Add more items as needed
 ];
-function GridUi({section}){  
+function GridUi({separar}){  
     return (
 
-        <GridMotion section={section} items={items} />
+        <GridMotion separar={separar} items={items} />
     )
 }
 

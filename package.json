@@ -20,6 +20,7 @@
     "leva": "^0.10.0",
     "motion": "^12.16.0",
     "my-app": "file:",
+    "ogl": "^1.0.11",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "tailwindcss": "^4.1.8",

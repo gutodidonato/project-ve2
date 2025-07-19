@@ -1,8 +1,8 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import './GridMotion.css';
 
-const GridMotion = ({ items = [], gradientColor = 'black', section }) => {
+const GridMotion = ({ items = [], gradientColor = 'black', separar }) => {
   const gridRef = useRef(null);
   const rowRefs = useRef([]);
 
@@ -14,32 +14,47 @@ const GridMotion = ({ items = [], gradientColor = 'black', section }) => {
   const [recovered, setRecovered] = useState(false)
 
 useEffect(() => {
-  if (section > 14) {
+  if (separar === false && !recovered) {
+    setRecovered(true);
+
     rowRefs.current.forEach((row, index) => {
       if (!row) return;
 
-      row.classList.remove('run-row', 'reverse-row');
+      row.classList.remove('run-row', 'reverse-row')
 
-      const direction = index % 2 === 0 ? 1 : -1; 
-      setRecovered(true)
+      const direction = index % 2 === 0 ? 1 : -1;
 
       gsap.to(row, {
-        x: `${200 * direction}px`,
-        opacity: 0.5,
-        duration: 2,
+        x: 4200 * direction,
+        duration: 4,
         ease: "power3.out",
+        overwrite: "auto",
       });
     });
   }
-  else if(section <= 14 && recovered){
+  else if (separar && recovered) {
+    
     rowRefs.current.forEach((row, index) => {
       if (!row) return;
-
-      index % 2 === 0 ? row.classList.add('run-row') : row.classList.add('reverse-row')
       
-    })
+      gsap.to(row, {
+        x: `25%`,
+        duration: 4,
+        ease: "power3.out",
+        overwrite: "auto",
+        onComplete: () => {
+          if (index % 2 === 0) {
+            row.classList.add('run-row');
+          } else {
+            row.classList.add('reverse-row');
+          }
+          setRecovered(false);
+        }
+      });
+    });
   }
-}, [section]);
+}, [separar, recovered]);
+
 
   return (
     <div className="noscroll loading" ref={gridRef}>

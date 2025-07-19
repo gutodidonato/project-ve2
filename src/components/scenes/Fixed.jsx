@@ -2,24 +2,30 @@ import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import CardCarrossel from "../ui/CardCarrossel";
 import GridUi from "../ui/GridUi";
+import SideCard from "../ui/SideCard"
 
 
-export default function Fixed({ section }) {
+export default function Fixed({ section, conteudo, setConteudo }) {
   const fixedPos = useRef(null);
 
-  const botItem = useRef(null);
+  const botItem1 = useRef(null);
   const botItem2 = useRef(null);
   const botItem3 = useRef(null);
-
+  const botItem4 = useRef(null);
+  
+  const centralContent = useRef(null);
   const gridLayout = useRef(null);
 
   const carrosselCard = useRef(null);
   const [carrosselState, setCarrosselState] = useState(true);
-  
+  const [separar, setSeparar] = useState(true)
+  const [text, setText] = useState("");
+
   let first_animate = (section >= 5 && section < 8);
   let second_animate = (section >= 8 && section<= 11);
-  let third_animate = (section > 11 && section <= 14);
-  let last_animate = (section > 14)
+  let inicio_grid = (section > 11 && section < 14);
+  let fim_grid = (section >= 14 )
+  
 
   useEffect(() => {
     console.log(section)
@@ -78,7 +84,7 @@ export default function Fixed({ section }) {
         overwrite: "auto"
       });
       
-      gsap.to(botItem.current, {
+      gsap.to(botItem1.current, {
         opacity: 0,
         duration: 1,
         ease: "power2.in",
@@ -93,6 +99,11 @@ export default function Fixed({ section }) {
         ease: "power2.in",
         pointerEvents: "none",
         overwrite: "auto"
+      });
+
+      gsap.to(gridLayout.current, {
+        opacity: 1, 
+        ease: "power1.inOut",
       });
       
       
@@ -112,7 +123,7 @@ export default function Fixed({ section }) {
     }
     
     
-    else if (third_animate)  {
+    else if (inicio_grid)  {
 
     setCarrosselState(false)
 
@@ -152,10 +163,16 @@ export default function Fixed({ section }) {
         ease: "power1.in",
         overwrite: "auto"
       } )
-
+      gsap.to(centralContent.current, {
+        opacity: 0,
+        duration: 2,
+        ease: "power1.in",
+        overwrite: "auto"
+      })
+      
     }
-    else if (last_animate){
-
+    else if (fim_grid){
+      
       gsap.to(fixedPos.current, {
         opacity: 0,
         duration: 0.5,
@@ -164,14 +181,14 @@ export default function Fixed({ section }) {
         overwrite: "auto"
       });
       
-      gsap.to(botItem.current, {
+      gsap.to(botItem1.current, {
         opacity: 0,
         duration: 0.5,
         ease: "power2.in",
         pointerEvents: "none",
         overwrite: "auto"
       });
-
+      
       gsap.to(botItem3.current, {
         opacity: 0,
         duration: 0.5,
@@ -179,13 +196,20 @@ export default function Fixed({ section }) {
         pointerEvents: "none",
         overwrite: "auto"
       });
-
-      gsap.to(gridLayout.current, {
-        opacity: 0, 
+    
+      gsap.to(botItem4.current, {
+        opacity: 1,
         duration: 2,
         ease: "power1.in",
         overwrite: "auto"
-      });
+      })
+  
+      gsap.to(centralContent.current, {
+        opacity: 1,
+        duration: 2,
+        ease: "power1.in",
+        overwrite: "auto"
+      })
 
     }
     else{
@@ -195,8 +219,8 @@ export default function Fixed({ section }) {
       })
     }
     
-  }, [first_animate, second_animate, third_animate, last_animate]);
-
+  }, [first_animate, second_animate, inicio_grid, fim_grid]);
+  
   /*
   ==============
   Scroll Effects
@@ -208,7 +232,7 @@ export default function Fixed({ section }) {
 
     if (section < 8) {
       
-    gsap.to(botItem.current, {
+    gsap.to(botItem1.current, {
       opacity: progress,
       y: 400 * (1 - progress),
       duration: 0.5,
@@ -216,35 +240,94 @@ export default function Fixed({ section }) {
       overwrite: "auto",
     });
     }
+
+    if (section < 14 && !separar){
+      setSeparar(true)
+    }
+
+    else if (section > 14 && separar){
+      setSeparar(false)
+    }
     
   }, [section]);
 
+
+  useEffect(()=>{
+    if (conteudo == 0){
+      setText("lallaal");
+      gsap.fromTo(botItem4.current, {
+        opacity: 0,
+        duration: 0.5,
+      },
+      {
+        opacity: 1,
+        duration: 0.5
+      })
+    }
+    else if (conteudo == 1){
+      setText("feijão");
+      gsap.fromTo(botItem4.current, {
+        opacity: 0,
+        duration: 0.5,
+      },
+      {
+        text: "lallaal",
+        opacity: 1,
+        duration: 0.5
+      })
+    }
+    else if (conteudo == 2){
+      setText("pamonha");
+      gsap.fromTo(botItem4.current, {
+        opacity: 0,
+        duration: 0.5,
+      },
+      {
+        opacity: 1,
+        duration: 0.5
+      })
+    }
+    else{
+      setText("requeijao");
+      gsap.fromTo(botItem4.current, {
+        opacity: 0,
+        duration: 0.5,
+      },
+      {
+        opacity: 1,
+        duration: 0.5
+      })
+    }
+  }, [conteudo])
+
   return (
     <div className="fixed w-screen h-screen top-0 z-20 pointer-events-none">
-      {/* Titulo superior Mobile */}
+
+      {/* Etapa Front */}
+
       <div  ref={fixedPos}
             style={{ opacity: 0 }} 
             className="h-2/8 w-1/3 mx-auto mt-10 flex justify-center items-center">
         <p className="text-white shadow-black text-shadow-lg/30 text-4xl font-bold text-center">Desenvolvimento Mobile</p>
       </div>
 
-
-      <div ref={carrosselCard} 
-           style={{opacity : 0}}
-           className="w-full overflow-hidden">
-          <CardCarrossel state={carrosselState} />
-      </div>
-
-      {/* Descrição inferior */}
       <div className="h-1/5 w-3/5 fixed left-1/5 right-1/5 bottom-10 flex justify-center items-center">
         <div className="w-3/4">
-          <p ref={botItem} 
+          <p ref={botItem1} 
           style={{ opacity: 0}} 
           className="text-white text-shadow-lg/30 shadow-black text-2xl text-center font-semibold font-open-sans">
           Lorem ipsum dolor sit amet consectetur, adipisicing elit. Nemo mollitia cumque architecto aut omnis incidunt ullam. Deleniti consequatur quidem ut modi dolor enim voluptate. Non amet quo voluptatem tenetur modi!
           </p>
         </div>
       </div>
+
+      {/* Etapa stacks */}
+      <div ref={carrosselCard} 
+           style={{opacity : 0}}
+           className="w-full overflow-hidden">
+          <CardCarrossel state={carrosselState} />
+      </div>
+
 
       <div className="h-1/5 w-3/5 fixed left-1/5 right-1/5 bottom-10 flex justify-center items-center">
         <div className="w-3/4">
@@ -255,10 +338,13 @@ export default function Fixed({ section }) {
         </div>
       </div>
 
+
+      {/* Etapa Grid */}
+
       <div ref={gridLayout} 
         style={{opacity: 0}}
         className="h-full w-full z-10 absolute top-0 overflow-visible">
-        <GridUi section={section}/>
+        <GridUi separar={separar}/>
       </div>
 
 
@@ -268,6 +354,23 @@ export default function Fixed({ section }) {
         <p className="text-amber-50 bg-[#222222f5] rounded-2xl 
           p-5 font-semibold text-xl">Muitos sites e soluções desenvolvidas para empresas, do back ao front, da ia ao BI,
           sempre presando a solução
+        </p>
+      </div>
+
+
+
+      {/* Etapa fim */}
+      <div ref={centralContent} 
+          style={{opacity : 0}}
+          className="absolute w-full 
+          flex items-center justify-center z-100 flex-col gap-15">
+        <div className="pointer-events-auto">
+            <SideCard conteudo={conteudo} setConteudo={setConteudo}/>
+        </div>
+        <p ref={botItem4} 
+          style={{opacity : 0}} 
+          className="text-amber-50 
+          p-5 font-semibold text-xl">{text}
         </p>
       </div>
 
