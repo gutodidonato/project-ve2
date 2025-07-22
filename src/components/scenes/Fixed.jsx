@@ -23,8 +23,8 @@ export default function Fixed({ section, conteudo, setConteudo }) {
 
   let first_animate = (section >= 5 && section < 8);
   let second_animate = (section >= 8 && section<= 11);
-  let inicio_grid = (section > 11 && section < 14);
-  let fim_grid = (section >= 14 )
+  let third_animate = (section > 11 && section < 14);
+  let fourth_animate = (section >= 14 )
   
 
   useEffect(() => {
@@ -123,7 +123,7 @@ export default function Fixed({ section, conteudo, setConteudo }) {
     }
     
     
-    else if (inicio_grid)  {
+    else if (third_animate)  {
 
     setCarrosselState(false)
 
@@ -163,15 +163,25 @@ export default function Fixed({ section, conteudo, setConteudo }) {
         ease: "power1.in",
         overwrite: "auto"
       } )
+
+      gsap.to(centralContent.current, {
+        opacity: 0,
+        zIndex: 10,
+        duration: 0.5,
+        overwrite: "auto"
+      })
       gsap.to(centralContent.current, {
         opacity: 0,
         duration: 2,
+        delay: 0.5,
+        zIndex: 10,
+        pointerEvents: "none",
         ease: "power1.in",
         overwrite: "auto"
       })
       
     }
-    else if (fim_grid){
+    else if (fourth_animate){
       
       gsap.to(fixedPos.current, {
         opacity: 0,
@@ -199,7 +209,7 @@ export default function Fixed({ section, conteudo, setConteudo }) {
     
       gsap.to(botItem4.current, {
         opacity: 1,
-        duration: 2,
+        duration: 0.5,
         ease: "power1.in",
         overwrite: "auto"
       })
@@ -207,19 +217,33 @@ export default function Fixed({ section, conteudo, setConteudo }) {
       gsap.to(centralContent.current, {
         opacity: 1,
         duration: 2,
+        zIndex: 30,
+        delay: 1,
         ease: "power1.in",
+        pointerEvents: "auto",
         overwrite: "auto"
       })
 
     }
     else{
+      gsap.to(centralContent.current, {
+        opacity: 0,
+        duration: 0.5,
+        ease: "power1.in",
+        pointerEvents: "none",
+        overwrite: "auto"
+      })
+
       gsap.to(fixedPos.current, {
         opacity: 0,
         duration: 0.5, ease: "power1.out", overwrite: "auto"
       })
+      
+
+
     }
     
-  }, [first_animate, second_animate, inicio_grid, fim_grid]);
+  }, [first_animate, second_animate, third_animate, fourth_animate]);
   
   /*
   ==============
@@ -228,7 +252,7 @@ export default function Fixed({ section, conteudo, setConteudo }) {
   */
 
   useEffect(() => {
-    const progress = Math.min(Math.max((section - 3.5) / 3, 0), 1);
+    const progress = Math.min(Math.max((section - 3.5) / 1.5, 0), 1); 
 
     if (section < 8) {
       
@@ -308,7 +332,7 @@ export default function Fixed({ section, conteudo, setConteudo }) {
       <div  ref={fixedPos}
             style={{ opacity: 0 }} 
             className="h-2/8 w-1/3 mx-auto mt-10 flex justify-center items-center">
-        <p className="text-white shadow-black text-shadow-lg/30 text-4xl font-bold text-center">Desenvolvimento Mobile</p>
+        <p className="text-white shadow-black text-shadow-lg/30 text-4xl font-bold text-center">Desenvolvimento Mobile/ Frontend </p>
       </div>
 
       <div className="h-1/5 w-3/5 fixed left-1/5 right-1/5 bottom-10 flex justify-center items-center">
@@ -316,7 +340,7 @@ export default function Fixed({ section, conteudo, setConteudo }) {
           <p ref={botItem1} 
           style={{ opacity: 0}} 
           className="text-white text-shadow-lg/30 shadow-black text-2xl text-center font-semibold font-open-sans">
-          Lorem ipsum dolor sit amet consectetur, adipisicing elit. Nemo mollitia cumque architecto aut omnis incidunt ullam. Deleniti consequatur quidem ut modi dolor enim voluptate. Non amet quo voluptatem tenetur modi!
+      Desenvolvo soluções digitais com foco em performance e experiência. Atuei nos projetos de streaming do Hospital Sírio-Libanês e da rede Posadas no México, com forte presença no mobile e frontend.
           </p>
         </div>
       </div>
@@ -333,7 +357,7 @@ export default function Fixed({ section, conteudo, setConteudo }) {
         <div className="w-3/4">
           <p ref={botItem2} 
           style={{ opacity: 0}} className="text-white text-shadow-lg/30 shadow-black text-2xl text-center font-semibold font-open-sans">
-          asd dasdasd as
+          Tenho domínio total sobre diferentes stacks e linguagens — programo com fluidez em qualquer tecnologia, ajustando à necessidade do projeto. Além do desenvolvimento full stack, também atuo com IA, aplicando modelos e integrações inteligentes em aplicações reais.
           </p>
         </div>
       </div>
@@ -343,14 +367,14 @@ export default function Fixed({ section, conteudo, setConteudo }) {
 
       <div ref={gridLayout} 
         style={{opacity: 0}}
-        className="h-full w-full z-10 absolute top-0 overflow-visible">
+        className="h-full w-full z-25 absolute top-0 overflow-visible">
         <GridUi separar={separar}/>
       </div>
 
 
       <div ref={botItem3} 
           style={{opacity : 0}}
-          className="absolute z-20 bottom-0 h-2/5 w-full flex items-center justify-center">
+          className="absolute z-30 bottom-0 h-2/5 w-full flex items-center justify-center">
         <p className="text-amber-50 bg-[#222222f5] rounded-2xl 
           p-5 font-semibold text-xl">Muitos sites e soluções desenvolvidas para empresas, do back ao front, da ia ao BI,
           sempre presando a solução
@@ -361,10 +385,10 @@ export default function Fixed({ section, conteudo, setConteudo }) {
 
       {/* Etapa fim */}
       <div ref={centralContent} 
-          style={{opacity : 0}}
+          style={{opacity : 0, pointerEvents: "none", zIndex: 10}}
           className="absolute w-full 
-          flex items-center justify-center z-100 flex-col gap-15">
-        <div className="pointer-events-auto">
+          flex items-center justify-center z-20 flex-col gap-15">
+        <div>
             <SideCard conteudo={conteudo} setConteudo={setConteudo}/>
         </div>
         <p ref={botItem4} 

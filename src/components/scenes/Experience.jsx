@@ -132,17 +132,24 @@ export const Experience = ({ section }) => {
 
       const targetPosition = new THREE.Vector3();
       
-      if (section < 1) {
-        targetPosition.set(-100, -100, -100);
+      if (section < 2) {
+        targetPosition.set(50, -50, -50);
+      }
+      else if (section >= 3.2 && section <= 8){
+        targetPosition.copy(state.camera.position).add(cameraDirection.multiplyScalar(7));
       }
       else if (section > 8 && section < 11){
         targetPosition.copy(state.camera.position).add(cameraDirection.multiplyScalar(7));
       }
-      else if (section >= 11 && section <= 14) {
+      else if (section >= 11) {
         targetPosition.copy(state.camera.position).add(cameraDirection.multiplyScalar(10));
+        if (section >= 13.5){
+            setScreenOpacity(0)
+        }
       }
       else {
         targetPosition.copy(state.camera.position).add(cameraDirection.multiplyScalar(10));
+        setScreenOpacity(1)
       }
 
       gsap.to(projectsModelRef.current.position, {
