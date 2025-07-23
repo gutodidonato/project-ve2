@@ -173,12 +173,12 @@ export default function Fixed({ section, conteudo, setConteudo }) {
       gsap.to(centralContent.current, {
         opacity: 0,
         duration: 2,
-        delay: 0.5,
+        delay: 2,
         zIndex: 10,
         pointerEvents: "none",
         ease: "power1.in",
-        overwrite: "auto"
-      })
+        overwrite: "auto",
+      });
       
     }
     else if (fourth_animate){
@@ -213,12 +213,19 @@ export default function Fixed({ section, conteudo, setConteudo }) {
         ease: "power1.in",
         overwrite: "auto"
       })
+
   
       gsap.to(centralContent.current, {
         opacity: 1,
         duration: 2,
-        zIndex: 30,
-        delay: 1,
+        delay: 3,
+        ease: "power1.in",
+        overwrite: "auto"
+      })
+      gsap.to(centralContent.current, {
+        duration: 2,
+        zIndex: 40,
+        delay:3,
         ease: "power1.in",
         pointerEvents: "auto",
         overwrite: "auto"
@@ -389,7 +396,7 @@ export default function Fixed({ section, conteudo, setConteudo }) {
           className="absolute w-full 
           flex items-center justify-center z-20 flex-col gap-15">
         <div>
-            <SideCard conteudo={conteudo} setConteudo={setConteudo} section={section}/>
+            <SideCard conteudo={conteudo} setConteudo={setConteudo} animation_status={fourth_animate}/>
         </div>
         <p ref={botItem4} 
           style={{opacity : 0}} 

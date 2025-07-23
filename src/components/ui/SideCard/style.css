@@ -48,3 +48,12 @@
 .sideCard .box_card:hover span {
   transform: rotate(0);
 }
+
+@media (max-width: 1024px) {
+  .sideCard {
+    width: 350px;
+    height: 200px;
+  }
+
+  
+}
