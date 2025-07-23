@@ -135,7 +135,7 @@ export const Experience = ({ section }) => {
       if (section < 2) {
         targetPosition.set(50, -50, -50);
       }
-      else if (section >= 3.2 && section <= 8){
+      else if (section >= 3.7 && section <= 8){
         targetPosition.copy(state.camera.position).add(cameraDirection.multiplyScalar(7));
       }
       else if (section > 8 && section < 11){

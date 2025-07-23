@@ -5,7 +5,7 @@
   gap: 5px;
 }
 
-.sideCard p {
+.sideCard .box_card {
   height: 100%;
   flex: 1;
   overflow: hidden;
@@ -18,7 +18,7 @@
 }
 
 
-.sideCard p::before {
+.sideCard .box_card::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -31,20 +31,20 @@
   z-index: 0;
 }
 
-.sideCard p:hover::before {
+.sideCard .box_card:hover::before {
   filter: grayscale(0) contrast(1) brightness(1.0);
 }
 
-.sideCard p:hover {
+.sideCard .box_card:hover {
   flex: 4;
 }
 
-.sideCard p span {
+.sideCard .box_card span {
   text-align: center;
   transform: rotate(-90deg);
   transition: all 1s;
 }
 
-.sideCard p:hover span {
+.sideCard .box_card:hover span {
   transform: rotate(0);
 }

@@ -389,7 +389,7 @@ export default function Fixed({ section, conteudo, setConteudo }) {
           className="absolute w-full 
           flex items-center justify-center z-20 flex-col gap-15">
         <div>
-            <SideCard conteudo={conteudo} setConteudo={setConteudo}/>
+            <SideCard conteudo={conteudo} setConteudo={setConteudo} section={section}/>
         </div>
         <p ref={botItem4} 
           style={{opacity : 0}} 

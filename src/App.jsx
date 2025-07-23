@@ -162,7 +162,7 @@ function App() {
         {section >= 14 && (
           <Waves
             lineColor={rgbString}
-            backgroundColor="rgb(27, 27, 27)"
+            backgroundColor="rgb(0, 0, 0)"
             waveSpeedX={0.02}
             waveSpeedY={0.01}
             waveAmpX={40}
