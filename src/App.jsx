@@ -9,7 +9,7 @@ import Experience from './components/scenes/Experience';
 import Fixed from "./components/scenes/Fixed";
 import Beams from "./components/ui/Beams";
 import gsap from "gsap";
-import Waves from "./components/ui/Waves";
+import LightRaysControl from "./components/ui/LightRaysControl";
 
 
 
@@ -160,19 +160,7 @@ function App() {
           />
         )} 
         {section >= 14 && (
-          <Waves
-            lineColor={rgbString}
-            backgroundColor="rgb(0, 0, 0)"
-            waveSpeedX={0.02}
-            waveSpeedY={0.01}
-            waveAmpX={40}
-            waveAmpY={20}
-            friction={0.9}
-            tension={0.01}
-            maxCursorMove={120}
-            xGap={12}
-            yGap={36}
-          />
+          <LightRaysControl section={section}/>
         )}
         
         </div>

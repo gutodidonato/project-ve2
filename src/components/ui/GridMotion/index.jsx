@@ -6,62 +6,63 @@ const GridMotion = ({ items = [], gradientColor = 'black', separar }) => {
   const gridRef = useRef(null);
   const rowRefs = useRef([]);
 
-
   const totalItems = 28;
   const defaultItems = Array.from({ length: totalItems }, (_, index) => `Item ${index + 1}`);
   const combinedItems = items.length > 0 ? items.slice(0, totalItems) : defaultItems;
 
-  const [recovered, setRecovered] = useState(false)
+  const [recovered, setRecovered] = useState(false);
+  const [currentGradientColor, setCurrentGradientColor] = useState(gradientColor);
 
-useEffect(() => {
-  if (separar === false && !recovered) {
-    setRecovered(true);
+  useEffect(() => {
+    if (separar === false && !recovered) {
+      setRecovered(true);
+      setCurrentGradientColor('transparent');
 
-    rowRefs.current.forEach((row, index) => {
-      if (!row) return;
+      rowRefs.current.forEach((row, index) => {
+        if (!row) return;
 
-      row.classList.remove('run-row', 'reverse-row')
+        row.classList.remove('run-row', 'reverse-row')
 
-      const direction = index % 2 === 0 ? 1 : -1;
+        const direction = index % 2 === 0 ? 1 : -1;
 
-      gsap.to(row, {
-        x: 4200 * direction,
-        duration: 4,
-        ease: "power3.out",
-        overwrite: "auto",
+        gsap.to(row, {
+          x: 4200 * direction,
+          duration: 4,
+          ease: "power3.out",
+          overwrite: "auto",
+        });
       });
-    });
-  }
-  else if (separar && recovered) {
-    
-    rowRefs.current.forEach((row, index) => {
-      if (!row) return;
-      
-      gsap.to(row, {
-        x: `25%`,
-        duration: 4,
-        ease: "power3.out",
-        overwrite: "auto",
-        onComplete: () => {
-          if (index % 2 === 0) {
-            row.classList.add('run-row');
-          } else {
-            row.classList.add('reverse-row');
+    }
+    else if (separar && recovered) {
+      setCurrentGradientColor('black');
+
+      rowRefs.current.forEach((row, index) => {
+        if (!row) return;
+
+        gsap.to(row, {
+          x: `25%`,
+          duration: 4,
+          ease: "power3.out",
+          overwrite: "auto",
+          onComplete: () => {
+            if (index % 2 === 0) {
+              row.classList.add('run-row');
+            } else {
+              row.classList.add('reverse-row');
+            }
+            setRecovered(false);
           }
-          setRecovered(false);
-        }
+        });
       });
-    });
-  }
-}, [separar, recovered]);
-
+    }
+  }, [separar, recovered]);
 
   return (
     <div className="noscroll loading" ref={gridRef}>
       <section
         className="intro"
         style={{
-          background: `radial-gradient(circle, ${gradientColor} 0%, transparent 100%)`,
+          background: `radial-gradient(circle, ${currentGradientColor} 0%, transparent 100%)`,
         }}
       >
         <div className="gridMotion-container">

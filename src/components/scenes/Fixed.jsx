@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import CardCarrossel from "../ui/CardCarrossel";
 import GridUi from "../ui/GridUi";
-import SideCard from "../ui/SideCard"
+import LastCard from "../ui/LastCard/Index";
 
 
 export default function Fixed({ section, conteudo, setConteudo }) {
@@ -11,9 +11,7 @@ export default function Fixed({ section, conteudo, setConteudo }) {
   const botItem1 = useRef(null);
   const botItem2 = useRef(null);
   const botItem3 = useRef(null);
-  const botItem4 = useRef(null);
-  
-  const centralContent = useRef(null);
+
   const gridLayout = useRef(null);
 
   const carrosselCard = useRef(null);
@@ -164,21 +162,6 @@ export default function Fixed({ section, conteudo, setConteudo }) {
         overwrite: "auto"
       } )
 
-      gsap.to(centralContent.current, {
-        opacity: 0,
-        zIndex: 10,
-        duration: 0.5,
-        overwrite: "auto"
-      })
-      gsap.to(centralContent.current, {
-        opacity: 0,
-        duration: 2,
-        delay: 2,
-        zIndex: 10,
-        pointerEvents: "none",
-        ease: "power1.in",
-        overwrite: "auto",
-      });
       
     }
     else if (fourth_animate){
@@ -206,40 +189,10 @@ export default function Fixed({ section, conteudo, setConteudo }) {
         pointerEvents: "none",
         overwrite: "auto"
       });
-    
-      gsap.to(botItem4.current, {
-        opacity: 1,
-        duration: 0.5,
-        ease: "power1.in",
-        overwrite: "auto"
-      })
-
   
-      gsap.to(centralContent.current, {
-        opacity: 1,
-        duration: 2,
-        delay: 3,
-        ease: "power1.in",
-        overwrite: "auto"
-      })
-      gsap.to(centralContent.current, {
-        duration: 2,
-        zIndex: 40,
-        delay:3,
-        ease: "power1.in",
-        pointerEvents: "auto",
-        overwrite: "auto"
-      })
 
     }
     else{
-      gsap.to(centralContent.current, {
-        opacity: 0,
-        duration: 0.5,
-        ease: "power1.in",
-        pointerEvents: "none",
-        overwrite: "auto"
-      })
 
       gsap.to(fixedPos.current, {
         opacity: 0,
@@ -281,55 +234,6 @@ export default function Fixed({ section, conteudo, setConteudo }) {
     }
     
   }, [section]);
-
-
-  useEffect(()=>{
-    if (conteudo == 0){
-      setText("lallaal");
-      gsap.fromTo(botItem4.current, {
-        opacity: 0,
-        duration: 0.5,
-      },
-      {
-        opacity: 1,
-        duration: 0.5
-      })
-    }
-    else if (conteudo == 1){
-      setText("feijão");
-      gsap.fromTo(botItem4.current, {
-        opacity: 0,
-        duration: 0.5,
-      },
-      {
-        text: "lallaal",
-        opacity: 1,
-        duration: 0.5
-      })
-    }
-    else if (conteudo == 2){
-      setText("pamonha");
-      gsap.fromTo(botItem4.current, {
-        opacity: 0,
-        duration: 0.5,
-      },
-      {
-        opacity: 1,
-        duration: 0.5
-      })
-    }
-    else{
-      setText("requeijao");
-      gsap.fromTo(botItem4.current, {
-        opacity: 0,
-        duration: 0.5,
-      },
-      {
-        opacity: 1,
-        duration: 0.5
-      })
-    }
-  }, [conteudo])
 
   return (
     <div className="fixed w-screen h-screen top-0 z-20 pointer-events-none">
@@ -391,18 +295,8 @@ export default function Fixed({ section, conteudo, setConteudo }) {
 
 
       {/* Etapa fim */}
-      <div ref={centralContent} 
-          style={{opacity : 0, pointerEvents: "none", zIndex: 10}}
-          className="absolute w-full 
-          flex items-center justify-center z-20 flex-col gap-15">
-        <div>
-            <SideCard conteudo={conteudo} setConteudo={setConteudo} animation_status={fourth_animate}/>
-        </div>
-        <p ref={botItem4} 
-          style={{opacity : 0}} 
-          className="text-amber-50 
-          p-5 font-semibold text-xl">{text}
-        </p>
+      <div>
+          <LastCard animate_state={fourth_animate} />
       </div>
 
     </div>
