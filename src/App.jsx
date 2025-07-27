@@ -9,7 +9,7 @@ import Experience from './components/scenes/Experience';
 import Fixed from "./components/scenes/Fixed";
 import Beams from "./components/ui/Beams";
 import gsap from "gsap";
-import LightRaysControl from "./components/ui/LightRaysControl";
+import DarkVeilControl from "./components/ui/DarkVeilControl";
 
 
 
@@ -160,7 +160,7 @@ function App() {
           />
         )} 
         {section >= 14 && (
-          <LightRaysControl section={section}/>
+          <DarkVeilControl section={section}/>
         )}
         
         </div>

@@ -2,7 +2,7 @@ export default function LastCard({ animate_state = false }) {
 return (
   <div
     className="w-screen h-screen flex items-center justify-top flex-col"
-    style={{ perspective: '1000px', opacity: 1 }}
+    style={{ perspective: '1000px', opacity: 0 }}
   >
     {/* Parte superior do fliperama */}
     <div className="w-3/10 h-2/5 bg-red-600 rounded-t-xl shadow-xl flex items-center justify-center">
