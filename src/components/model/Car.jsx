@@ -26,8 +26,8 @@ export function Car(props) {
 
 
   return (
-    <group {...props} dispose={null}>
-      <group position={[3.419, 0.579, -1.061]} rotation={[0, -0.783, -Math.PI / 2]} scale={1.203}>
+    <group {...props} dispose={null} scale={props.scale}>
+      <group position={[3.419, 0.579, -1.061]} rotation={[0, -0.783, -Math.PI / 2]} scale={1.203 }>
         <mesh geometry={nodes.Object_16.geometry} material={materials.base} />
         <mesh geometry={nodes.Object_17.geometry} material={materials.base} />
       </group>
@@ -61,7 +61,7 @@ export function Car(props) {
         material={materials.glass} 
         position={[3.419, 0.579, -1.061]} 
         rotation={[0, -0.783, -Math.PI / 2]} 
-        scale={1.203} />
+        scale={1.203 } />
       <mesh geometry={nodes.Object_49.geometry} material={materials.details} position={[3.441, 0.574, -1.083]} rotation={[0, -0.783, 0]} scale={1.203} />
       <mesh geometry={nodes.Object_51.geometry} material={materials.details} position={[3.43, 0.574, -1.072]} rotation={[0, -0.783, 0]} scale={1.203} />
       <mesh geometry={nodes.Object_19.geometry} material={materials.details} position={[3.419, 0.579, -1.061]} rotation={[0, -0.783, -Math.PI / 2]} scale={1.203} />

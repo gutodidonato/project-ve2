@@ -1,7 +1,7 @@
 import gsap from 'gsap';
 import { useEffect, useRef, useState } from 'react';
 
-export default function LastCardComponent({index, setIndex, natural_index}) {
+export default function LastCardComponent({index, setIndex, natural_index, image_src, video_src = "/video/sample1.mp4"}) {
 
   const imagem_up = useRef(null);
   const [isUp, setIsUp] = useState(false);
@@ -28,16 +28,20 @@ export default function LastCardComponent({index, setIndex, natural_index}) {
   return (
     <div 
         onClick={() => index != natural_index? setIndex(natural_index) : setIndex(0)}
-        className="w-60 h-60 bg-white rounded-2xl flex items-center justify-center
-        relative overflow-hidden cursor-pointer">
+        className="w-70 h-70 bg-white rounded-2xl flex items-center justify-center
+        relative overflow-hidden cursor-pointer opacity-80">
             <div className='w-full h-full bg-[#000000]'>
-              <video autoPlay controls src="/video/sample1.mp4"></video>
+              <video 
+              on
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              autoPlay 
+              src={video_src}></video>
             </div>
             <img 
               ref={imagem_up}
-              style={{ filter: 'grayscale(1) brightness(0.1)' }}
+              style={{ filter: 'grayscale(0.3) brightness(0.5)', opacity: 1 }}
               className="absolute w-full h-full" 
-              src="/imgs/eu.jpg" 
+              src={image_src} 
               alt="" />
             
     </div>

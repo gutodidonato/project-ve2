@@ -16,12 +16,70 @@ export const Experience = ({ section }) => {
   const projectsModelRef = useRef();
 
   const [modelOpacity, setModelOpacity] = useState(1);
-  const [screenOpacity, setScreenOpacity] = useState(0)
+  const [screenOpacity, setScreenOpacity] = useState(0);
+
+  let scale = window.innerWidth < 1500 ? 0.5 : 1;
+  const lastTargetRef = useRef(new THREE.Vector3());
 
   console.log(section)
   
 
-  const cameraStages = [
+  const cameraStages = window.innerWidth < 1500? [
+    {
+      //traseira
+      start: 0.0,
+      end: (0.20)/4,
+      from: new THREE.Vector3(10, -0.78, -7),
+      to: new THREE.Vector3(15.66, -0.83, -6.31),
+      lookFrom: new THREE.Vector3(0, 0, 0),
+      lookTo: new THREE.Vector3(1, 0, 0),
+    },
+    {
+      //esquerda 
+      start: (0.20)/4,
+      end: (0.50)/4, 
+      from: new THREE.Vector3(15.66, -0.83, -6.31),
+      to: new THREE.Vector3(0.62, 1, 15.58),
+      lookFrom: new THREE.Vector3(1, 0, 0),
+      lookTo: new THREE.Vector3(0, 0, 0),
+    },
+    {
+      //frente_1
+      start: (0.50)/4,
+      end: (0.70)/4,
+      from: new THREE.Vector3(0.62, 1, 15.58),
+      to: new THREE.Vector3(-7.41, -1, 10),
+      lookFrom: new THREE.Vector3(0, 0, 0),
+      lookTo: new THREE.Vector3(0, 0, 0),
+    },
+    {
+      //frente_2
+      start: (0.70)/4,
+      end: (0.80)/4,
+      from: new THREE.Vector3(-7.41, -1, 10),
+      to: new THREE.Vector3(-7.41, 10, 10),
+      lookFrom: new THREE.Vector3(0, 0, 0),
+      lookTo: new THREE.Vector3(0, 1, 0),
+    },
+    {
+      //entrando espelho
+      start: (0.80)/4,
+      end:(1.00)/4,
+      from: new THREE.Vector3(-7.41, 10, 10),
+      to: new THREE.Vector3(2, -1.5, -1),
+      lookFrom: new THREE.Vector3(0, 1, 0),
+      lookTo: new THREE.Vector3(7, -9, -5),
+    },
+    {
+      start: (1.00)/4,
+      end:(3.00)/4,
+      from: new THREE.Vector3(2, 1, 0),
+      to: new THREE.Vector3(2, 1, 0),
+      lookFrom: new THREE.Vector3(7, -9, -5),
+      lookTo: new THREE.Vector3(5, -4, -3),
+    },
+
+  ] : [
     {
       //traseira
       start: 0.0,
@@ -65,7 +123,7 @@ export const Experience = ({ section }) => {
       from: new THREE.Vector3(-7.41, 10, 10),
       to: new THREE.Vector3(2, 1, 0),
       lookFrom: new THREE.Vector3(0, 1, 0),
-      lookTo: new THREE.Vector3(5, -4, -3),
+      lookTo: new THREE.Vector3(5, -3, -3),
     },
     {
       start: (1.00)/4,
@@ -76,8 +134,8 @@ export const Experience = ({ section }) => {
       lookTo: new THREE.Vector3(5, -4, -3),
     },
 
-  ];
-
+  ]
+  
   useFrame((state) => {
     const y = scroll.offset;
 
@@ -126,43 +184,46 @@ export const Experience = ({ section }) => {
 
 
   
-    if (projectsModelRef.current) {
+    if (!projectsModelRef.current) return;
+
       const cameraDirection = new THREE.Vector3();
       state.camera.getWorldDirection(cameraDirection);
 
       const targetPosition = new THREE.Vector3();
-      
-      if (section < 2) {
+
+      if (section < 3.7) {
         targetPosition.set(50, -50, -50);
-      }
-      else if (section >= 3.7 && section <= 8){
+      } else if (section >= 3.7 && section <= 11) {
         targetPosition.copy(state.camera.position).add(cameraDirection.multiplyScalar(7));
-      }
-      else if (section > 8 && section < 11){
-        targetPosition.copy(state.camera.position).add(cameraDirection.multiplyScalar(7));
-      }
-      else if (section >= 11) {
+      } else if (section >= 11 && section < 13) {
         targetPosition.copy(state.camera.position).add(cameraDirection.multiplyScalar(10));
-        if (section >= 13.5){
-            setScreenOpacity(0)
-        }
-      }
-      else {
-        targetPosition.copy(state.camera.position).add(cameraDirection.multiplyScalar(10));
-        setScreenOpacity(1)
+      } else {
+        targetPosition.copy(state.camera.position); // fallback
       }
 
-      gsap.to(projectsModelRef.current.position, {
-        x: targetPosition.x,
-        y: targetPosition.y,
-        z: targetPosition.z,
-        duration: 4,
-        ease: "power3.out",
-        overwrite: "auto"
-      });
-    }
-  
-  })
+      // Verifica se a diferença é significativa
+      const distance = lastTargetRef.current.distanceTo(targetPosition);
+      if (distance > 0.1) {
+        // Atualiza a referência para o novo destino
+        lastTargetRef.current.copy(targetPosition);
+
+        gsap.to(projectsModelRef.current.position, {
+          x: targetPosition.x,
+          y: targetPosition.y,
+          z: targetPosition.z,
+          duration: 4,
+          ease: "power3.out",
+          overwrite: "auto"
+        });
+      }
+
+      // Controle da opacidade
+      if (section >= 13.8) {
+        setScreenOpacity(0);
+      } else {
+        setScreenOpacity(1);
+      }
+    });
 
 
     return (
@@ -173,8 +234,8 @@ export const Experience = ({ section }) => {
         <planeGeometry args={[100, 100]} />
         <meshBasicMaterial color="black" transparent opacity={0} />
       </mesh>
-      <group ref={meshRef} position={[0, -1.5, 0]}>
-        <Car opacity={modelOpacity} />
+      <group ref={meshRef} position={[0, -1.5, 0]} >
+        <Car scale={scale} opacity={modelOpacity} />
       </group>
       <group ref={projectsModelRef}>
         <ProjectsModel opacity={screenOpacity} />

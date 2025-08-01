@@ -5,6 +5,8 @@ import { FaGithub, FaLinkedinIn } from "react-icons/fa";
 import { MdEmail } from "react-icons/md";
 import gsap from "gsap";
 
+let imagem_eb = "/imgs/br.png";
+
 let frases_eb = ["Ingressei na academia militar das agulhas negras em 2020",
   "Fui treinado para ser um oficial do exército brasileiro",
   "Refinei habilidades de liderança e disciplina",
@@ -46,7 +48,6 @@ export default function LastCard({ animate_state = false }) {
         opacity: 1,
         duration: 0.5,
         ease: "power2.out",
-        pointerEvents: "auto", 
       });
     }
     else{
@@ -54,27 +55,25 @@ export default function LastCard({ animate_state = false }) {
         opacity: 0,
         duration: 0.5,
         ease: "power2.out",
-        pointerEvents: "none", 
       });
     }
   }, [animate_state]);
 
 
   return (
-  <div
-    ref={fixedPos}
-    className="w-screen h-screen flex items-center justify-top flex-col pointer-events-none"
+  <div ref={fixedPos}
+    className="w-screen h-screen flex items-center justify-around flex-col pointer-events-none"
     style={{ opacity: 1 }}>
-    <div>
+    <div className="flex items-center flex-col justify-center w-full pointer-events-none">
       <p className="text-white text-2xl">
         Mais um pouco sobre mim
       </p>
-    </div>
-    <div className="flex items-center justify-center w-full gap-10 mt-10"
-      style={{ pointerEvents: animate_state ? "auto" : "none" }}>
-      <LastCardComponent natural_index={1} index={index} setIndex={setIndex}/>
-      <LastCardComponent natural_index={2} index={index} setIndex={setIndex}/>
-      <LastCardComponent natural_index={3} index={index} setIndex={setIndex}/>
+      <div className="flex items-center justify-center w-full gap-10 mt-10"
+        style={{ pointerEvents: animate_state ? "auto" : "none" }}>
+        <LastCardComponent natural_index={1} index={index} setIndex={setIndex} image_src={imagem_eb}/>
+        <LastCardComponent natural_index={2} index={index} setIndex={setIndex} image_src={imagem_eb}/>
+        <LastCardComponent natural_index={3} index={index} setIndex={setIndex} image_src={imagem_eb}/>
+      </div>
     </div>
     <div className="mt-20">
       <TextType 
@@ -89,14 +88,17 @@ export default function LastCard({ animate_state = false }) {
         className="text-white text-2xl"
       />
     </div>
-    <div className="flex items-center justify-center w-full gap-3 mt-30" style={{ pointerEvents: animate_state ? "auto" : "none" }}>
-      <div className="bg-[#311688] rounded-4xl shadow-lg flex items-center justify-center h-20 w-20 cursor-pointer">
+    <div className="flex items-center justify-center w-full gap-10 pointer-events-none">
+      <div className="bg-[#311688] rounded-4xl shadow-lg flex items-center justify-center h-20 w-20 cursor-pointer"
+      style={{ pointerEvents: animate_state ? "auto" : "none" }}>
         <FaGithub className="text-white w-full h-full p-5" />
       </div>
-      <div className="bg-[#311688] rounded-4xl shadow-lg flex items-center justify-center h-20 w-20 cursor-pointer">
+      <div className="bg-[#311688] rounded-4xl shadow-lg flex items-center justify-center h-20 w-20 cursor-pointer"
+      style={{ pointerEvents: animate_state ? "auto" : "none" }}>
         <FaLinkedinIn className="text-white w-full h-full p-5" />
       </div>
-      <div className="bg-[#311688] rounded-4xl shadow-lg flex items-center justify-center h-20 w-20 cursor-pointer">
+      <div className="bg-[#311688] rounded-4xl shadow-lg flex items-center justify-center h-20 w-20 cursor-pointer"
+      style={{ pointerEvents: animate_state ? "auto" : "none" }}>
         <MdEmail  className="text-white w-full h-full p-5" />
       </div>
     </div>

@@ -17,7 +17,6 @@ export default function Fixed({ section, conteudo, setConteudo }) {
   const carrosselCard = useRef(null);
   const [carrosselState, setCarrosselState] = useState(true);
   const [separar, setSeparar] = useState(true)
-  const [text, setText] = useState("");
 
   let first_animate = (section >= 5 && section < 8);
   let second_animate = (section >= 8 && section<= 11);
@@ -38,14 +37,14 @@ export default function Fixed({ section, conteudo, setConteudo }) {
 
       gsap.to(fixedPos.current, {
         opacity: 1,
-        duration: 0.5,
+        duration: 1.0,
         ease: "power2.out",
         pointerEvents: "none", 
       });
 
       gsap.to(botItem2.current, {
         opacity: 0,
-        duration: 0.3,
+        duration: 0.2,
         ease: "power2.in",
         pointerEvents: "none",
       });
@@ -81,14 +80,7 @@ export default function Fixed({ section, conteudo, setConteudo }) {
         pointerEvents: "none",
         overwrite: "auto"
       });
-      
-      gsap.to(botItem1.current, {
-        opacity: 0,
-        duration: 1,
-        ease: "power2.in",
-        pointerEvents: "none",
-        overwrite: "auto"
-      });
+    
 
       gsap.to(botItem2.current, {
         opacity: 1,
@@ -174,13 +166,6 @@ export default function Fixed({ section, conteudo, setConteudo }) {
         overwrite: "auto"
       });
       
-      gsap.to(botItem1.current, {
-        opacity: 0,
-        duration: 0.5,
-        ease: "power2.in",
-        pointerEvents: "none",
-        overwrite: "auto"
-      });
       
       gsap.to(botItem3.current, {
         opacity: 0,
@@ -219,11 +204,20 @@ export default function Fixed({ section, conteudo, setConteudo }) {
     gsap.to(botItem1.current, {
       opacity: progress,
       y: 400 * (1 - progress),
-      duration: 0.5,
+      duration: 1.0,
       ease: "power3.out",
       overwrite: "auto",
     });
     }
+    else {
+    gsap.to(botItem1.current, {
+      opacity: 0,
+      y: 400,
+      duration: 0.3,
+      ease: "power2.in",
+      overwrite: "auto",
+    });
+  }
 
     if (section < 14 && !separar){
       setSeparar(true)
@@ -295,7 +289,7 @@ export default function Fixed({ section, conteudo, setConteudo }) {
 
 
       {/* Etapa fim */}
-      <div>
+      <div className="absolute top-0 w-full h-full flex items-center justify-around flex-col ">
           <LastCard animate_state={fourth_animate} />
       </div>
 
