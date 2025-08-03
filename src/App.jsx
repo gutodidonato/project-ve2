@@ -11,14 +11,14 @@ import Beams from "./components/ui/Beams";
 import gsap from "gsap";
 import DarkVeilControl from "./components/ui/DarkVeilControl";
 
-
-
 function App() {
   const tweenRef = useRef()
 
   const [section, setSection] = useState(0);
 
-  const [menuOpened, setMenuOpened] = useState(false);
+  let firstSection = section < 7;
+  let secondSection = section >= 7 && section <= 9;
+  let thirdSection = section > 9;
   
   const [shouldAnimate, setShouldAnimate] = useState([false, true, false])
   const [beamChange, setBeamChange] = useState({
@@ -29,24 +29,19 @@ function App() {
   const [fundoLiquid, setFundoLiquid] = useState(-1);
   const [colorLiquid, setColorLiquid] = useState({ r: 1, g: 1, b: 1 });
 
-
   function hexToRgb(hex) {
-  const bigint = parseInt(hex.replace('#', ''), 16);
-  return {
-    r: ((bigint >> 16) & 255) / 255,
-    g: ((bigint >> 8) & 255) / 255,
-    b: (bigint & 255) / 255,
-  };
-}
-
-
-
+    const bigint = parseInt(hex.replace('#', ''), 16);
+    return {
+      r: ((bigint >> 16) & 255) / 255,
+      g: ((bigint >> 8) & 255) / 255,
+      b: (bigint & 255) / 255,
+    };
+  }
   
   const updateShouldAnimate = (indexToSetTrue) => {
     setShouldAnimate(prev =>
       prev.map((_, idx) => idx === indexToSetTrue ? false : true)
-    );
-  };
+  )};
 
 
   useEffect(() => {
@@ -55,7 +50,7 @@ function App() {
       color: beamChange.color,
     };
 
-    if (section < 8 && shouldAnimate[0]){
+    if (firstSection && shouldAnimate[0]){
 
       updateShouldAnimate(0);
 
@@ -73,7 +68,7 @@ function App() {
       });
     }
 
-    else if (section > 8 && section <= 11 && shouldAnimate[1]) {
+    else if (secondSection && shouldAnimate[1]) {
 
       updateShouldAnimate(1);
 
@@ -90,7 +85,7 @@ function App() {
         },
       });
     } 
-      else if (section > 11  && shouldAnimate[2]) {
+      else if (thirdSection  && shouldAnimate[2]) {
 
       updateShouldAnimate(2);
 
@@ -137,8 +132,6 @@ function App() {
 
 
   let intensity = (section == 0 || section == 1)? 0 : section/3;
-  const rgbString = `rgb(${Math.round(colorLiquid.r * 255)}, ${Math.round(colorLiquid.g * 255)}, ${Math.round(colorLiquid.b * 255)})`;
-
 
   return (
     <>

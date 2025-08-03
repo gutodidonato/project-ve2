@@ -184,7 +184,6 @@ export const Experience = ({ section }) => {
 
 
   
-    if (!projectsModelRef.current) return;
 
       const cameraDirection = new THREE.Vector3();
       state.camera.getWorldDirection(cameraDirection);
@@ -197,14 +196,17 @@ export const Experience = ({ section }) => {
         targetPosition.copy(state.camera.position).add(cameraDirection.multiplyScalar(7));
       } else if (section >= 11 && section < 13) {
         targetPosition.copy(state.camera.position).add(cameraDirection.multiplyScalar(10));
-      } else {
+      }
+      else if (section >= 13){
+        targetPosition.copy(state.camera.position).add(cameraDirection.multiplyScalar(10));
+      }
+      else {
         targetPosition.copy(state.camera.position); // fallback
       }
 
-      // Verifica se a diferença é significativa
       const distance = lastTargetRef.current.distanceTo(targetPosition);
       if (distance > 0.1) {
-        // Atualiza a referência para o novo destino
+      
         lastTargetRef.current.copy(targetPosition);
 
         gsap.to(projectsModelRef.current.position, {
@@ -218,7 +220,7 @@ export const Experience = ({ section }) => {
       }
 
       // Controle da opacidade
-      if (section >= 13.8) {
+      if (section >= 12) {
         setScreenOpacity(0);
       } else {
         setScreenOpacity(1);

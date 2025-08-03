@@ -64,10 +64,7 @@ export default function LastCard({ animate_state = false }) {
   <div ref={fixedPos}
     className="w-screen h-screen flex items-center justify-around flex-col pointer-events-none"
     style={{ opacity: 1 }}>
-    <div className="flex items-center flex-col justify-center w-full pointer-events-none">
-      <p className="text-white text-2xl">
-        Mais um pouco sobre mim
-      </p>
+    <div className="flex items-center flex-col justify-center w-full pointer-events-none mt-50">
       <div className="flex items-center justify-center w-full gap-10 mt-10"
         style={{ pointerEvents: animate_state ? "auto" : "none" }}>
         <LastCardComponent natural_index={1} index={index} setIndex={setIndex} image_src={imagem_eb}/>
@@ -75,7 +72,7 @@ export default function LastCard({ animate_state = false }) {
         <LastCardComponent natural_index={3} index={index} setIndex={setIndex} image_src={imagem_eb}/>
       </div>
     </div>
-    <div className="mt-20">
+    <div className="mt-10">
       <TextType 
         key={index}
         text={frase}

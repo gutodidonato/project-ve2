@@ -18,9 +18,9 @@ export default function Fixed({ section, conteudo, setConteudo }) {
   const [carrosselState, setCarrosselState] = useState(true);
   const [separar, setSeparar] = useState(true)
 
-  let first_animate = (section >= 5 && section < 8);
-  let second_animate = (section >= 8 && section<= 11);
-  let third_animate = (section > 11 && section < 14);
+  let first_animate = (section >= 5 && section < 7);
+  let second_animate = (section >= 7 && section<= 9);
+  let third_animate = (section > 9 && section < 14);
   let fourth_animate = (section >= 14 )
   
 
@@ -199,7 +199,7 @@ export default function Fixed({ section, conteudo, setConteudo }) {
   useEffect(() => {
     const progress = Math.min(Math.max((section - 3.5) / 1.5, 0), 1); 
 
-    if (section < 8) {
+    if (section < 7) {
       
     gsap.to(botItem1.current, {
       opacity: progress,
