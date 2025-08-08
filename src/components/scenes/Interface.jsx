@@ -181,13 +181,13 @@ const SkillsSection = () => {
   return (
     <Section>
       <motion.div whileInView={"visible"} 
-      className="bg-gradient-to-br from-[#172436] to-[#8e1e839e] p-10 border-[#0dbaf5] border-1 rounded-2xl">
-        <h2 className="text-4xl font-bold text-white text-shadow-lg/50 text-shadow-black">Skills</h2>
+      className="sm:w-85 w-67 bg-gradient-to-br from-[#172436] to-[#8e1e839e] p-10 border-[#0dbaf5] border-1 rounded-2xl">
+        <h2 className="sm:text-4xl text-3xl font-bold text-white text-shadow-lg/50 text-shadow-black">Skills</h2>
         <div className=" mt-4 space-y-2">
           {skills.map((skill, index) => (
-            <div className="w-64" key={index}>
+            <div className="sm:w-64 w-60" key={index}>
               <motion.h3
-                className="text-lg font-bold text-white text-shadow-2xs text-shadow-black"
+                className="sm:text-xl text-md font-bold text-white text-shadow-2xs text-shadow-black"
                 initial={{
                   opacity: 0,
                 }}
@@ -203,7 +203,7 @@ const SkillsSection = () => {
               >
                 {skill.title}
               </motion.h3>
-              <div className="h-1.5 w-full bg-gray-200 rounded-full mt-2">
+              <div className="h-1.5 sm:w-full w-8/10 bg-gray-200 rounded-full mt-2">
                 <motion.div
                   className="h-full bg-purple-400 rounded-full"
                   style={{ width: `${skill.level}%` }}
@@ -226,12 +226,12 @@ const SkillsSection = () => {
           ))}
         </div>
         <div>
-          <h2 className="text-4xl font-bold mt-8 text-white text-shadow-lg/50 text-shadow-black">Languages</h2>
+          <h2 className="sm:text-4xl text-3xl font-bold mt-8 text-white text-shadow-lg/50 text-shadow-black">Languages</h2>
           <div className=" mt-4 space-y-2">
             {languages.map((lng, index) => (
-              <div className="w-64" key={index}>
+              <div className="sm:w-64 w-60" key={index}>
                 <motion.h3
-                  className="text-lg font-bold text-white text-shadow-2xs text-shadow-black"
+                  className="sm:text-xl text-md font-bold text-white text-shadow-2xs text-shadow-black"
                   initial={{
                     opacity: 0,
                   }}
@@ -247,7 +247,7 @@ const SkillsSection = () => {
                 >
                   {lng.title}
                 </motion.h3>
-                <div className="h-1.5 w-full bg-gray-200 rounded-full mt-2">
+                <div className="h-1.5 sm:w-full w-8/10 bg-gray-200 rounded-full mt-2">
                   <motion.div
                     className="h-full bg-purple-400 rounded-full "
                     style={{ width: `${lng.level}%` }}
@@ -287,7 +287,7 @@ const MyRole = () => {
   
   return(
     <Section>
-      <div className="w-96 mt-200 ml-2 opacity-95">
+      <div className="mt-200 ml-2 opacity-95">
       <ProfileCard
         name="Luis Didonato"
         iconUrl="https://upload.wikimedia.org/wikipedia/commons/c/c3/Python-logo-notext.svg"
@@ -298,16 +298,16 @@ const MyRole = () => {
         avatarUrl="/imgs/profile1.png"
         showUserInfo={true}
         enableTilt={true}
-        onContactClick={() => console.log('Contact clicked')}
+        onContactClick={() => window.open('https://github.com/gutodidonato', '_blank')}
       />
       </div>
-      <div className="bg-[#172436] opacity-92 p-7 border-[#0dbaf5] border-1 rounded-2xl z-[-9] mt-10 w-98 ml-2">
+      <div className="bg-[#172436] opacity-92 p-7 border-[#0dbaf5] border-1 rounded-2xl z-[-9] mt-10 sm:w-98 w-67 ml-2">
         <div className="rotating-text-container h-24 overflow-hidden relative">
           <div className="relative h-24 flex colum flex-col gap-15 animate-rotateSteps">
-            <p className="text-item left-0 w-full text-xl text-white text-center">Desenvolvedor Full Stack apaixonado por transformar ideias em soluções reais.</p>
-            <p className="text-item left-0 w-full text-xl text-white text-center">Curioso por natureza, estudo IA, linguagens, dados e automações.</p>
-            <p className="text-item left-0 w-full text-xl text-white text-center">Comprometido com soluções inovadoras e código de qualidade.</p>
-            <p className="text-item left-0 w-full text-xl text-white text-center">Sempre aprendendo e evoluindo como profissional de tecnologia.</p>
+            <p className="text-item left-0 w-full sm:text-xl text-md text-white text-center">Desenvolvedor Full Stack apaixonado por transformar ideias em soluções reais.</p>
+            <p className="text-item left-0 w-full sm:text-xl text-md text-white text-center">Curioso por natureza, estudo IA, linguagens, dados e automações.</p>
+            <p className="text-item left-0 w-full sm:text-xl text-md text-white text-center">Comprometido com soluções inovadoras e código de qualidade.</p>
+            <p className="text-item left-0 w-full sm:text-xl text-md text-white text-center">Sempre aprendendo e evoluindo como profissional de tecnologia.</p>
           </div>
         </div>
       </div>

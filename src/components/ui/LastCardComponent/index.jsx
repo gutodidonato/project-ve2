@@ -1,7 +1,7 @@
 import gsap from 'gsap';
 import { useEffect, useRef, useState } from 'react';
 
-export default function LastCardComponent({index, setIndex, natural_index, style,setChosenIndex, image_src, video_src = "/video/sample1.mp4"}) {
+export default function LastCardComponent({index, size, setIndex, natural_index, style,setChosenIndex, image_src, video_src = "/video/sample1.mp4"}) {
 
   const imagem_up = useRef(null);
   const comp_card = useRef(null);
@@ -29,13 +29,15 @@ export default function LastCardComponent({index, setIndex, natural_index, style
     useEffect(() => {
     if (isTheChosen) {
       gsap.to(comp_card.current, {
-        width: 200,
+        width: 295,
+        height: 295,
         duration: 1,
         ease: "power2.out",
       });
     } else {
       gsap.to(comp_card.current, {
-        width: 200,
+        width: 140,
+        height: 140,
         duration: 1,
         ease: "power2.inOut",
       });
@@ -56,10 +58,13 @@ export default function LastCardComponent({index, setIndex, natural_index, style
             setIsUp(false)
           }
         }}
-        className={`bg-white rounded-2xl flex items-center justify-center
-        relative overflow-hidden cursor-pointer opacity-80`}
+        className='{bg-white rounded-2xl flex items-center justify-center
+        relative overflow-hidden cursor-pointer opacity-80}'
         ref={comp_card}
-        style={{width: 200, height: 200}}>
+        style={{
+                width: size,
+                height: size,
+              }}>
             <div className='w-full h-full bg-[#000000]'>
               {isTheChosen && (
                 <video 

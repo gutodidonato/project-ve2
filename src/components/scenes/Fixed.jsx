@@ -231,68 +231,77 @@ export default function Fixed({ section, conteudo, setConteudo }) {
 
   return (
     <div className="fixed w-screen h-screen top-0 z-20 pointer-events-none">
-
-      {/* Etapa Front */}
-
-      <div  ref={fixedPos}
-            style={{ opacity: 0 }} 
-            className="h-2/8 w-1/3 mx-auto mt-10 flex justify-center items-center">
-        <p className="text-white shadow-black text-shadow-lg/30 text-4xl font-bold text-center">Desenvolvimento Mobile/ Frontend </p>
+      {/* Título Responsivo */}
+      <div
+        ref={fixedPos}
+        style={{ opacity: 0 }}
+        className="h-2/8 w-full max-w-lg mx-auto mt-6 flex justify-center items-center px-4"
+      >
+        <p className="text-white shadow-black text-shadow-lg/30 text-center font-bold text-xl md:text-4xl">
+          Desenvolvimento Mobile/ Frontend
+        </p>
       </div>
 
-      <div className="h-1/5 w-3/5 fixed left-1/5 right-1/5 bottom-10 flex justify-center items-center">
-        <div className="w-3/4">
-          <p ref={botItem1} 
-          style={{ opacity: 0}} 
-          className="text-white text-shadow-lg/30 shadow-black text-2xl text-center font-semibold font-open-sans">
-      Desenvolvo soluções digitais com foco em performance e experiência. Atuei nos projetos de streaming do Hospital Sírio-Libanês e da rede Posadas no México, com forte presença no mobile e frontend.
+      {/* Primeira descrição responsiva */}
+      <div className="w-full fixed left-1/2 bottom-6 md:bottom-10 flex justify-center items-center transform -translate-x-1/2 px-4">
+        <div className="w-full max-w-2xl">
+          <p
+            ref={botItem1}
+            style={{ opacity: 0 }}
+            className="text-white text-shadow-lg/30 shadow-black text-center font-semibold font-open-sans text-sm md:text-2xl"
+          >
+            Desenvolvo soluções digitais com foco em performance e experiência. Atuei nos projetos de streaming do Hospital Sírio-Libanês e da rede Posadas no México, com forte presença no mobile e frontend.
           </p>
         </div>
       </div>
 
-      {/* Etapa stacks */}
-      <div ref={carrosselCard} 
-           style={{opacity : 0}}
-           className="w-full overflow-hidden">
-          <CardCarrossel state={carrosselState} />
+      {/* Carrossel responsivo */}
+      <div
+        ref={carrosselCard}
+        style={{ opacity: 0 }}
+        className="w-full flex justify-center items-center overflow-hidden px-2"
+      >
+        <CardCarrossel state={carrosselState} />
       </div>
 
-
-      <div className="h-1/5 w-3/5 fixed left-1/5 right-1/5 bottom-10 flex justify-center items-center">
-        <div className="w-3/4">
-          <p ref={botItem2} 
-          style={{ opacity: 0}} className="text-white text-shadow-lg/30 shadow-black text-2xl text-center font-semibold font-open-sans">
-          Tenho domínio total sobre diferentes stacks e linguagens — programo com fluidez em qualquer tecnologia, ajustando à necessidade do projeto. Além do desenvolvimento full stack, também atuo com IA, aplicando modelos e integrações inteligentes em aplicações reais.
+      {/* Segunda descrição responsiva */}
+      <div className="w-full max-w-2xl fixed left-1/2 md:bottom-10 bottom-20 flex justify-center items-center transform -translate-x-1/2 px-4">
+        <div className="w-full flex justify-center items-center">
+          <p
+            ref={botItem2}
+            style={{ opacity: 0 }}
+            className="text-white text-shadow-lg/30 shadow-black text-center font-semibold font-open-sans text-xs md:text-2xl"
+          >
+            Tenho domínio total sobre diferentes stacks e linguagens — programo com fluidez em qualquer tecnologia, ajustando à necessidade do projeto. Além do desenvolvimento full stack, também atuo com IA, aplicando modelos e integrações inteligentes em aplicações reais.
           </p>
         </div>
       </div>
 
-
-      {/* Etapa Grid */}
-
-      <div ref={gridLayout} 
-        style={{opacity: 0}}
-        className="h-full w-full z-25 absolute top-0 overflow-visible">
-        <GridUi separar={separar}/>
+      {/* Grid responsivo */}
+      <div
+        ref={gridLayout}
+        style={{ opacity: 0 }}
+        className="h-full w-full z-25 absolute top-0 overflow-visible"
+      >
+        <GridUi separar={separar} />
       </div>
 
-
-      <div ref={botItem3} 
-          style={{opacity : 0}}
-          className="absolute z-30 bottom-0 h-2/5 w-full flex items-center justify-center">
-        <p className="text-amber-50 bg-[#222222f5] rounded-2xl 
-          p-5 font-semibold text-xl">Muitos sites e soluções desenvolvidas para empresas, do back ao front, da ia ao BI,
+      {/* Terceira descrição responsiva */}
+      <div
+        ref={botItem3}
+        style={{ opacity: 0 }}
+        className="absolute z-30 bottom-0 h-auto min-h-[120px] w-full flex items-center justify-center px-2 pb-4"
+      >
+        <p className="text-amber-50 bg-[#222222f5] rounded-2xl p-3 md:p-5 font-semibold text-base md:text-xl text-center">
+          Muitos sites e soluções desenvolvidas para empresas, do back ao front, da ia ao BI,
           sempre presando a solução
         </p>
       </div>
 
-
-
-      {/* Etapa fim */}
-      <div className="absolute top-0 w-full h-full flex items-center justify-around flex-col ">
-          <LastCard animate_state={fourth_animate} />
+      {/* Etapa fim responsiva */}
+      <div className="absolute top-0 w-full h-full flex items-center justify-around flex-col">
+        <LastCard animate_state={fourth_animate} />
       </div>
-
     </div>
   );
 }

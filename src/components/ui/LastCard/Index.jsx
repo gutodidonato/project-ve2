@@ -26,7 +26,7 @@ let frases_atual = [
 
 
 export default function LastCard({ animate_state = false }) {
-  const [index, setIndex] = useState(3);
+  const [index, setIndex] = useState(1);
   const [frase, setFrase] = useState("");
   const fixedPos = useRef(null);
 
@@ -86,17 +86,26 @@ export default function LastCard({ animate_state = false }) {
       </div>
     </div>
     <div className="flex items-center justify-center w-full gap-10 pointer-events-none">
-      <div className="bg-[#311688] rounded-4xl shadow-lg flex items-center justify-center h-20 w-20 cursor-pointer"
+      <div className="bg-[#311688] rounded-4xl shadow-lg flex items-center justify-center h-20 w-20 cursor-pointer 
+      transition-all duration-500 ease-in-out hover:scale-105  mb-3"
       style={{ pointerEvents: animate_state ? "auto" : "none" }}>
-        <FaGithub className="text-white w-full h-full p-5" />
+        <a className="w-full h-full" href="https://github.com/gutodidonato" target="_blank">
+          <FaGithub className="text-white w-full h-full p-5" />
+        </a>
       </div>
-      <div className="bg-[#311688] rounded-4xl shadow-lg flex items-center justify-center h-20 w-20 cursor-pointer"
+      <div className="bg-[#311688] rounded-4xl shadow-lg flex items-center justify-center h-20 w-20 cursor-pointer 
+      transition-all duration-500 ease-in-out hover:scale-105 mb-3"
       style={{ pointerEvents: animate_state ? "auto" : "none" }}>
-        <FaLinkedinIn className="text-white w-full h-full p-5" />
+        <a className="w-full h-full" href="https://www.linkedin.com/in/luis-didonato-66746a250/" target="_blank">
+          <FaLinkedinIn className="text-white w-full h-full p-5" />
+        </a>
       </div>
-      <div className="bg-[#311688] rounded-4xl shadow-lg flex items-center justify-center h-20 w-20 cursor-pointer"
+      <div className="bg-[#311688] rounded-4xl shadow-lg flex items-center justify-center h-20 w-20 cursor-pointer 
+      transition-all duration-500 ease-in-out hover:scale-105  mb-3"
       style={{ pointerEvents: animate_state ? "auto" : "none" }}>
-        <MdEmail  className="text-white w-full h-full p-5" />
+        <a className="w-full h-full" href="mailto:gutodidonato@gmail.com">
+          <MdEmail  className="text-white w-full h-full p-5" />
+        </a>
       </div>
     </div>
   </div>
