@@ -4,8 +4,8 @@ import TextType from "../TextType";
 import { FaGithub, FaLinkedinIn } from "react-icons/fa";
 import { MdEmail } from "react-icons/md";
 import gsap from "gsap";
+import CircleMenu from "../Circular";
 
-let imagem_eb = "/imgs/br.png";
 
 let frases_eb = ["Ingressei na academia militar das agulhas negras em 2020",
   "Fui treinado para ser um oficial do exército brasileiro",
@@ -26,16 +26,16 @@ let frases_atual = [
 
 
 export default function LastCard({ animate_state = false }) {
-  const [index, setIndex] = useState(null);
+  const [index, setIndex] = useState(3);
   const [frase, setFrase] = useState("");
   const fixedPos = useRef(null);
 
   useEffect(() => {
-    if (index === 1) {
+    if (index === 0) {
       setFrase(frases_eb);
-    } else if (index === 2) {
+    } else if (index === 1) {
       setFrase(frases_formacao);
-    } else if (index === 3) {
+    } else if (index === 2) {
       setFrase(frases_atual);
     } else {
       setFrase([""]);
@@ -64,26 +64,26 @@ export default function LastCard({ animate_state = false }) {
   <div ref={fixedPos}
     className="w-screen h-screen flex items-center justify-around flex-col pointer-events-none"
     style={{ opacity: 1 }}>
-    <div className="flex items-center flex-col justify-center w-full pointer-events-none mt-50">
-      <div className="flex items-center justify-center w-full gap-10 mt-10"
+    <div className="flex items-center justify-between flex-row w-8/10 h-8/10 pointer-events-none m-auto mt-20 m-auto pl-50">
+      <div className="flex items-center justify-center w-1/2 h-full gap-10 mt-10 flex-col"
         style={{ pointerEvents: animate_state ? "auto" : "none" }}>
-        <LastCardComponent natural_index={1} index={index} setIndex={setIndex} image_src={imagem_eb}/>
-        <LastCardComponent natural_index={2} index={index} setIndex={setIndex} image_src={imagem_eb}/>
-        <LastCardComponent natural_index={3} index={index} setIndex={setIndex} image_src={imagem_eb}/>
+        <div className="h-full w-full rounded-full">
+          <CircleMenu index={index} setIndex={setIndex} />
+        </div>
       </div>
-    </div>
-    <div className="mt-10">
-      <TextType 
-        key={index}
-        text={frase}
-        typingSpeed={100}
-        pauseDuration={1500}
-        showCursor={true}
-        cursorCharacter="|"
-        deletingSpeed={100}
-        loop={true}
-        className="text-white text-2xl"
-      />
+      <div className="mt-10 flex itens-start justify-start w-1/2 mb-auto mt-80">
+        <TextType 
+          key={index}
+          text={frase}
+          typingSpeed={100}
+          pauseDuration={1500}
+          showCursor={true}
+          cursorCharacter="|"
+          deletingSpeed={100}
+          loop={true}
+          className="text-white text-2xl"
+        />
+      </div>
     </div>
     <div className="flex items-center justify-center w-full gap-10 pointer-events-none">
       <div className="bg-[#311688] rounded-4xl shadow-lg flex items-center justify-center h-20 w-20 cursor-pointer"

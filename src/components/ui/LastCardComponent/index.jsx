@@ -1,14 +1,17 @@
 import gsap from 'gsap';
 import { useEffect, useRef, useState } from 'react';
 
-export default function LastCardComponent({index, setIndex, natural_index, image_src, video_src = "/video/sample1.mp4"}) {
+export default function LastCardComponent({index, setIndex, natural_index, style,setChosenIndex, image_src, video_src = "/video/sample1.mp4"}) {
 
   const imagem_up = useRef(null);
-  const [isUp, setIsUp] = useState(false);
+  const comp_card = useRef(null);
+  const [isUp, setIsUp] = useState(true);
+
+  let isTheChosen = (natural_index ) === index;
 
 
   useEffect(() => {
-    if (index === natural_index) {
+    if (index === natural_index && isUp === true) {
       gsap.to(imagem_up.current, {
         y: -300,
         duration: 1,
@@ -21,21 +24,53 @@ export default function LastCardComponent({index, setIndex, natural_index, image
         ease: "power2.inOut",
       });
     }
-  }, [index]);
+  }, [index, isUp]);
+
+    useEffect(() => {
+    if (isTheChosen) {
+      gsap.to(comp_card.current, {
+        width: 200,
+        duration: 1,
+        ease: "power2.out",
+      });
+    } else {
+      gsap.to(comp_card.current, {
+        width: 200,
+        duration: 1,
+        ease: "power2.inOut",
+      });
+    }
+  }, [isTheChosen]);
+
 
 
 
   return (
     <div 
-        onClick={() => index != natural_index? setIndex(natural_index) : setIndex(0)}
-        className="w-70 h-70 bg-white rounded-2xl flex items-center justify-center
-        relative overflow-hidden cursor-pointer opacity-80">
+        onClick={() => {
+          if (index != natural_index) {
+            setIsUp(true)
+            setIndex(natural_index);
+            setChosenIndex(natural_index);
+          } else {
+            setIsUp(false)
+          }
+        }}
+        className={`bg-white rounded-2xl flex items-center justify-center
+        relative overflow-hidden cursor-pointer opacity-80`}
+        ref={comp_card}
+        style={{width: 200, height: 200}}>
             <div className='w-full h-full bg-[#000000]'>
-              <video 
-              on
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              autoPlay 
-              src={video_src}></video>
+              {isTheChosen && (
+                <video 
+                  autoPlay 
+                  muted
+                  loop
+                  playsInline
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  src={video_src}
+                />
+              )}
             </div>
             <img 
               ref={imagem_up}
