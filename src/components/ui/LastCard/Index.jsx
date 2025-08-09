@@ -64,7 +64,7 @@ export default function LastCard({ animate_state = false }) {
     <div
       ref={fixedPos}
       className="w-screen h-screen flex items-center justify-around flex-col pointer-events-none"
-      style={{ opacity: 1 }}
+      style={{ opacity: 0 }}
     >
       <div
         className="
@@ -73,7 +73,7 @@ export default function LastCard({ animate_state = false }) {
           sm:mb-80
           w-8/10 h-8/10 
           sm:pl-50
-          sm:mt-0 mt-30
+          sm:mt-0 mt-0
           max-w-full max-h-full
           sm:w-8/10 sm:h-8/10
           w-full h-8/10
@@ -93,7 +93,7 @@ export default function LastCard({ animate_state = false }) {
 
         {/* Parte do texto */}
         <div className="flex items-start justify-start 
-        sm:w-2/3 w-full sm:h-full h-30 sm:mt-80 px-30 sm:pt-0 pt-20">
+        sm:w-2/3 w-full sm:h-40 h-20 px-30 sm:pt-0 sm:pt-80">
           <TextType
             key={index}
             text={frase}
@@ -103,7 +103,7 @@ export default function LastCard({ animate_state = false }) {
             cursorCharacter="|"
             deletingSpeed={100}
             loop={true}
-            className="text-white sm:text-4xl text-2xl text-center sm:text-left"
+            className="text-white sm:text-4xl text-xl text-center sm:text-left"
           />
         </div>
       </div>

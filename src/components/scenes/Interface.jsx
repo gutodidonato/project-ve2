@@ -182,7 +182,7 @@ const SkillsSection = () => {
     <Section>
       <motion.div whileInView={"visible"} 
       className="sm:w-85 w-67 bg-gradient-to-br from-[#172436] to-[#8e1e839e] p-10 border-[#0dbaf5] border-1 rounded-2xl">
-        <h2 className="sm:text-4xl text-3xl font-bold text-white text-shadow-lg/50 text-shadow-black">Skills</h2>
+        <h2 className="sm:text-3xl text-2xl font-bold text-white text-shadow-lg/50 text-shadow-black">Skills</h2>
         <div className=" mt-4 space-y-2">
           {skills.map((skill, index) => (
             <div className="sm:w-64 w-60" key={index}>
@@ -226,7 +226,7 @@ const SkillsSection = () => {
           ))}
         </div>
         <div>
-          <h2 className="sm:text-4xl text-3xl font-bold mt-8 text-white text-shadow-lg/50 text-shadow-black">Languages</h2>
+          <h2 className="sm:text-3xl text-2xl font-bold mt-8 text-white text-shadow-lg/50 text-shadow-black">Languages</h2>
           <div className=" mt-4 space-y-2">
             {languages.map((lng, index) => (
               <div className="sm:w-64 w-60" key={index}>
@@ -301,7 +301,7 @@ const MyRole = () => {
         onContactClick={() => window.open('https://github.com/gutodidonato', '_blank')}
       />
       </div>
-      <div className="bg-[#172436] opacity-92 p-7 border-[#0dbaf5] border-1 rounded-2xl z-[-9] mt-10 sm:w-98 w-67 ml-2">
+      <div className="bg-[#172436] opacity-92 p-7 border-[#0dbaf5] border-1 rounded-2xl z-[-9] mt-10 sm:w-98 w-80 ml-2">
         <div className="rotating-text-container h-24 overflow-hidden relative">
           <div className="relative h-24 flex colum flex-col gap-15 animate-rotateSteps">
             <p className="text-item left-0 w-full sm:text-xl text-md text-white text-center">Desenvolvedor Full Stack apaixonado por transformar ideias em soluções reais.</p>

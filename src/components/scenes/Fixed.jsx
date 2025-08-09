@@ -264,7 +264,7 @@ export default function Fixed({ section, conteudo, setConteudo }) {
           <p
             ref={botItem1}
             style={{ opacity: 0 }}
-            className="text-white text-shadow-lg/30 shadow-black text-center font-semibold font-open-sans text-sm md:text-2xl"
+            className="text-white text-shadow-lg/30 shadow-black text-center font-semibold font-open-sans text-md md:text-2xl"
           >
             Desenvolvo soluções digitais com foco em performance e experiência. Atuei nos projetos de streaming do Hospital Sírio-Libanês e da rede Posadas no México, com forte presença no mobile e frontend.
           </p>
@@ -286,9 +286,9 @@ export default function Fixed({ section, conteudo, setConteudo }) {
           <p
             ref={botItem2}
             style={{ opacity: 0 }}
-            className="text-white text-shadow-lg/30 shadow-black text-center font-semibold font-open-sans text-xs md:text-2xl"
+            className="text-white text-shadow-lg/30 shadow-black text-center font-semibold font-open-sans text-md md:text-2xl"
           >
-            Tenho domínio total sobre diferentes stacks e linguagens — programo com fluidez em qualquer tecnologia, ajustando à necessidade do projeto. Além do desenvolvimento full stack, também atuo com IA, aplicando modelos e integrações inteligentes em aplicações reais.
+            Tenho domínio total sobre diferentes stacks e linguagens — programo com fluidez em qualquer tecnologia, ajustando à necessidade do projeto. Além do desenvolvimento full stack, também atuo com IA, aplicando modelos e integrações em aplicações reais.
           </p>
         </div>
       </div>

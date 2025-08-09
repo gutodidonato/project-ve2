@@ -4,7 +4,7 @@ function Card(props) {
       <h2 className="text-xl font-bold mb-4 text-white text-center capitalize">{props.title}</h2>
       <div className="[perspective:50px] w-15 h-15 flex items-center justify-center drop-shadow-xl/50 drop-shadow-red-500/50">
         <img
-          className="w-15 h-15 object-contain -rotate-x-15 drop-shadow-xl"
+          className="w-15 h-15 object-contain drop-shadow-xl"
           src={props.img}
           loading="lazy"
           alt={props.title}
