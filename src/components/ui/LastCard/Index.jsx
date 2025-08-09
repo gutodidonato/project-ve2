@@ -61,54 +61,85 @@ export default function LastCard({ animate_state = false }) {
 
 
   return (
-  <div ref={fixedPos}
-    className="w-screen h-screen flex items-center justify-around flex-col pointer-events-none"
-    style={{ opacity: 1 }}>
-    <div className="flex items-center justify-between flex-row w-8/10 h-8/10 pointer-events-none m-auto mt-20 m-auto pl-50">
-      <div className="flex items-center justify-center w-1/2 h-full gap-10 mt-10 flex-col"
-        style={{ pointerEvents: animate_state ? "auto" : "none" }}>
-        <div className="h-full w-full rounded-full">
-          <CircleMenu index={index} setIndex={setIndex} />
+    <div
+      ref={fixedPos}
+      className="w-screen h-screen flex items-center justify-around flex-col pointer-events-none"
+      style={{ opacity: 1 }}
+    >
+      <div
+        className="
+          flex sm:flex-row flex-col 
+          justify-between 
+          sm:mb-80
+          w-8/10 h-8/10 
+          sm:pl-50
+          sm:mt-0 mt-30
+          max-w-full max-h-full
+          sm:w-8/10 sm:h-8/10
+          w-full h-8/10
+          sm:gap-10   
+          px-2
+        "
+      >
+        {/* Parte do CircleMenu */}
+        <div
+          className="flex items-center justify-center sm:w-1/3 w-full sm:h-full h-30 sm:mt-10 mt-20 sm:flex-row flex-col"
+          style={{ pointerEvents: animate_state ? 'auto' : 'none' }}
+        >
+          <div className="h-full w-full rounded-full flex items-center justify-center">
+            <CircleMenu index={index} setIndex={setIndex} />
+          </div>
+        </div>
+
+        {/* Parte do texto */}
+        <div className="flex items-start justify-start 
+        sm:w-2/3 w-full sm:h-full h-30 sm:mt-80 px-30 sm:pt-0 pt-20">
+          <TextType
+            key={index}
+            text={frase}
+            typingSpeed={100}
+            pauseDuration={1500}
+            showCursor={true}
+            cursorCharacter="|"
+            deletingSpeed={100}
+            loop={true}
+            className="text-white sm:text-4xl text-2xl text-center sm:text-left"
+          />
         </div>
       </div>
-      <div className="mt-10 flex itens-start justify-start w-1/2 mb-auto mt-80">
-        <TextType 
-          key={index}
-          text={frase}
-          typingSpeed={100}
-          pauseDuration={1500}
-          showCursor={true}
-          cursorCharacter="|"
-          deletingSpeed={100}
-          loop={true}
-          className="text-white text-2xl"
-        />
+      <div className="flex items-center justify-center w-full gap-10 pointer-events-none flex-wrap px-2 mt-20">
+        <div
+          className="bg-[#311688] rounded-4xl shadow-lg flex items-center justify-center h-20 w-20 cursor-pointer 
+          transition-all duration-500 ease-in-out hover:scale-105 mb-3
+          sm:h-20 sm:w-20 h-14 w-14"
+          style={{ pointerEvents: animate_state ? "auto" : "none" }}
+        >
+          <a className="w-full h-full" href="https://github.com/gutodidonato" target="_blank" rel="noopener noreferrer">
+            <FaGithub className="text-white w-full h-full p-5" />
+          </a>
+        </div>
+        <div
+          className="bg-[#311688] rounded-4xl shadow-lg flex items-center justify-center h-20 w-20 cursor-pointer 
+          transition-all duration-500 ease-in-out hover:scale-105 mb-3
+          sm:h-20 sm:w-20 h-14 w-14"
+          style={{ pointerEvents: animate_state ? "auto" : "none" }}
+        >
+          <a className="w-full h-full" href="https://www.linkedin.com/in/luis-didonato-66746a250/" target="_blank" rel="noopener noreferrer">
+            <FaLinkedinIn className="text-white w-full h-full p-5" />
+          </a>
+        </div>
+        <div
+          className="bg-[#311688] rounded-4xl shadow-lg flex items-center justify-center h-20 w-20 cursor-pointer 
+          transition-all duration-500 ease-in-out hover:scale-105 mb-3
+          sm:h-20 sm:w-20 h-14 w-14"
+          style={{ pointerEvents: animate_state ? "auto" : "none" }}
+        >
+          <a className="w-full h-full" href="mailto:gutodidonato@gmail.com">
+            <MdEmail className="text-white w-full h-full p-5" />
+          </a>
+        </div>
       </div>
     </div>
-    <div className="flex items-center justify-center w-full gap-10 pointer-events-none">
-      <div className="bg-[#311688] rounded-4xl shadow-lg flex items-center justify-center h-20 w-20 cursor-pointer 
-      transition-all duration-500 ease-in-out hover:scale-105  mb-3"
-      style={{ pointerEvents: animate_state ? "auto" : "none" }}>
-        <a className="w-full h-full" href="https://github.com/gutodidonato" target="_blank">
-          <FaGithub className="text-white w-full h-full p-5" />
-        </a>
-      </div>
-      <div className="bg-[#311688] rounded-4xl shadow-lg flex items-center justify-center h-20 w-20 cursor-pointer 
-      transition-all duration-500 ease-in-out hover:scale-105 mb-3"
-      style={{ pointerEvents: animate_state ? "auto" : "none" }}>
-        <a className="w-full h-full" href="https://www.linkedin.com/in/luis-didonato-66746a250/" target="_blank">
-          <FaLinkedinIn className="text-white w-full h-full p-5" />
-        </a>
-      </div>
-      <div className="bg-[#311688] rounded-4xl shadow-lg flex items-center justify-center h-20 w-20 cursor-pointer 
-      transition-all duration-500 ease-in-out hover:scale-105  mb-3"
-      style={{ pointerEvents: animate_state ? "auto" : "none" }}>
-        <a className="w-full h-full" href="mailto:gutodidonato@gmail.com">
-          <MdEmail  className="text-white w-full h-full p-5" />
-        </a>
-      </div>
-    </div>
-  </div>
-);
+  );
 
 }

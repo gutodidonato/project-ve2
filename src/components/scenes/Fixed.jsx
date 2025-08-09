@@ -165,6 +165,14 @@ export default function Fixed({ section, conteudo, setConteudo }) {
         pointerEvents: "none",
         overwrite: "auto"
       });
+
+      gsap.to(botItem2.current, {
+        opacity: 0,
+        duration: 0.3,
+        ease: "power2.in",
+        overwrite: "auto",
+        pointerEvents: "none",
+      });
       
       
       gsap.to(botItem3.current, {
@@ -178,6 +186,14 @@ export default function Fixed({ section, conteudo, setConteudo }) {
 
     }
     else{
+
+      gsap.to(botItem2.current, {
+        opacity: 0,
+        duration: 0.3,
+        ease: "power2.in",
+        overwrite: "auto",
+        pointerEvents: "none",
+      });
 
       gsap.to(fixedPos.current, {
         opacity: 0,
@@ -238,7 +254,7 @@ export default function Fixed({ section, conteudo, setConteudo }) {
         className="h-2/8 w-full max-w-lg mx-auto mt-6 flex justify-center items-center px-4"
       >
         <p className="text-white shadow-black text-shadow-lg/30 text-center font-bold text-xl md:text-4xl">
-          Desenvolvimento Mobile/ Frontend
+          Desenvolvimento Mobile e Frontend
         </p>
       </div>
 

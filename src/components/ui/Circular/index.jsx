@@ -7,13 +7,15 @@ const items = [
   { id: 2, label: "Item 2", image: "/imgs/br.png" },
 ];
 
+let isMobile =  window.innerWidth < 1200
+
 export default function CircleMenu({ index, setIndex }) {
   const [chosenIndex, setChosenIndex] = useState(index ?? 1);
 
   const total = items.length;
 
-  const radiusChosen = 180;      
-  const radiusOthers = 90;    
+  const radiusChosen = isMobile? 140: 180;      
+  const radiusOthers = isMobile? 70: 90;    
 
   return (
     <div
@@ -31,15 +33,18 @@ export default function CircleMenu({ index, setIndex }) {
         const x = radius * Math.cos(angleRad);
         const y = radius * Math.sin(angleRad);
 
-        const size = isChosen ? 295 : 140;
+
+
+
+        const size = isChosen ? (isMobile? 230 : 295) : (isMobile? 100 : 140);
 
         return (
           <div
             key={item.id}
-            className="absolute cursor-pointer transition-all duration-500 ease-in-out hover:scale-105"
+            className="absolute cursor-pointer transition-all duration-500 ease-in-out hover:scale-105 opacity-80"
             style={{
-              left: `calc(30% + ${x}px - ${size / 2}px)`,
-              top: `calc(30% + ${y}px - ${size / 2}px)`,
+              left: `calc(50% + ${x}px - ${size / 2}px)`,
+              top: `calc(50% + ${y}px - ${size / 2}px)`,
               width: `${size}px`,
               height: `${size}px`,
               zIndex: isChosen ? 10 : 1,

@@ -1,7 +1,9 @@
 import gsap from 'gsap';
 import { useEffect, useRef, useState } from 'react';
 
-export default function LastCardComponent({index, size, setIndex, natural_index, style,setChosenIndex, image_src, video_src = "/video/sample1.mp4"}) {
+export default function LastCardComponent({index, size, setIndex, natural_index, style,setChosenIndex,
+   image_src,
+   video_src = "/video/sample1.mp4"}) {
 
   const imagem_up = useRef(null);
   const comp_card = useRef(null);
@@ -59,7 +61,7 @@ export default function LastCardComponent({index, size, setIndex, natural_index,
           }
         }}
         className='{bg-white rounded-2xl flex items-center justify-center
-        relative overflow-hidden cursor-pointer opacity-80}'
+        relative overflow-hidden cursor-pointer}'
         ref={comp_card}
         style={{
                 width: size,

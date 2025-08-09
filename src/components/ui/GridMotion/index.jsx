@@ -12,6 +12,7 @@ const GridMotion = ({ items = [], gradientColor = 'black', separar }) => {
 
   const [recovered, setRecovered] = useState(false);
   const [currentGradientColor, setCurrentGradientColor] = useState(gradientColor);
+  let distance =  window.innerWidth < 1200?  8400 : 4200
 
   useEffect(() => {
     if (separar === false && !recovered) {
@@ -26,35 +27,39 @@ const GridMotion = ({ items = [], gradientColor = 'black', separar }) => {
         const direction = index % 2 === 0 ? 1 : -1;
 
         gsap.to(row, {
-          x: 4200 * direction,
+          x: distance * direction,
           duration: 4,
           ease: "power3.out",
           overwrite: "auto",
         });
       });
     }
-    else if (separar && recovered) {
-      setCurrentGradientColor('black');
+else if (separar && recovered) {
+  setCurrentGradientColor('black');
 
-      rowRefs.current.forEach((row, index) => {
-        if (!row) return;
+  rowRefs.current.forEach((row, index) => {
+    if (!row) return;
 
-        gsap.to(row, {
-          x: `25%`,
-          duration: 4,
-          ease: "power3.out",
-          overwrite: "auto",
-          onComplete: () => {
-            if (index % 2 === 0) {
-              row.classList.add('run-row');
-            } else {
-              row.classList.add('reverse-row');
-            }
-            setRecovered(false);
-          }
-        });
-      });
-    }
+    // Calcula deslocamento baseado na largura real da linha
+    const perc = window.innerWidth < 1200 ? -0.25 : 0.25;
+    const moveX = row.offsetWidth * perc;
+
+    gsap.to(row, {
+      x: moveX,
+      duration: 4,
+      ease: "power3.out",
+      overwrite: "auto",
+      onComplete: () => {
+        if (index % 2 === 0) {
+          row.classList.add('run-row');
+        } else {
+          row.classList.add('reverse-row');
+        }
+        setRecovered(false);
+      }
+    });
+  });
+}
   }, [separar, recovered]);
 
   return (
@@ -77,7 +82,7 @@ const GridMotion = ({ items = [], gradientColor = 'black', separar }) => {
                 return (
                   <div key={itemIndex} className="row__item">
                     <div className="row__item-inner" style={{ backgroundColor: '#111' }}>
-                      {typeof content === 'string' && content.startsWith('http') ? (
+                      {typeof content === 'string'? (
                         <div
                           className="row__item-img"
                           style={{
@@ -96,7 +101,7 @@ const GridMotion = ({ items = [], gradientColor = 'black', separar }) => {
                 return (
                   <div key={itemIndex} className="row__item">
                     <div className="row__item-inner" style={{ backgroundColor: '#111' }}>
-                      {typeof content === 'string' && content.startsWith('http') ? (
+                      {typeof content === 'string'? (
                         <div
                           className="row__item-img"
                           style={{
