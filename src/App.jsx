@@ -176,8 +176,6 @@ function App() {
           </Scroll>
         </ScrollControls>
       </Canvas>
-      {//<Menu onSectionChange={setSection} menuOpened = {menuOpened} setMenuOpened = {setMenuOpened}/>
-      }
       <Fixed section={section} conteudo={fundoLiquid} setConteudo={setFundoLiquid}/>
       </div>
     </>
