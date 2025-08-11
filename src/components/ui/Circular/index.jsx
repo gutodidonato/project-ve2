@@ -52,7 +52,7 @@ export default function CircleMenu({ index, setIndex }) {
           >
             <LastCardComponent
               natural_index={item.id}
-              video_src={}
+              video_src={item.video}
               index={index}
               setIndex={setIndex}
               setChosenIndex={setChosenIndex}

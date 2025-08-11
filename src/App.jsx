@@ -20,6 +20,7 @@ function App() {
   let secondSection = section >= 7 && section <= 9;
   let thirdSection = section > 9;
   
+  const [index, setIndex] = useState(1);
   const [shouldAnimate, setShouldAnimate] = useState([false, true, false])
   const [beamChange, setBeamChange] = useState({
     rotation: 30,
@@ -153,7 +154,7 @@ function App() {
           />
         )} 
         {section >= 14 && (
-          <DarkVeilControl section={section}/>
+          <DarkVeilControl section={section} index={index}/>
         )}
         
         </div>
@@ -176,7 +177,12 @@ function App() {
           </Scroll>
         </ScrollControls>
       </Canvas>
-      <Fixed section={section} conteudo={fundoLiquid} setConteudo={setFundoLiquid}/>
+      <Fixed
+        index={index}
+        setIndex={setIndex} 
+        section={section} 
+        conteudo={fundoLiquid} 
+        setConteudo={setFundoLiquid}/>
       </div>
     </>
   );

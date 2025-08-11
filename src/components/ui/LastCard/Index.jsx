@@ -25,8 +25,7 @@ let frases_atual = [
 ]
 
 
-export default function LastCard({ animate_state = false }) {
-  const [index, setIndex] = useState(1);
+export default function LastCard({ animate_state = false, index, setIndex }) {
   const [frase, setFrase] = useState("");
   const fixedPos = useRef(null);
 

@@ -5,7 +5,7 @@ import GridUi from "../ui/GridUi";
 import LastCard from "../ui/LastCard/Index";
 
 
-export default function Fixed({ section, conteudo, setConteudo }) {
+export default function Fixed({ section, conteudo, setConteudo, index, setIndex }) {
   const fixedPos = useRef(null);
 
   const botItem1 = useRef(null);
@@ -316,7 +316,7 @@ export default function Fixed({ section, conteudo, setConteudo }) {
 
       {/* Etapa fim responsiva */}
       <div className="absolute top-0 w-full h-full flex items-center justify-around flex-col">
-        <LastCard animate_state={fourth_animate} />
+        <LastCard animate_state={fourth_animate} index={index} setIndex={setIndex} />
       </div>
     </div>
   );

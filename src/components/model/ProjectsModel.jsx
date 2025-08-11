@@ -3,19 +3,33 @@ import { useFrame } from '@react-three/fiber';
 import { useScroll } from '@react-three/drei';
 import * as THREE from 'three';
 
-export const ProjectsModel = ({ opacity }) => {
+export const ProjectsModel = ({ opacity, section }) => {
   const meshRef = useRef();
   const videoRef = useRef(null);
   const scroll = useScroll();
   const [videoTexture, setVideoTexture] = useState(null);
 
   const video_1 = '/video/sample1.mp4';
+  const video_2 = '/video/aman.mp4';
+  
+  let video_stage_1 = section < 7
+  let video_stage_2 = section < 13
 
   const edgeGeometry = useMemo(() => new THREE.PlaneGeometry(4, 2.25), []);
 
   useEffect(() => {
     const video = document.createElement('video');
-    video.src = video_1;
+
+    if (video_stage_1){
+      video.src = video_1;
+    }
+    else if(video_stage_2){
+      video.src =video_2;
+    }
+    else{
+      video.src = video_1;
+    }
+
     video.crossOrigin = 'anonymous';
     video.loop = true;
     video.muted = true;
@@ -23,6 +37,8 @@ export const ProjectsModel = ({ opacity }) => {
     video.autoplay = true;
 
     video.addEventListener('loadeddata', () => {
+      video.pause();
+      video.currentTime = 0;
       video.play();
       const texture = new THREE.VideoTexture(video);
       setVideoTexture(texture);
@@ -35,7 +51,7 @@ export const ProjectsModel = ({ opacity }) => {
       video.removeAttribute('src');
       video.load();
     };
-  }, []);
+  }, [video_stage_1, video_stage_2]);
 
   useFrame(() => {
     if (!meshRef.current) return;

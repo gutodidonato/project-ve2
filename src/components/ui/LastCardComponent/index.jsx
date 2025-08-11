@@ -57,7 +57,7 @@ export default function LastCardComponent({index, size, setIndex, natural_index,
             setIndex(natural_index);
             setChosenIndex(natural_index);
           } else {
-            setIsUp(false)
+            setIsUp(!isUp)
           }
         }}
         className='{bg-white rounded-2xl flex items-center justify-center
@@ -74,7 +74,7 @@ export default function LastCardComponent({index, size, setIndex, natural_index,
                   muted
                   loop
                   playsInline
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  style={{ width: '100%', height: '100%', objectFit: 'fill' }}
                   src={video_src}
                 />
               )}
