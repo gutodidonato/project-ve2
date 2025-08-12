@@ -14,7 +14,7 @@ export default function CircleMenu({ index, setIndex }) {
 
   const total = items.length;
 
-  const radiusChosen = isMobile? 140: 180;      
+  const radiusChosen = isMobile? 160: 180;      
   const radiusOthers = isMobile? 70: 90;    
 
   return (

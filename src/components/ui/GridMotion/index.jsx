@@ -40,7 +40,6 @@ else if (separar && recovered) {
   rowRefs.current.forEach((row, index) => {
     if (!row) return;
 
-    // Calcula deslocamento baseado na largura real da linha
     const perc = window.innerWidth < 1200 ? -0.25 : 0.25;
     const moveX = row.offsetWidth * perc;
 

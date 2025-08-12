@@ -259,7 +259,7 @@ export default function Fixed({ section, conteudo, setConteudo, index, setIndex 
       </div>
 
       {/* Primeira descrição responsiva */}
-      <div className="w-full fixed left-1/2 bottom-6 md:bottom-10 flex justify-center items-center transform -translate-x-1/2 px-4">
+      <div className="w-full fixed left-1/2 bottom-20 md:bottom-10 flex justify-center items-center transform -translate-x-1/2 px-4">
         <div className="w-full max-w-2xl">
           <p
             ref={botItem1}

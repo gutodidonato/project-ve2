@@ -31,15 +31,15 @@ export default function LastCardComponent({index, size, setIndex, natural_index,
     useEffect(() => {
     if (isTheChosen) {
       gsap.to(comp_card.current, {
-        width: 295,
-        height: 295,
+        width: window.innerWidth < 1200? 230: 295,
+        height: window.innerWidth < 1200? 230: 295,
         duration: 1,
         ease: "power2.out",
       });
     } else {
       gsap.to(comp_card.current, {
-        width: 140,
-        height: 140,
+        width: window.innerWidth < 1200? 100: 140,
+        height: window.innerWidth < 1200? 100: 140,
         duration: 1,
         ease: "power2.inOut",
       });

@@ -111,7 +111,7 @@ export const Experience = ({ section, index, setIndex }) => {
       }
 
       // Controle da opacidade
-      if (section >= 12) {
+      if (section >= 14) {
         setScreenOpacity(0);
       } else {
         setScreenOpacity(1);
@@ -130,9 +130,11 @@ export const Experience = ({ section, index, setIndex }) => {
       <group ref={meshRef} position={[0, -1.5, 0]} >
         <Car scale={scale} opacity={modelOpacity} />
       </group>
+      {section <= 14 &&
       <group ref={projectsModelRef}>
         <ProjectsModel opacity={screenOpacity} section={section} index={index} setIndex={setIndex} />
       </group>
+      }
     </>
   );
   }
