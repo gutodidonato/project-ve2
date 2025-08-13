@@ -16,8 +16,8 @@ function App() {
 
   const [section, setSection] = useState(0);
 
-  let firstSection = section < 7;
-  let secondSection = section >= 7 && section <= 9;
+  let firstSection = section < 6.5;
+  let secondSection = section >= 6.5 && section <= 9;
   let thirdSection = section > 9;
   
   const [index, setIndex] = useState(1);
