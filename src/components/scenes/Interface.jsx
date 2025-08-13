@@ -77,7 +77,7 @@ const palavraAnimada = (palavra, certo) => {
               delay: index * 0.05,
               ease: "easeOut",
             }}
-            className={`text-3xl capitalize text-center font-sans font-bold text-shadow-2xs
+            className={`sm:text-3xl text-xl capitalize text-center font-sans font-bold text-shadow-2xs
               text-shadow-black
               ${(certo)? `text-sky-400`: `text-red-400` }
               ${isPar ? `par_${Math.floor(index / 2)}` : `inpar_${Math.floor(index / 2)}`}
@@ -108,7 +108,7 @@ const palavraAnimada = (palavra, certo) => {
         <br />
       </h1>
       <div className="w-full flex justify-center">
-        <span className="text-7xl font-orbitron2
+        <span className="sm:text-7xl text-5xl font-orbitron2
          text-center text-white font-extrabold text-shadow-lg/30 text-shadow-black">Luis <br/> Didonato</span>
       </div>
       <div className="overflow-hidden h-15 mt-5 bg-[#ffffff1a] rounded-lg flex items-center justify-center">

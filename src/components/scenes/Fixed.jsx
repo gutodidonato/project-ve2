@@ -18,8 +18,8 @@ export default function Fixed({ section, conteudo, setConteudo, index, setIndex 
   const [carrosselState, setCarrosselState] = useState(true);
   const [separar, setSeparar] = useState(true)
 
-  let first_animate = (section >= 5 && section < 7);
-  let second_animate = (section >= 7 && section<= 9);
+  let first_animate = (section >= 4.5 && section < 6.5);
+  let second_animate = (section >= 6.5 && section<= 9);
   let third_animate = (section > 9 && section < 14);
   let fourth_animate = (section >= 14 )
   
@@ -215,7 +215,7 @@ export default function Fixed({ section, conteudo, setConteudo, index, setIndex 
   useEffect(() => {
     const progress = Math.min(Math.max((section - 3.5) / 1.5, 0), 1); 
 
-    if (section < 7) {
+    if (section < 6.5) {
       
     gsap.to(botItem1.current, {
       opacity: progress,
@@ -281,7 +281,7 @@ export default function Fixed({ section, conteudo, setConteudo, index, setIndex 
       </div>
 
       {/* Segunda descrição responsiva */}
-      <div className="w-full max-w-2xl fixed left-1/2 md:bottom-10 bottom-20 flex justify-center items-center transform -translate-x-1/2 px-4">
+      <div className="w-full max-w-2xl fixed left-1/2 md:bottom-10 bottom-10 flex justify-center items-center transform -translate-x-1/2 px-4">
         <div className="w-full flex justify-center items-center">
           <p
             ref={botItem2}
@@ -306,7 +306,7 @@ export default function Fixed({ section, conteudo, setConteudo, index, setIndex 
       <div
         ref={botItem3}
         style={{ opacity: 0 }}
-        className="absolute z-30 bottom-0 h-auto min-h-[120px] w-full flex items-center justify-center px-2 pb-4"
+        className="absolute z-30 bottom-10 sm:bottom-0 h-auto min-h-[120px] w-full flex items-center justify-center px-2 pb-4"
       >
         <p className="text-amber-50 bg-[#222222f5] rounded-2xl p-3 md:p-5 font-semibold text-base md:text-xl text-center">
           Muitos sites e soluções desenvolvidas para empresas, do back ao front, da ia ao BI,

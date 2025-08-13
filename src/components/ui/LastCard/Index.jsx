@@ -92,7 +92,7 @@ export default function LastCard({ animate_state = false, index, setIndex }) {
 
         {/* Parte do texto */}
         <div className="flex items-start justify-start 
-        sm:w-2/3 w-full sm:h-40 h-20 px-30 sm:pt-0 sm:pt-80">
+        sm:w-2/3 w-full sm:h-40 h-40 px-10 sm:pt-0 sm:pt-80">
           <TextType
             key={index}
             text={frase}
@@ -102,11 +102,11 @@ export default function LastCard({ animate_state = false, index, setIndex }) {
             cursorCharacter="|"
             deletingSpeed={100}
             loop={true}
-            className="text-white sm:text-4xl text-xl text-center sm:text-left"
+            className="text-white sm:text-4xl text-2xl text-center sm:text-left"
           />
         </div>
       </div>
-      <div className="flex items-center justify-center w-full gap-10 pointer-events-none flex-wrap px-2 mt-20">
+      <div className="flex items-center justify-center w-full sm:gap-10 gap-3 pointer-events-none flex-wrap px-2 mt-20">
         <div
           className="bg-[#311688] rounded-4xl shadow-lg flex items-center justify-center h-20 w-20 cursor-pointer 
           transition-all duration-500 ease-in-out hover:scale-105 mb-3
