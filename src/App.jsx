@@ -4,7 +4,8 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import Interface  from './components/scenes/Interface'
 import ScrollManager from "./components/assets/ScrollManager";
 import Menu from "./components/assets/Menu"
-import { EffectComposer, Bloom } from '@react-three/postprocessing';
+import { EffectComposer, Bloom, ChromaticAberration, Noise, Vignette, DepthOfField, HueSaturation, BrightnessContrast } from '@react-three/postprocessing';
+import { BlendFunction } from 'postprocessing';
 import Experience from './components/scenes/Experience';
 import Fixed from "./components/scenes/Fixed";
 import Beams from "./components/ui/Beams";
@@ -166,9 +167,51 @@ function App() {
         <ScrollControls pages={16} damping={0.1}>
           <ScrollManager section={section} onSectionChange={setSection}/>
           <EffectComposer>
-          <Experience section={section}/>
+          <Experience section={section} multisampling={4}/>
           
-            <Bloom intensity={intensity} luminanceThreshold={0.1} luminanceSmoothing={0.9}/>
+              <Bloom intensity={intensity} luminanceThreshold={0.1} luminanceSmoothing={0.9}  mipmapBlur/>
+              {/*
+
+                <Bloom
+                intensity={0.12} // mais natural
+                luminanceThreshold={0.25}
+                luminanceSmoothing={0.9}
+                mipmapBlur // deixa mais suave ainda
+                />
+                */
+              }
+
+              <ChromaticAberration
+                blendFunction={BlendFunction.NORMAL}
+                offset={[0.0005, 0.0005]} 
+              />
+
+              <DepthOfField
+                focusDistance={0.18} 
+                focalLength={0.015}
+                bokehScale={0.1} 
+              />
+
+              <HueSaturation
+                hue={0} 
+                saturation={-0.15} 
+              />
+              <BrightnessContrast
+                brightness={0.1} 
+                contrast={0.3} 
+              />
+
+              <Noise
+                premultiply
+                blendFunction={BlendFunction.SCREEN}
+                opacity={1.3} 
+              />
+
+              <Vignette
+                eskil={false}
+                offset={0.45}
+                darkness={0.6} 
+              />
           </EffectComposer>
           <Scroll html>
             <Interface/>
