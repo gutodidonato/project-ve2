@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
 
-const cameraStages = window.innerWidth < 1500? [
+const cameraStages = window.innerWidth < 1200? [
     {
       //traseira
       start: 0.0,

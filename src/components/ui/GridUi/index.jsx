@@ -13,7 +13,6 @@ const items = [
   '/imgs/sites/site10.png',
   '/imgs/sites/site11.png',
   '/imgs/sites/site12.png',
-  '/imgs/sites/site12.png',
   '/imgs/sites/site13.png',
   '/imgs/sites/site14.png',
   '/imgs/sites/site15.png',

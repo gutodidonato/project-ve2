@@ -20,6 +20,9 @@ function App() {
   let firstSection = section < 6.5;
   let secondSection = section >= 6.5 && section <= 9;
   let thirdSection = section > 9;
+
+  let contrast = section < 4? 0.3 : 0.4;
+  let luminance = section < 4? 0.9 : 10;
   
   const [index, setIndex] = useState(1);
   const [shouldAnimate, setShouldAnimate] = useState([false, true, false])
@@ -169,17 +172,7 @@ function App() {
           <EffectComposer>
           <Experience section={section} multisampling={4}/>
           
-              <Bloom intensity={intensity} luminanceThreshold={0.1} luminanceSmoothing={0.9}  mipmapBlur/>
-              {/*
-
-                <Bloom
-                intensity={0.12} // mais natural
-                luminanceThreshold={0.25}
-                luminanceSmoothing={0.9}
-                mipmapBlur // deixa mais suave ainda
-                />
-                */
-              }
+              <Bloom intensity={intensity} luminanceThreshold={0.1} luminanceSmoothing={luminance}  mipmapBlur/>
 
               <ChromaticAberration
                 blendFunction={BlendFunction.NORMAL}
@@ -198,13 +191,13 @@ function App() {
               />
               <BrightnessContrast
                 brightness={0.1} 
-                contrast={0.3} 
+                contrast={contrast} 
               />
 
               <Noise
                 premultiply
                 blendFunction={BlendFunction.SCREEN}
-                opacity={1.3} 
+                opacity={1.1} 
               />
 
               <Vignette

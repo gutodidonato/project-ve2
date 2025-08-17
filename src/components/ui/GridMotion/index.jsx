@@ -81,16 +81,12 @@ else if (separar && recovered) {
                 return (
                   <div key={itemIndex} className="row__item">
                     <div className="row__item-inner" style={{ backgroundColor: '#111' }}>
-                      {typeof content === 'string'? (
                         <div
                           className="row__item-img"
                           style={{
                             backgroundImage: `url(${content})`,
                           }}
                         ></div>
-                      ) : (
-                        <div className="row__item-content">{content}</div>
-                      )}
                     </div>
                   </div>
                 );
@@ -100,16 +96,12 @@ else if (separar && recovered) {
                 return (
                   <div key={itemIndex} className="row__item">
                     <div className="row__item-inner" style={{ backgroundColor: '#111' }}>
-                      {typeof content === 'string'? (
                         <div
                           className="row__item-img"
                           style={{
                             backgroundImage: `url(${content})`,
                           }}
                         ></div>
-                      ) : (
-                        <div className="row__item-content">{content}</div>
-                      )}
                     </div>
                   </div>
                 );

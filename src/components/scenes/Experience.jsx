@@ -20,7 +20,7 @@ export const Experience = ({ section, index, setIndex }) => {
   const [modelOpacity, setModelOpacity] = useState(1);
   const [screenOpacity, setScreenOpacity] = useState(0);
 
-  let scale = window.innerWidth < 1500 ? 0.5 : 1;
+  let scale = window.innerWidth < 1200 ? 0.5 : 1;
   const lastTargetRef = useRef(new THREE.Vector3());
 
   console.log(section)
