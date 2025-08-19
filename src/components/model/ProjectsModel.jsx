@@ -9,10 +9,10 @@ export const ProjectsModel = ({ opacity, section }) => {
   const scroll = useScroll();
   const [videoTexture, setVideoTexture] = useState(null);
 
-  const video_1 = '/video/sample1.mp4';
+  const video_1 = '/video/mobile.mp4';
   const video_2 = '/video/aman.mp4';
   
-  let video_stage_1 = section < 7
+  let video_stage_1 = section <= 6.5
   let video_stage_2 = section < 13
 
   const edgeGeometry = useMemo(() => new THREE.PlaneGeometry(4, 2.25), []);
