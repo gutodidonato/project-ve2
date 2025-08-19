@@ -3,7 +3,7 @@ import { useFrame } from '@react-three/fiber';
 import { useScroll } from '@react-three/drei';
 import * as THREE from 'three';
 
-export const ProjectsModel = ({ opacity, section }) => {
+export const ProjectsModel = ({ opacity, section, active= false }) => {
   const meshRef = useRef();
   const videoRef = useRef(null);
   const scroll = useScroll();
@@ -56,15 +56,25 @@ export const ProjectsModel = ({ opacity, section }) => {
   useFrame(() => {
     if (!meshRef.current) return;
 
-    const scrollY = scroll.offset;
-    const targetScale = (scrollY < 0.35) ? ((scrollY - 0.25) * 5) : 0.5;
+    if (active){
 
-    meshRef.current.scale.setScalar(targetScale);
-    meshRef.current.rotation.y = Math.min(scrollY * 15, Math.PI * 1.83);
-    meshRef.current.rotation.x = Math.min(scrollY * 15, Math.PI * 1.69);
-    meshRef.current.rotation.z = Math.min(scrollY * 15, Math.PI * 1.8);
-  });
-
+      const scrollY = scroll?.offset ?? 0;
+      const targetScale = scrollY < 0.35 ? (scrollY - 0.25) * 5 : 0.5;
+      
+      meshRef.current.scale.setScalar(targetScale);
+      meshRef.current.rotation.y = Math.min(scrollY * 15, Math.PI * 1.83);
+      meshRef.current.rotation.x = Math.min(scrollY * 15, Math.PI * 1.69);
+      meshRef.current.rotation.z = Math.min(scrollY * 15, Math.PI * 1.8);
+    }
+    else{
+      meshRef.current.scale.setScalar(0.5);
+      meshRef.current.rotation.y = Math.PI * 1.83
+      meshRef.current.rotation.x = Math.PI * 1.69
+      meshRef.current.rotation.z = Math.PI * 1.8
+    }
+      
+    });
+    
   if (!videoTexture) return null;
 
   return (

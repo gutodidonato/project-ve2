@@ -14,15 +14,15 @@ import DarkVeilControl from "./components/ui/DarkVeilControl";
 
 function App() {
   const tweenRef = useRef()
-
   const [section, setSection] = useState(0);
 
+  let isMobile = window.innerWidth <= 1200
   let firstSection = section < 6.5;
   let secondSection = section >= 6.5 && section <= 9;
   let thirdSection = section > 9;
 
-  let contrast = section < 4? 0.3 : 0.4;
-  let luminance = section < 4? 0.9 : 10;
+  let contrast = section < 4? 0.3 : 0.1;
+  let luminance = section < 4? 0.9 : 100;
   
   const [index, setIndex] = useState(1);
   const [shouldAnimate, setShouldAnimate] = useState([false, true, false])
@@ -165,46 +165,55 @@ function App() {
       
 
       <Canvas 
+        dpr={[1, 1.5]}
+        gl={{ powerPreference: 'high-performance', antialias: false }}
         shadows 
         camera={{ position: [3, 3, 3], fov: 30 }}>
         <ScrollControls pages={16} damping={0.1}>
           <ScrollManager section={section} onSectionChange={setSection}/>
           <EffectComposer>
           <Experience section={section} multisampling={4}/>
-          
-              <Bloom intensity={intensity} luminanceThreshold={0.1} luminanceSmoothing={luminance}  mipmapBlur/>
 
-              <ChromaticAberration
-                blendFunction={BlendFunction.NORMAL}
-                offset={[0.0005, 0.0005]} 
-              />
+                <Bloom 
+                 intensity={intensity} 
+                 luminanceThreshold={0.1} 
+                 luminanceSmoothing={luminance}  
+                 mipmapBlur/>
 
-              <DepthOfField
-                focusDistance={0.18} 
-                focalLength={0.015}
-                bokehScale={0.1} 
-              />
+                <ChromaticAberration 
+                  blendFunction={BlendFunction.NORMAL}
+                  offset={[0.0005, 0.0005]} 
+                />
 
-              <HueSaturation
-                hue={0} 
-                saturation={-0.15} 
-              />
-              <BrightnessContrast
-                brightness={0.1} 
-                contrast={contrast} 
-              />
+                <DepthOfField
+                  focusDistance={0.18} 
+                  focalLength={0.015}
+                  bokehScale={0.1} 
+                />
 
-              <Noise
-                premultiply
-                blendFunction={BlendFunction.SCREEN}
-                opacity={1.1} 
-              />
+                <HueSaturation
+                  hue={0} 
+                  saturation={isMobile? 0 : -0.15} 
+                />
+                <BrightnessContrast
+                  enabled={index<=4}
+                  brightness={0.1} 
+                  contrast={contrast} 
+                />
 
-              <Vignette
-                eskil={false}
-                offset={0.45}
-                darkness={0.6} 
-              />
+                <Noise
+                  enabled={index<=4}
+                  premultiply
+                  blendFunction={BlendFunction.SCREEN}
+                  opacity={isMobile? 0.5 : 1.1} 
+                />
+
+                <Vignette
+                  eskil={false}
+                  offset={0.45}
+                  darkness={0.6} 
+                />
+
           </EffectComposer>
           <Scroll html>
             <Interface/>

@@ -8,6 +8,7 @@ import {ProjectsModel} from "../model/ProjectsModel";
 import cameraStages from './cameraStage';
 
 
+
 export const Experience = ({ section, index, setIndex }) => {
   const meshRef = useRef();
   const lightRef = useRef();
@@ -15,6 +16,13 @@ export const Experience = ({ section, index, setIndex }) => {
 
   const fadePlaneRef = useRef();
   const projectsModelRef = useRef();
+
+  const [modelActions, setModelActions] = useState([true, true, true, true, true])
+
+  let correctModelAction = (index)=>{
+    modelActions.map((_, idx)=> idx === index? setModelActions[idx] = false : setModelActions[idx] = true )
+  }
+
 
 
   const [modelOpacity, setModelOpacity] = useState(1);
@@ -81,18 +89,32 @@ export const Experience = ({ section, index, setIndex }) => {
 
       const targetPosition = new THREE.Vector3();
 
-      if (section < 3.7) {
+      if (section < 3.7 && modelActions[0]) {
+
         targetPosition.set(50, -50, -50);
-      } else if (section >= 3.7 && section <= 11) {
+        correctModelAction(0)
+
+      } else if (section >= 3.7 && section <= 11 && modelActions[1]) {
+
         targetPosition.copy(state.camera.position).add(cameraDirection.multiplyScalar(7));
-      } else if (section >= 11 && section < 13) {
+        correctModelAction(1)
+
+      } else if (section >= 11 && section < 13 && modelActions[2]) {
+        
         targetPosition.copy(state.camera.position).add(cameraDirection.multiplyScalar(10));
+        correctModelAction(2)
+      
       }
-      else if (section >= 13){
+      else if (section >= 13 && modelActions[3]){
+
         targetPosition.copy(state.camera.position).add(cameraDirection.multiplyScalar(10));
+        correctModelAction(3)
+
       }
       else {
-        targetPosition.copy(state.camera.position); // fallback
+      
+        targetPosition.copy(state.camera.position); 
+        correctModelAction(4)
       }
 
       const distance = lastTargetRef.current.distanceTo(targetPosition);
@@ -110,7 +132,6 @@ export const Experience = ({ section, index, setIndex }) => {
         });
       }
 
-      // Controle da opacidade
       if (section >= 14) {
         setScreenOpacity(0);
       } else {
@@ -132,7 +153,12 @@ export const Experience = ({ section, index, setIndex }) => {
       </group>
       {section <= 14 &&
       <group ref={projectsModelRef}>
-        <ProjectsModel opacity={screenOpacity} section={section} index={index} setIndex={setIndex} />
+        <ProjectsModel 
+          active={section<7}
+          opacity={screenOpacity} 
+          section={section} 
+          index={index} 
+          setIndex={setIndex} />
       </group>
       }
     </>
