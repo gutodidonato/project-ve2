@@ -1,10 +1,10 @@
 import { useEffect, useState, useRef } from "react";
-import LastCardComponent from "../LastCardComponent";
-import TextType from "../TextType";
+import LastCardComponent from "../../ui/LastCardComponent";
+import TextType from "../../ui/TextType";
 import { FaGithub, FaLinkedinIn } from "react-icons/fa";
 import { MdEmail } from "react-icons/md";
 import gsap from "gsap";
-import CircleMenu from "../Circular";
+import CircleMenu from "../../ui/Circular";
 
 
 let frases_eb = ["Ingressei na academia militar das agulhas negras em 2020",
@@ -70,12 +70,11 @@ export default function LastCard({ animate_state = false, index, setIndex }) {
           flex sm:flex-row flex-col 
           justify-between 
           sm:mb-80
-          w-8/10 h-8/10 
+          w-full h-7/10 
           sm:pl-50
           sm:mt-0 mt-0
           max-w-full max-h-full
           sm:w-8/10 sm:h-8/10
-          w-full h-8/10
           sm:gap-10   
           px-2
         "

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import LastCard from "../ui/LastCard/Index";
+import LastCard from "./LastCard/Index";
 import FixedFirst from "./FixedFirst";
 import FixedSecond from "./FixedSecond";
 import FixedThird from "./FixedThird";

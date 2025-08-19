@@ -7,12 +7,12 @@ import {Car} from "../model/Car";
 import {ProjectsModel} from "../model/ProjectsModel";
 import cameraStages from './cameraStage';
 
-
-
 export const Experience = ({ section, index, setIndex }) => {
   const meshRef = useRef();
   const lightRef = useRef();
   const scroll = useScroll();
+
+  let isMobile = window.innerWidth < 1200;
 
   const fadePlaneRef = useRef();
   const projectsModelRef = useRef();
@@ -96,18 +96,18 @@ export const Experience = ({ section, index, setIndex }) => {
 
       } else if (section >= 3.7 && section <= 11 && modelActions[1]) {
 
-        targetPosition.copy(state.camera.position).add(cameraDirection.multiplyScalar(7));
+        targetPosition.copy(state.camera.position).add(cameraDirection.multiplyScalar(isMobile? 7 : 5));
         correctModelAction(1)
 
       } else if (section >= 11 && section < 13 && modelActions[2]) {
         
-        targetPosition.copy(state.camera.position).add(cameraDirection.multiplyScalar(10));
+        targetPosition.copy(state.camera.position).add(cameraDirection.multiplyScalar(isMobile? 9 : 10));
         correctModelAction(2)
       
       }
       else if (section >= 13 && modelActions[3]){
 
-        targetPosition.copy(state.camera.position).add(cameraDirection.multiplyScalar(10));
+        targetPosition.copy(state.camera.position).add(cameraDirection.multiplyScalar(isMobile? 4 : 10));
         correctModelAction(3)
 
       }
