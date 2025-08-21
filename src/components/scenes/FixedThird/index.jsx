@@ -12,8 +12,8 @@ export default function FixedThird({ first_animate, second_animate, third_animat
     if (first_animate) {
 
       gsap.set(gridLayout.current, {
-        x: '300vw', 
-        opacity: 1
+        x: '500vw', 
+        opacity: 0
       });
 
       gsap.to(botItem3.current, {
@@ -24,7 +24,7 @@ export default function FixedThird({ first_animate, second_animate, third_animat
     } else if(second_animate)  {
 
       gsap.to(gridLayout.current, {
-        opacity: 1, 
+        opacity: 0, 
         ease: "power1.inOut",
       });
       

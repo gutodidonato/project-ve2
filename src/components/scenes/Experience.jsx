@@ -30,14 +30,14 @@ export const Experience = ({ section, index, setIndex }) => {
 
   let scale = window.innerWidth < 1200 ? 0.5 : 1;
   const lastTargetRef = useRef(new THREE.Vector3());
-
-  console.log(section)
   
 
   
   useFrame((state) => {
+    
     const y = scroll.offset;
-
+    console.log(y)
+    
     const targetUseModel = y <= 1/4;
 
     setModelOpacity(prev => THREE.MathUtils.lerp(prev, targetUseModel ? 1 : 0, 0.1));
@@ -75,7 +75,7 @@ export const Experience = ({ section, index, setIndex }) => {
       fadePlaneRef.current.quaternion.copy(camera.quaternion);
       
       if (y < 1/4){
-        fadePlaneRef.current.material.opacity = THREE.MathUtils.clamp((y - 0.5) / 0.1, 0, 1);
+        isMobile? fadePlaneRef.current.material.opacity = THREE.MathUtils.clamp((y - 0.2) / 0.1, 0, 1) : fadePlaneRef.current.material.opacity = THREE.MathUtils.clamp((y - 0.5) / 0.1, 0, 1)
       } if (y >= 1/4) {
         fadePlaneRef.current.material.opacity = 0
       }
@@ -96,12 +96,12 @@ export const Experience = ({ section, index, setIndex }) => {
 
       } else if (section >= 3.7 && section <= 11 && modelActions[1]) {
 
-        targetPosition.copy(state.camera.position).add(cameraDirection.multiplyScalar(isMobile? 7 : 5));
+        targetPosition.copy(state.camera.position).add(cameraDirection.multiplyScalar(isMobile? 10.5 : 5));
         correctModelAction(1)
 
       } else if (section >= 11 && section < 13 && modelActions[2]) {
         
-        targetPosition.copy(state.camera.position).add(cameraDirection.multiplyScalar(isMobile? 9 : 10));
+        targetPosition.copy(state.camera.position).add(cameraDirection.multiplyScalar(isMobile? 12 : 10));
         correctModelAction(2)
       
       }

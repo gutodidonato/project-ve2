@@ -43,7 +43,7 @@ const cameraStages = window.innerWidth < 1200? [
       start: (0.80)/4,
       end:(1.00)/4,
       from: new THREE.Vector3(-7.41, 10, 10),
-      to: new THREE.Vector3(1.5, -1.5, -1),
+      to: new THREE.Vector3(2.5, -2, -1),
       lookFrom: new THREE.Vector3(0, 1, 0),
       lookTo: new THREE.Vector3(6, -7, -4),
     },

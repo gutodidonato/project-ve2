@@ -108,7 +108,7 @@ const palavraAnimada = (palavra, certo) => {
         <br />
       </h1>
       <div className="w-full flex justify-center">
-        <span className="sm:text-7xl text-5xl font-orbitron2
+        <span className="sm:text-7xl text-4xl font-orbitron2
          text-center text-white font-extrabold text-shadow-lg/30 text-shadow-black">Luis <br/> Didonato</span>
       </div>
       <div className="overflow-hidden h-15 mt-5 bg-[#ffffff1a] rounded-lg flex items-center justify-center">
@@ -301,7 +301,7 @@ const MyRole = () => {
         onContactClick={() => window.open('https://github.com/gutodidonato', '_blank')}
       />
       </div>
-      <div className="bg-[#172436] opacity-92 p-7 border-[#0dbaf5] border-1 rounded-2xl z-[-9] mt-10 sm:w-81 md:w-98 w-70 ml-2">
+      <div className="bg-[#172436] opacity-92 p-7 border-[#0dbaf5] border-1 rounded-2xl z-[-9] mt-10 sm:w-81 md:w-98 acc-card ml-2">
         <div className="rotating-text-container h-24 overflow-hidden relative">
           <div className="relative h-24 flex colum flex-col gap-15 animate-rotateSteps">
             <p className="text-item left-0 w-full sm:text-xl text-md text-white text-center">Desenvolvedor Full Stack apaixonado por transformar ideias em soluções reais.</p>

@@ -90,7 +90,7 @@ export default function LastCard({ animate_state = false, index, setIndex }) {
         </div>
 
         {/* Parte do texto */}
-        <div className="flex items-start justify-start 
+        <div className="flex items-start justify-start
         sm:w-2/3 w-full sm:h-40 h-40 px-10 sm:pt-0 sm:pt-80">
           <TextType
             key={index}
@@ -101,7 +101,7 @@ export default function LastCard({ animate_state = false, index, setIndex }) {
             cursorCharacter="|"
             deletingSpeed={100}
             loop={true}
-            className="text-white sm:text-4xl text-2xl text-center sm:text-left"
+            className="text-white sm:text-4xl text-2xl text-center sm:text-left mt-10 sm:mt-0"
           />
         </div>
       </div>
