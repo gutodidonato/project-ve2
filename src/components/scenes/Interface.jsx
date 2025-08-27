@@ -304,7 +304,7 @@ const MyRole = () => {
       <div className="bg-[#172436] opacity-92 p-7 border-[#0dbaf5] border-1 rounded-2xl z-[-9] mt-10 sm:w-81 md:w-98 acc-card ml-2">
         <div className="rotating-text-container h-24 overflow-hidden relative">
           <div className="relative h-24 flex colum flex-col gap-15 animate-rotateSteps">
-            <p className="text-item left-0 w-full sm:text-xl text-md text-white text-center">Desenvolvedor Full Stack apaixonado por transformar ideias em soluções reais.</p>
+            <p className="text-item left-0 w-full sm:text-xl text-md text-white text-center ">Desenvolvedor Full Stack apaixonado por transformar ideias em soluções reais.</p>
             <p className="text-item left-0 w-full sm:text-xl text-md text-white text-center">Curioso por natureza, estudo IA, linguagens, dados e automações.</p>
             <p className="text-item left-0 w-full sm:text-xl text-md text-white text-center">Comprometido com soluções inovadoras e código de qualidade.</p>
             <p className="text-item left-0 w-full sm:text-xl text-md text-white text-center">Sempre aprendendo e evoluindo como profissional de tecnologia.</p>

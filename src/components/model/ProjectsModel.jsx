@@ -10,7 +10,7 @@ export const ProjectsModel = ({ opacity, section, active= false }) => {
   const [videoTexture, setVideoTexture] = useState(null);
 
   const video_1 = '/video/mobile.mp4';
-  const video_2 = '/video/aman.mp4';
+  const video_2 = '/video/fullstack.mp4';
   
   let video_stage_1 = section <= 6.5
   let video_stage_2 = section < 13
