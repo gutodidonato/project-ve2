@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { ScrollControls, Scroll} from "@react-three/drei";
+import { ScrollControls, Scroll, useProgress} from "@react-three/drei";
 import { Canvas, useFrame } from "@react-three/fiber";
 import Interface  from './components/scenes/Interface'
 import ScrollManager from "./components/assets/ScrollManager";
-import Menu from "./components/assets/Menu"
 import { EffectComposer, Bloom, ChromaticAberration, Noise, Vignette, DepthOfField, HueSaturation, BrightnessContrast } from '@react-three/postprocessing';
 import { BlendFunction } from 'postprocessing';
 import Experience from './components/scenes/Experience';
@@ -15,6 +14,9 @@ import DarkVeilControl from "./components/ui/DarkVeilControl";
 function App() {
   const tweenRef = useRef()
   const [section, setSection] = useState(0);
+
+  const { progress, loaded, total } = useProgress();
+  const [ready, setReady] = useState(false);
 
   let isMobile = window.innerWidth <= 1200
   let firstSection = section < 6.5;
@@ -48,6 +50,11 @@ function App() {
       prev.map((_, idx) => idx === indexToSetTrue ? false : true)
   )};
 
+  useEffect(() => {
+    if (loaded === total && total > 0) {
+      setReady(true);
+    }
+  }, [loaded, total]);
 
   useEffect(() => {
     const target = {
@@ -141,93 +148,92 @@ function App() {
   return (
     <>
         <div className="relative w-screen h-screen">
-
-        <div className="absolute top-0 left-0 w-full h-full z-0 bg-black">
-        {/*Fundo Beams */}
-        {section >= 3.9 && section < 14 && (
-          
-          <Beams
-            beamWidth={1}
-            beamHeight={30}
-            beamNumber={200}
-            lightColor={beamChange.color}
-            speed={1.5}
-            noiseIntensity={1}
-            scale={0.2}
-            rotation={beamChange.rotation}
-          />
-        )} 
-        {section >= 14 && (
-          <DarkVeilControl section={section} index={index}/>
-        )}
-        
+        {!ready && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black text-white z-50">
+          Carregando... {progress.toFixed(0)}%
         </div>
-      
+      )}
+      {ready && (
+        <>
+        <div className="absolute top-0 left-0 w-full h-full z-0 bg-black">
+            {/*Fundo Beams */}
+            {section >= 3.9 && section < 14 && (
 
-      <Canvas 
-        dpr={[1, 1.5]}
-        gl={{ powerPreference: 'high-performance', antialias: false }}
-        shadows 
-        camera={{ position: [3, 3, 3], fov: 30 }}>
-        <ScrollControls pages={16} damping={0.1}>
-          <ScrollManager section={section} onSectionChange={setSection}/>
-          <EffectComposer>
-          <Experience section={section} multisampling={4}/>
+              <Beams
+                beamWidth={1}
+                beamHeight={30}
+                beamNumber={200}
+                lightColor={beamChange.color}
+                speed={1.5}
+                noiseIntensity={1}
+                scale={0.2}
+                rotation={beamChange.rotation} />
+            )}
+            {section >= 14 && (
+              <DarkVeilControl section={section} index={index} />
+            )}
 
-                <Bloom 
-                 intensity={intensity} 
-                 luminanceThreshold={0.1} 
-                 luminanceSmoothing={luminance}  
-                 mipmapBlur/>
+          </div><Canvas
+            dpr={[1, 1.5]}
+            gl={{ powerPreference: 'high-performance', antialias: false }}
+            shadows
+            camera={{ position: [3, 3, 3], fov: 30 }}>
+              <ScrollControls pages={16} damping={0.1}>
+                <ScrollManager section={section} onSectionChange={setSection} />
+                <EffectComposer>
+                  <Experience section={section} multisampling={4} />
 
-                <ChromaticAberration 
-                  blendFunction={BlendFunction.NORMAL}
-                  offset={[0.0005, 0.0005]} 
-                />
+                  <Bloom
+                    intensity={intensity}
+                    luminanceThreshold={0.1}
+                    luminanceSmoothing={luminance}
+                    mipmapBlur />
 
-                <DepthOfField
-                  focusDistance={0.18} 
-                  focalLength={0.015}
-                  bokehScale={0.1} 
-                />
+                  <ChromaticAberration
+                    blendFunction={BlendFunction.NORMAL}
+                    offset={[0.0005, 0.0005]} />
 
-                <HueSaturation
-                  hue={0} 
-                  saturation={isMobile? 0 : -0.15} 
-                />
-                <BrightnessContrast
-                  enabled={index<=4}
-                  brightness={0.1} 
-                  contrast={contrast} 
-                />
+                  <DepthOfField
+                    focusDistance={0.18}
+                    focalLength={0.015}
+                    bokehScale={0.1} />
 
-                <Noise
-                  enabled={index<=4}
-                  premultiply
-                  blendFunction={BlendFunction.SCREEN}
-                  opacity={isMobile? 0.5 : 1.1} 
-                />
+                  <HueSaturation
+                    hue={0}
+                    saturation={isMobile ? 0 : -0.15} />
+                  <BrightnessContrast
+                    enabled={index <= 4}
+                    brightness={0.1}
+                    contrast={contrast} />
 
-                <Vignette
-                  eskil={false}
-                  offset={0.45}
-                  darkness={0.6} 
-                />
+                  <Noise
+                    enabled={index <= 4}
+                    premultiply
+                    blendFunction={BlendFunction.SCREEN}
+                    opacity={isMobile ? 0.5 : 1.1} />
 
-          </EffectComposer>
-          <Scroll html>
-            <Interface/>
-            <div className="h-screen w-screen"></div>
-            <div className="h-screen w-screen"></div>
-          </Scroll>
-        </ScrollControls>
-      </Canvas>
-      <Fixed
-        index={index}
-        setIndex={setIndex} 
-        section={section} 
-        conteudo={fundoLiquid} 
-        setConteudo={setFundoLiquid}/>
+                  <Vignette
+                    eskil={false}
+                    offset={0.45}
+                    darkness={0.6} />
+
+                </EffectComposer>
+                <Scroll html>
+                  <Interface />
+                  <div className="h-screen w-screen"></div>
+                  <div className="h-screen w-screen"></div>
+                </Scroll>
+              </ScrollControls>
+            </Canvas>
+            <Fixed
+              index={index}
+              setIndex={setIndex}
+              section={section}
+              conteudo={fundoLiquid}
+              setConteudo={setFundoLiquid}
+            />
+          </>
+        )}
       </div>
     </>
   );

@@ -290,7 +290,7 @@ const MyRole = () => {
       <div className="mt-200 ml-2 opacity-95">
       <ProfileCard
         name="Luis Didonato"
-        iconUrl="https://upload.wikimedia.org/wikipedia/commons/c/c3/Python-logo-notext.svg"
+        iconUrl="/imgs/fundo.png"
         title="Fullstack"
         handle="luishtml"
         status="Online"

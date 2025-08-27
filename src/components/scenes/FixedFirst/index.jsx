@@ -11,7 +11,7 @@ export default function FixedFirst({section}){
         if (section < 6.5 && section > 4.2) {
             gsap.to(botItem1.current, {
             opacity: progress,
-            y: 400 * (1 - progress),
+            y: 100 * (1 - progress),
             duration: 1.0,
             ease: "power3.out",
             overwrite: "auto",
@@ -28,7 +28,7 @@ export default function FixedFirst({section}){
         else {
             gsap.to(botItem1.current, {
                 opacity: 0,
-                y: 400,
+                y: 100,
                 duration: 0.3,
                 ease: "power2.in",
                 overwrite: "auto",
@@ -55,7 +55,7 @@ export default function FixedFirst({section}){
             </div>
 
             {/* Primeira descrição responsiva */}
-            <div className="w-full fixed left-1/2 bottom-20 md:bottom-10 flex justify-center items-center transform -translate-x-1/2 px-4">
+            <div className="w-full fixed left-1/2 bottom-10 md:bottom-10 flex justify-center items-center transform -translate-x-1/2 px-4">
                 <div className="w-full max-w-2xl">
                 <p
                     ref={botItem1}

@@ -2,9 +2,9 @@ import { useState } from 'react';
 import LastCardComponent from "../LastCardComponent";
 
 const items = [
-  { id: 0, label: "Item 0", image: "/imgs/br.png", video: "/video/aman.mp4"},
-  { id: 1, label: "Item 1", image: "/imgs/br.png",  video: "/video/fiap.mp4"},
-  { id: 2, label: "Item 2", image: "/imgs/br.png", video: "/video/fiap.mp4"},
+  { id: 0, label: "Item 0", image: "/imgs/eng-eb.png", video: "/video/aman.mp4"},
+  { id: 1, label: "Item 1", image: "/imgs/eng-eb.png",  video: "/video/fiap.mp4"},
+  { id: 2, label: "Item 2", image: "/imgs/stacks/python.svg", video: "/video/comemoracao.mp4"},
 ];
 
 let isMobile =  window.innerWidth < 1200
@@ -41,7 +41,7 @@ export default function CircleMenu({ index, setIndex }) {
         return (
           <div
             key={item.id}
-            className="absolute cursor-pointer transition-all duration-500 ease-in-out hover:scale-105 opacity-80"
+            className="absolute cursor-pointer transition-all duration-500 ease-in-out hover:scale-105"
             style={{
               left: `calc(50% + ${x}px - ${size / 2}px)`,
               top: `calc(50% + ${y}px - ${size / 2}px)`,

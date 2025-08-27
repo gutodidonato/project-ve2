@@ -11,6 +11,32 @@ export default function LastCardComponent({index, size, setIndex, natural_index,
 
   let isTheChosen = (natural_index ) === index;
 
+  useEffect(() => {
+    if (index == 1){
+      gsap.to(imagem_up.current, {
+        background: "rgb(64 15 95)",
+        duration: 3,
+        ease: "power2.out",
+        overwrite: true,
+    })}
+    if (index == 2){
+      gsap.to(imagem_up.current, {
+        background: "rgb(123 1 10)",
+        duration: 3,
+        ease: "power2.out",
+        overwrite: true,
+    })}
+    if (index == 0){
+      gsap.to(imagem_up.current, {
+        background: "rgb(20 18 110)",
+        duration: 3,
+        ease: "power2.out",
+        overwrite: true,
+    })}
+      
+    
+  }, [index]);
+
 
   useEffect(() => {
     if (index === natural_index && isUp === true) {
@@ -79,12 +105,19 @@ export default function LastCardComponent({index, size, setIndex, natural_index,
                 />
               )}
             </div>
-            <img 
+            <div 
               ref={imagem_up}
-              style={{ filter: 'grayscale(0.3) brightness(0.5)', opacity: 1 }}
-              className="absolute w-full h-full" 
+              style={{ filter: 'grayscale(0.3) brightness(0.5)', opacity: 1, background: 'red' }}
+              className="absolute w-full h-full flex items-center justify-center" 
               src={image_src} 
-              alt="" />
+              alt="" >
+              <img 
+                src={image_src} 
+                style={{ width: '80%', height: '80%'}}
+                alt="" 
+                className="w-full h-full object-cover"
+                />
+              </div>
             
     </div>
   )

@@ -1,5 +1,4 @@
 import { useEffect, useState, useRef } from "react";
-import LastCardComponent from "../../ui/LastCardComponent";
 import TextType from "../../ui/TextType";
 import { FaGithub, FaLinkedinIn } from "react-icons/fa";
 import { MdEmail } from "react-icons/md";
@@ -26,20 +25,86 @@ let frases_atual = [
 
 
 export default function LastCard({ animate_state = false, index, setIndex }) {
+  const githubButtonRef = useRef(null);
+  const linkedinButtonRef = useRef(null);
+  const emailButtonRef = useRef(null);
   const [frase, setFrase] = useState("");
   const fixedPos = useRef(null);
 
   useEffect(() => {
     if (index === 0) {
       setFrase(frases_eb);
+      gsap.to(githubButtonRef.current, {
+        background: "rgb(20 18 110)",
+        duration: 2,
+        ease: "power2.out",
+        overwrite: true,
+      });
+      gsap.to(linkedinButtonRef.current, {
+        background: "rgb(20 18 110)",
+        duration: 2,
+        ease: "power2.out",
+        overwrite: true,
+      });
+      gsap.to(emailButtonRef.current, {
+        background: "rgb(20 18 110)",
+        duration: 2,
+        ease: "power2.out",
+        overwrite: true,
+      });
+
+
     } else if (index === 1) {
+      
       setFrase(frases_formacao);
+      gsap.to(githubButtonRef.current, {
+        background: "rgb(64 15 95)",
+        duration: 2,
+        ease: "power2.out",
+        overwrite: true,
+      });
+      gsap.to(linkedinButtonRef.current, {
+        background: "rgb(64 15 95)",
+        duration: 2,
+        ease: "power2.out",
+        overwrite: true,
+      });
+      gsap.to(emailButtonRef.current, {
+        background: "rgb(64 15 95)",
+        duration: 2,
+        ease: "power2.out",
+        overwrite: true,
+      });
+
+
     } else if (index === 2) {
+
+
       setFrase(frases_atual);
+      gsap.to(githubButtonRef.current, {
+        background: "rgb(123 1 10)",
+        duration: 2,
+        ease: "power2.out",
+        overwrite: true,
+      });
+      gsap.to(linkedinButtonRef.current, {
+        background: "rgb(123 1 10)",
+        duration: 2,
+        ease: "power2.out",
+        overwrite: true,
+      });
+      gsap.to(emailButtonRef.current, {
+        background: "rgb(123 1 10)",
+        duration: 2,
+        ease: "power2.out",
+        overwrite: true,
+      });
+
+
     } else {
       setFrase([""]);
     }
-  },[index]);
+  }, [index]);
 
   useEffect(() => {
     if (animate_state) {
@@ -105,32 +170,35 @@ export default function LastCard({ animate_state = false, index, setIndex }) {
           />
         </div>
       </div>
-      <div className="flex items-center justify-center w-full sm:gap-10 gap-3 pointer-events-none flex-wrap px-2 mt-20">
+      <div className="flex items-center justify-center w-full sm:gap-10 gap-3 pointer-events-none flex-wrap px-2 mt-20 mr-3">
         <div
-          className="bg-[#311688] rounded-4xl shadow-lg flex items-center justify-center h-20 w-20 cursor-pointer 
+        ref={githubButtonRef}
+          className="rounded-4xl shadow-lg flex items-center justify-center h-20 w-20 cursor-pointer 
           transition-all duration-500 ease-in-out hover:scale-105 mb-3
           sm:h-20 sm:w-20 h-14 w-14"
-          style={{ pointerEvents: animate_state ? "auto" : "none" }}
+          style={{ pointerEvents: animate_state ? "auto" : "none", background: "red" }}
         >
           <a className="w-full h-full" href="https://github.com/gutodidonato" target="_blank" rel="noopener noreferrer">
             <FaGithub className="text-white w-full h-full p-5" />
           </a>
         </div>
         <div
-          className="bg-[#311688] rounded-4xl shadow-lg flex items-center justify-center h-20 w-20 cursor-pointer 
+          ref={linkedinButtonRef}
+          className="rounded-4xl shadow-lg flex items-center justify-center h-20 w-20 cursor-pointer 
           transition-all duration-500 ease-in-out hover:scale-105 mb-3
           sm:h-20 sm:w-20 h-14 w-14"
-          style={{ pointerEvents: animate_state ? "auto" : "none" }}
+          style={{ pointerEvents: animate_state ? "auto" : "none", background: "red" }}
         >
           <a className="w-full h-full" href="https://www.linkedin.com/in/luis-didonato-66746a250/" target="_blank" rel="noopener noreferrer">
             <FaLinkedinIn className="text-white w-full h-full p-5" />
           </a>
         </div>
         <div
-          className="bg-[#311688] rounded-4xl shadow-lg flex items-center justify-center h-20 w-20 cursor-pointer 
+          ref={emailButtonRef}
+          className="rounded-4xl shadow-lg flex items-center justify-center h-20 w-20 cursor-pointer 
           transition-all duration-500 ease-in-out hover:scale-105 mb-3
           sm:h-20 sm:w-20 h-14 w-14"
-          style={{ pointerEvents: animate_state ? "auto" : "none" }}
+          style={{ pointerEvents: animate_state ? "auto" : "none", background: "red" }}
         >
           <a className="w-full h-full" href="mailto:gutodidonato@gmail.com">
             <MdEmail className="text-white w-full h-full p-5" />

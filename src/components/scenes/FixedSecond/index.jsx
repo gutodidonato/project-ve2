@@ -63,7 +63,7 @@ export default function FixedSecond({phase}){
                   </div>
             
                   {/* Segunda descrição responsiva */}
-                  <div className="w-full max-w-2xl fixed left-1/2 md:bottom-10 bottom-10 flex justify-center items-center transform -translate-x-1/2 px-4">
+                  <div className="w-full max-w-2xl fixed left-1/2 md:bottom-10 bottom-2 flex justify-center items-center transform -translate-x-1/2 px-4">
                     <div className="w-full flex justify-center items-center">
                       <p
                         ref={botItem2}
