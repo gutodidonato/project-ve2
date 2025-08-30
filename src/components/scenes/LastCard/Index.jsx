@@ -179,7 +179,7 @@ export default function LastCard({ animate_state = false, index, setIndex }) {
         </div>
       </div>
       <div
-        className="absolute bottom-20 left-1/2 transform -translate-x-1/2 
+        className="absolute bottom-20 sm:bottom-10 left-1/2 transform -translate-x-1/2 
                   flex items-center justify-center gap-6 sm:gap-10 
                   pointer-events-auto px-2"
       >
