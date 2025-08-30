@@ -114,7 +114,7 @@ export default function FixedThird({ first_animate, second_animate, third_animat
       <div
         ref={botItem3}
         style={{ opacity: 0 }}
-        className="absolute z-30 bottom-10 sm:bottom-0 h-auto min-h-[120px] w-full flex items-center justify-center px-2 pb-4"
+        className="absolute z-30 bottom-20 sm:bottom-0 h-auto min-h-[120px] w-full flex items-center justify-center px-2 pb-4"
       >
         <p className="text-amber-50 bg-[#222222f5] rounded-2xl p-3 md:p-5 font-semibold text-base md:text-xl text-center">
           Muitos sites e soluções desenvolvidas para empresas, do back ao front, da ia ao BI,
