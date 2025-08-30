@@ -132,21 +132,21 @@ export default function LastCard({ animate_state = false, index, setIndex }) {
     >
       <div
         className="
+          top-5 absolute 
           flex sm:flex-row flex-col 
-          justify-between 
-          sm:mb-80
-          w-full h-7/10 
+          justify-between items-start
+          w-full h-5/10 
           sm:pl-50
-          sm:mt-0 mt-0
+          sm:mt-20 mt-0
           max-w-full max-h-full
-          sm:w-8/10 sm:h-8/10
+          sm:w-8/10 sm:h-5/10
           sm:gap-10   
           px-2
         "
       >
         {/* Parte do CircleMenu */}
         <div
-          className="flex items-center justify-center sm:w-1/3 w-full sm:h-full h-30 sm:mt-10 mt-20 sm:flex-row flex-col"
+          className="flex items-center justify-center sm:w-1/3 w-full sm:mt-10 mt-20 sm:flex-row flex-col"
           style={{ pointerEvents: animate_state ? 'auto' : 'none' }}
         >
           <div className="h-full w-full rounded-full flex items-center justify-center">
@@ -156,7 +156,7 @@ export default function LastCard({ animate_state = false, index, setIndex }) {
 
         {/* Parte do texto */}
         <div className="flex items-start justify-start
-        sm:w-2/3 w-full sm:h-40 h-40 px-10 sm:pt-0 sm:pt-80">
+        sm:w-2/3 w-full sm:h-40 h-40 px-10 pt-65 sm:pt-20">
           <TextType
             key={index}
             text={frase}
@@ -166,42 +166,56 @@ export default function LastCard({ animate_state = false, index, setIndex }) {
             cursorCharacter="|"
             deletingSpeed={100}
             loop={true}
-            className="text-white sm:text-4xl text-2xl text-center sm:text-left mt-10 sm:mt-0"
+            className="
+              text-white 
+              text-center sm:text-left 
+              text-lg sm:text-2xl md:text-3xl lg:text-4xl 
+              leading-relaxed 
+              px-4 sm:px-0 
+              mt-6 sm:mt-0
+            "
           />
+
         </div>
       </div>
-      <div className="flex items-center justify-center w-full sm:gap-10 gap-3 pointer-events-none flex-wrap px-2 mt-20 mr-3">
+      <div
+        className="absolute bottom-5 left-1/2 transform -translate-x-1/2 
+                  flex items-center justify-center gap-6 sm:gap-10 
+                  pointer-events-auto px-2"
+      >
         <div
-        ref={githubButtonRef}
-          className="rounded-4xl shadow-lg flex items-center justify-center h-20 w-20 cursor-pointer 
-          transition-all duration-500 ease-in-out hover:scale-105 mb-3
-          sm:h-20 sm:w-20 h-14 w-14"
+          ref={githubButtonRef}
+          className="rounded-4xl shadow-lg flex items-center justify-center 
+                    h-14 w-14 sm:h-20 sm:w-20 cursor-pointer 
+                    transition-all duration-500 ease-in-out hover:scale-105"
           style={{ pointerEvents: animate_state ? "auto" : "none", background: "red" }}
         >
           <a className="w-full h-full" href="https://github.com/gutodidonato" target="_blank" rel="noopener noreferrer">
-            <FaGithub className="text-white w-full h-full p-5" />
+            <FaGithub className="text-white w-full h-full p-4 sm:p-5" />
           </a>
         </div>
+
         <div
           ref={linkedinButtonRef}
-          className="rounded-4xl shadow-lg flex items-center justify-center h-20 w-20 cursor-pointer 
-          transition-all duration-500 ease-in-out hover:scale-105 mb-3
-          sm:h-20 sm:w-20 h-14 w-14"
+          className="rounded-4xl shadow-lg flex items-center justify-center 
+                    h-14 w-14 sm:h-20 sm:w-20 cursor-pointer 
+                    transition-all duration-500 ease-in-out hover:scale-105"
           style={{ pointerEvents: animate_state ? "auto" : "none", background: "red" }}
         >
           <a className="w-full h-full" href="https://www.linkedin.com/in/luis-didonato-66746a250/" target="_blank" rel="noopener noreferrer">
-            <FaLinkedinIn className="text-white w-full h-full p-5" />
+            <FaLinkedinIn className="text-white w-full h-full p-4 sm:p-5" />
           </a>
         </div>
+
         <div
           ref={emailButtonRef}
-          className="rounded-4xl shadow-lg flex items-center justify-center h-20 w-20 cursor-pointer 
-          transition-all duration-500 ease-in-out hover:scale-105 mb-3
-          sm:h-20 sm:w-20 h-14 w-14"
+          className="rounded-4xl shadow-lg flex items-center justify-center 
+                    h-14 w-14 sm:h-20 sm:w-20 cursor-pointer 
+                    transition-all duration-500 ease-in-out hover:scale-105"
           style={{ pointerEvents: animate_state ? "auto" : "none", background: "red" }}
         >
           <a className="w-full h-full" href="mailto:gutodidonato@gmail.com">
-            <MdEmail className="text-white w-full h-full p-5" />
+            <MdEmail className="text-white w-full h-full p-4 sm:p-5" />
           </a>
         </div>
       </div>

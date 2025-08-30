@@ -96,7 +96,7 @@ export const Experience = ({ section, index, setIndex }) => {
 
       } else if (section >= 3.7 && section <= 11 && modelActions[1]) {
 
-        targetPosition.copy(state.camera.position).add(cameraDirection.multiplyScalar(isMobile? 10.5 : 5));
+        targetPosition.copy(state.camera.position).add(cameraDirection.multiplyScalar(isMobile? 8 : 6));
         correctModelAction(1)
 
       } else if (section >= 11 && section < 13 && modelActions[2]) {
