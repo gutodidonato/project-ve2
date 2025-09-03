@@ -86,7 +86,7 @@ function App() {
 
       tweenRef.current = gsap.to(target, {
         rotation: 180,
-        color: "#ff0000",
+        color: "#d400ff",
         duration: 2.0,
         ease: "power2.out",
         onUpdate: () => {

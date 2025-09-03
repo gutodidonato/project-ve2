@@ -36,7 +36,6 @@ export const Experience = ({ section, index, setIndex }) => {
   useFrame((state) => {
     
     const y = scroll.offset;
-    console.log(y)
     
     const targetUseModel = y <= 1/4;
 

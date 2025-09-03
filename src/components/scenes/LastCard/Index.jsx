@@ -6,6 +6,9 @@ import gsap from "gsap";
 import CircleMenu from "../../ui/Circular";
 
 
+let tela_curta = window.innerHeight < 800;
+
+
 let frases_eb = ["Ingressei na academia militar das agulhas negras em 2020",
   "Fui treinado para ser um oficial do exército brasileiro",
   "Refinei habilidades de liderança e disciplina",
@@ -131,18 +134,18 @@ export default function LastCard({ animate_state = false, index, setIndex }) {
       style={{ opacity: 0 }}
     >
       <div
-        className="
+        className={`
           top-5 absolute 
           flex sm:flex-row flex-col 
           justify-between items-start
           w-full h-5/10 
           sm:pl-50
-          sm:mt-50 mt-0
+          mt-0 ${tela_curta ? 'sm:mt-20' : 'sm:mt-30'}
           max-w-full max-h-full
           sm:w-8/10 sm:h-5/10
           sm:gap-10   
           px-2
-        "
+        `}
       >
         {/* Parte do CircleMenu */}
         <div
