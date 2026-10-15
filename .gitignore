@@ -36,3 +36,6 @@ playwright-report/
 .env
 .env*.local
 *.tsbuildinfo
+
+# local agent workspaces
+.superpowers/
