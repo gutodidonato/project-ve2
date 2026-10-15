@@ -1,0 +1,150 @@
+@import "tailwindcss";
+
+@theme {
+  --color-night: #0c0717;
+  --color-panel: #140c23;
+  --color-line: #2e2148;
+  --color-ink: #efe8ff;
+  --color-muted: #a597c6;
+  --color-magenta: #ff3ea5;
+  --color-cyan: #3ee8ff;
+  --color-sun: #ffb347;
+  --color-bad: #ff5a5a;
+
+  /* next/font (app/fonts.ts, applied on <html> by the locale layout and the 404 page) sets --font-michroma / --font-plex-* on <html>. */
+  --font-display: var(--font-michroma), "Eurostile", "Arial Black", sans-serif;
+  --font-body: var(--font-plex-sans), "Segoe UI", system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, "Cascadia Mono", Consolas, monospace;
+
+  /* The artifact's single-column cutoff: everything below 700px is one column. */
+  --breakpoint-md: 43.75rem;
+
+  /* Game zone panel content swap; used as motion-safe:animate-panel-in only. */
+  --animate-panel-in: panel-in 180ms ease-out both;
+
+  @keyframes panel-in {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+:root {
+  --night: #0c0717;
+  --panel: #140c23;
+  --line: #2e2148;
+  --ink: #efe8ff;
+  --muted: #a597c6;
+  --magenta: #ff3ea5;
+  --cyan: #3ee8ff;
+  --sun: #ffb347;
+  --bad: #ff5a5a;
+  --font-display: var(--font-michroma), "Eurostile", "Arial Black", sans-serif;
+  --font-body: var(--font-plex-sans), "Segoe UI", system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, "Cascadia Mono", Consolas, monospace;
+  color-scheme: dark;
+}
+
+html {
+  background: var(--night);
+}
+
+body {
+  background: var(--night);
+  color: var(--ink);
+  font-family: var(--font-body);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/*
+ * The default focus ring lives in the base layer so Tailwind utilities (layer
+ * utilities) can still tune it per element, e.g. focus-visible:outline-offset-[-2px].
+ * Unlayered, it would beat every utility. Elements that only take programmatic
+ * focus (tabindex="-1", like the pit stop <main> after "text version") get no ring.
+ */
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--sun);
+    outline-offset: 3px;
+  }
+
+  [tabindex="-1"]:focus-visible {
+    outline: none;
+  }
+}
+
+::selection {
+  background: var(--magenta);
+  color: var(--night);
+}
+
+/* Mono uppercase label above headings and on small meta rows. */
+@utility eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 400;
+  line-height: 1.4;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+}
+
+/* The one bold gesture: sun → magenta, top to bottom, clipped to the glyphs. */
+@utility text-sunset {
+  background-image: linear-gradient(180deg, var(--sun) 10%, var(--magenta) 85%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+/* Thin horizon line under the hero name. */
+@utility horizon {
+  height: 2px;
+  background-image: linear-gradient(90deg, transparent, var(--magenta) 20%, var(--cyan) 80%, transparent);
+  opacity: 0.7;
+}
+
+/* Game mode: the pit stop (HTML content) stays in the DOM for SEO / a11y but is visually hidden. */
+html[data-mode="game"] .pitstop {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+html[data-mode="game"],
+html[data-mode="game"] body {
+  overflow: hidden;
+  height: 100%;
+}
+
+/* Game mode: a finger dragging on the canvas steers the car, so the browser must not pan or zoom under it. */
+html[data-mode="game"] .game-layer canvas {
+  touch-action: none;
+}
+
+/*
+ * Under 700px the pit stop toggle is pinned top-right: leave the first screen's
+ * header clear of it, and of the line that explains why it is disabled when the
+ * pit stop is forced (GameMount sets html[data-forced]).
+ */
+@media (width < 43.75rem) {
+  html[data-mode="pitstop"] .pitstop {
+    padding-top: 2.5rem;
+  }
+
+  html[data-mode="pitstop"][data-forced] .pitstop {
+    padding-top: 6.5rem;
+  }
+}
