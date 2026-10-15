@@ -60,6 +60,8 @@ Modelos: Kenney (CC0) em estilo low-poly com luz neon. Pacotes: Car Kit, City Ki
 - **Modo foto:** tecla `F` ou botão. Pausa a simulação, câmera livre, filtros (normal, VHS, neon, preto e branco) e captura. No site, salvar e compartilhar com o link do portfolio.
 - **Tela cheia:** a experiência ocupa a tela inteira; o texto de apoio fica numa gaveta (`i`).
 - **Voo (Colmeia e EVIG):** `E` ou `Espaço` sobe, `Q` ou `Shift` desce, com inércia, piso e teto por era; altímetro no painel; botões ▲▼ na tela no celular. Os obstáculos de voo dependem da altura: monotrilho (passa por baixo ou por cima), torres (bloqueiam baixo, sobrevoáveis), plataformas de entrega em alturas diferentes, argolas em alturas diferentes e portal que exige mira.
+- **Colisões:** cada objeto colide com o formato da própria base (tronco, poste, parede, prédio girado), com altura; o DeLorean e os veículos são dois círculos ao longo do comprimento, com massa e giro. Paredes deixam deslizar e devolvem um pouco; batidas fora do centro fazem girar; massa conta (cone quase não freia, caminhão segura o carro); carros estacionados e do trânsito são empurrados e batem em outros; no voo dá para pousar em telhados e plataformas. Tecla `C` mostra os colisores (verde fixos, rosa móveis).
+- **Trânsito:** cada carro mantém distância do da frente, espera atrás do DeLorean parado, quem vem pela rua leste-oeste cede no cruzamento, e cones na pista são empurrados em vez de travar a fila. Depois de uma batida o carro vira corpo livre e, parado, volta ao trânsito longe da câmera.
 - **Pista do Exército:** largada, slalom de cones (+1 s por cone), lama (limita a velocidade), rampa sobre a vala (cair custa +3 s), chegada com tempo e melhor tempo.
 
 ## 4. Rodovia e salto
@@ -69,6 +71,8 @@ Modelos: Kenney (CC0) em estilo low-poly com luz neon. Pacotes: Car Kit, City Ki
 - Expectativa crescente: FOV abre, riscos de velocidade nas laterais, tremor a partir de 72 mph, faíscas azuis em volta do carro, capacitor pulsando cada vez mais rápido.
 - A 88 mph: rastro de fogo duplo, explosão de faíscas, o carro some, flash branco; durante o flash a próxima era já foi carregada e aparece com o carro entrando nela. ÚLTIMA PARTIDA recebe a data da era deixada.
 - No modo demo a rodovia é dirigida sozinha, desviando do tráfego.
+- **"VOCÊ CAIU EM SÃO PAULO :)"**: a rodovia que sai da FIAP + RedBit vira a Marginal Tietê no horário de pico. Aviso grande na tela, placa da Marginal e painel da CET, prédios de São Paulo nas laterais, neblina de poluição, trânsito parado em ondas de anda-e-para nas 3 faixas, motoboys no corredor entre as faixas e buzinas (com o som ligado). É preciso costurar até o fim do trecho (cerca de 320 m) para voltar a buscar as 88 mph; o contador mostra o tempo preso no trânsito.
+- Batidas na rodovia: de traseira passam velocidade para o carro da frente (que é empurrado e pode rodar); de lado empurram os dois para os lados.
 
 ## 5. Arquitetura técnica
 
