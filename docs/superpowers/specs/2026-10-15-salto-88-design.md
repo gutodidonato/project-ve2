@@ -40,6 +40,26 @@ Cada era tem **paradas** com painel de conteúdo (o antigo ZonePanel): ao parar 
 
 Comum a todas as eras terrestres: rampa com salto, cones/caixotes que voam, derrapagem com rastro neon da cor da era, colisão com prédios, árvores, cactos, montanhas e carros; postes iluminados; prédios que acendem quando o carro passa.
 
+### 3.1 Bíblia das eras (ambiente = o papel do Luis naquela fase)
+
+Modelos: Kenney (CC0) em estilo low-poly com luz neon. Pacotes: Car Kit, City Kit Commercial/Suburban/Roads, Nature Kit, Racing Kit, Survival Kit, Space Kit. Modelos próprios só onde não existe pronto (torre da AMAN, torres hexagonais da Colmeia, células de plutônio).
+
+| Era | Propósito que o ambiente conta | Hora e clima | Modelos principais | Interação própria | Rádio padrão |
+|-----|--------------------------------|--------------|--------------------|-------------------|--------------|
+| Exército | Disciplina, resistência, liderança | Alvorada; chuva na selva, poeira na caatinga, neve na montanha | Árvores e palmeiras, cactos, pinheiros, penhascos, barracas, caixotes, barris, cerca fortificada, SUV e caminhão em verde-oliva, torre da AMAN (própria) | Pista de obstáculos com pórticos cronometrados | Rádio Quartel (marcha) |
+| FIAP + RedBit | Fazer sites rápidos e encontráveis (estágio front-end) | Noite neon com garoa | Prédios comerciais com toldos e guarda-sóis, semáforos, postes, outdoors com os sites | Radar de velocidade: o "tempo de carregamento" cai de 2,0 s para 0,5 s quando você passa rápido | 88 FM (synthwave) |
+| ValiantGroup | Levar conteúdo a telas (streaming, Android TV) | Noite clara com holofotes | Arranha-céus com telões, parabólicas e antenas, hospital com ambulância, hotel com palmeiras e guarda-sóis | "Ao vivo": entrar na praça sincroniza todos os telões no mesmo canal | Broadcast FM |
+| Colmeia | Conectar sistemas de parceiros | Pôr do sol dourado | Torres hexagonais (próprias), tubos em arco, monotrilho com trens passando por cima da pista | Entrega: pegar um pacote na torre Google Calendar e levar à torre Jira | Integração FM (bipes e ritmo) |
+| EVIG | Arquitetar e liderar (CTO, cloud, IA) | Amanhecer acima das nuvens | Plataformas, hangares, parabólicas, naves speeder como carros voadores, argolas | Migração: cada argola move um serviço da ilha GCP para a ilha AWS; o medidor de custo cai até −80% | Cloud FM (pads) |
+| Final | Quem é o Luis hoje | Pôr do sol retrowave | Cena original do DeLorean (sol, céu, grid) girando como showroom | Painel final: cargo, contato, CV, "recomeçar a viagem" | — |
+
+### 3.2 Camadas comuns
+
+- **Rádio do DeLorean:** painel fixo no canto inferior esquerdo, estação padrão por era, troca com `R` ou botões. Som desligado até o visitante ligar. No protótipo as estações são geradas por Web Audio; no site, faixas licenciadas ou próprias.
+- **Células de plutônio:** 5 por era (25 no total), algumas fora da rota. Contador no HUD. Juntar as 5 de uma era mostra um aviso; juntar as 25 libera a pintura neon do DeLorean.
+- **Modo foto:** tecla `F` ou botão. Pausa a simulação, câmera livre, filtros (normal, VHS, neon, preto e branco) e captura. No site, salvar e compartilhar com o link do portfolio.
+- **Tela cheia:** a experiência ocupa a tela inteira; o texto de apoio fica numa gaveta (`i`).
+
 ## 4. Rodovia e salto
 
 - O portão no fim de cada era leva à rodovia de 3 faixas com sol listrado da cor da próxima era.
@@ -81,7 +101,8 @@ Física: `@react-three/rapier`. O DeLorean nas eras terrestres é um corpo dinâ
 ## 6. Assets
 
 - **DeLorean:** o pipeline (`scripts/optimize-assets.mjs`) passa a manter portas e rodas como nós separados (sem `join` nesses nós), nomeados `door_l`, `door_r`, `wheel_fl/fr/rl/rr`. Se o modelo-fonte não tiver as portas separadas, as portas ficam fechadas e a animação é removida. Isso deve ser conferido no primeiro passo do plano. Orçamento ≤ 1,8 MB.
-- **Carros e cenário:** low-poly próprio em código (geometrias compartilhadas + `InstancedMesh`), sem downloads.
+- **Carros e cenário:** pacotes Kenney (CC0) listados em §3.1, reunidos em bibliotecas GLB por categoria (veículos, cidade, natureza, props, espaço) com nós nomeados por modelo; objetos repetidos viram `InstancedMesh`. Crédito à Kenney na tela de créditos.
+- **Showroom final:** a cena original completa do DeLorean (com sol, céu e grid), otimizada para ~5 MB e carregada só no final.
 - **Vídeos:** loops de 10–15 s em 640×360 (H.264 MP4 + WebM), ~400–800 KB cada, gerados por `scripts/encode-videos.mjs` (ffmpeg via `ffmpeg-static`, dev dependency) a partir dos originais da tag `v2-legacy`. Cada loop tem um pôster JPEG. Carregam só quando a era está ativa e o telão entra no quadro; pausam fora de vista. Tier B e `prefers-reduced-motion` usam só o pôster.
 - **Vídeo da AMAN:** institucional do Exército. Trechos curtos com crédito ("vídeo: AMAN / Exército Brasileiro") até o Luis trocar por material próprio.
 
