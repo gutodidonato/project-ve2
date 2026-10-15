@@ -15,8 +15,8 @@ Sucesso = quem entra tem um momento "uau" (o salto), cada era tem cara própria 
 | Tema | Decisão |
 |------|---------|
 | Conceito | Máquina do tempo (espinha) + cada era é um mundo denso + rodovia outrun entre eras com salto a 88 mph |
-| Eras | Exército → FIAP + RedBit → ValiantGroup → Colmeia → EVIG; depois da EVIG, loop ao começo |
-| Física | Abordagem C: Rapier (veículo com suspensão) nas eras terrestres; carro cinemático na rodovia e no voo da EVIG |
+| Eras | Exército → FIAP + RedBit → ValiantGroup → Colmeia → EVIG → showroom final; depois do showroom, loop ao começo |
+| Física | Abordagem C: Rapier (veículo com suspensão) nas eras terrestres; carro cinemático na rodovia e nos voos (Colmeia com asas, EVIG como nave) |
 | Câmera | Perseguição baixa atrás do carro, olhando à frente conforme a velocidade; zoom (scroll, pinça, botões); órbita cinematográfica quando o carro para; câmera de perseguição com FOV crescente na rodovia |
 | Carro | DeLorean real (CC-BY-4.0, dark_igorek), com portas asa-de-gaivota e rodas como nós separados para animar |
 | Trânsito | Carros em todas as eras: trânsito nas ruas, estacionados, comboio militar, carros voadores, tráfego na rodovia |
@@ -33,10 +33,10 @@ Datas do painel = início de cada era. Fonte: CV de out/2026; Exército informad
 | Exército | FEV 2019 (2019 – jul/2021) | Cadete · EsPCEx / AMAN | Estrada de terra em laço por selva, caatinga e montanha; acampamentos | Torre da AMAN, pátio de formatura, bandeira, Esquadrilha da Fumaça | Vídeo AMAN / EsPCEx | Jipes e caminhões militares em comboio e estacionados |
 | FIAP + RedBit | MAR 2023 | Estágio front-end · ADS na FIAP | Cidade em grade, avenida principal | Cânion de outdoors com os sites reais dos dois lados; campus FIAP | `fullstack` (sites); FIAP NEXT + formatura | Trânsito e estacionados |
 | ValiantGroup | MAR 2025 | Full Stack · apps de streaming | Cidade em grade com praça aberta | Praça dos telões na altura do carro | `mobile` (streaming) | Trânsito e estacionados |
-| Colmeia | NOV 2025 | Analista de integração sênior | Torres hexagonais | Pontes de integração por cima da pista com pacotes trafegando | Painéis gerados: log de API | Trânsito e estacionados |
-| EVIG | JAN 2026 | CTO / Tech Lead | Ilhas flutuantes na nuvem; o carro voa (rodas viram) | Argolas para atravessar ("Agente conectado N/6") | Painéis gerados: custo −80%, WhatsApp com agentes | Carros voadores em faixas aéreas |
+| Colmeia | NOV 2025 | Analista de integração sênior | Torres hexagonais; o DeLorean abre asas e voa entre elas | Monotrilho cruzando a avenida e arcos de tubos | Painéis gerados: log de API | Trânsito no chão, visto de cima |
+| EVIG | JAN 2026 | CTO / Tech Lead | Estações em órbita sobre um planeta; o DeLorean vira nave (asas, motores, propulsores) | Argolas de migração e o último portal | Painéis gerados: custo −80%, WhatsApp com agentes | Naves speeder em faixas orbitais |
 
-Cada era tem **paradas** com painel de conteúdo (o antigo ZonePanel): ao parar perto do marco, o painel mostra o conteúdo daquela fase da carreira (cargo, período, bullets do CV). A EVIG termina na parada **Contato** (formulário, email, links, CV). O botão de contato do HUD leva direto a ela de qualquer era (viagem rápida).
+Cada era tem **paradas** com painel de conteúdo (o antigo ZonePanel): ao parar perto do marco, o painel mostra o conteúdo daquela fase da carreira (cargo, período, bullets do CV). A EVIG termina no **último portal**, que leva direto ao showroom final, sem rodovia; o showroom tem o painel de contato (email, links, CV). O botão de contato do HUD leva direto a ela de qualquer era (viagem rápida).
 
 Comum a todas as eras terrestres: rampa com salto, cones/caixotes que voam, derrapagem com rastro neon da cor da era, colisão com prédios, árvores, cactos, montanhas e carros; postes iluminados; prédios que acendem quando o carro passa.
 
@@ -49,9 +49,9 @@ Modelos: Kenney (CC0) em estilo low-poly com luz neon. Pacotes: Car Kit, City Ki
 | Exército | Disciplina, resistência, liderança | Alvorada; chuva na selva, poeira na caatinga, neve na montanha | Árvores e palmeiras, cactos, pinheiros, penhascos, barracas, caixotes, barris, cerca fortificada, SUV e caminhão em verde-oliva, torre da AMAN (própria) | Pista de obstáculos com pórticos cronometrados | Rádio Quartel (marcha) |
 | FIAP + RedBit | Fazer sites rápidos e encontráveis (estágio front-end) | Noite neon com garoa | Prédios comerciais com toldos e guarda-sóis, semáforos, postes, outdoors com os sites | Radar de velocidade: o "tempo de carregamento" cai de 2,0 s para 0,5 s quando você passa rápido | 88 FM (synthwave) |
 | ValiantGroup | Levar conteúdo a telas (streaming, Android TV) | Noite clara com holofotes | Arranha-céus com telões, parabólicas e antenas, hospital com ambulância, hotel com palmeiras e guarda-sóis | "Ao vivo": entrar na praça sincroniza todos os telões no mesmo canal | Broadcast FM |
-| Colmeia | Conectar sistemas de parceiros | Pôr do sol dourado | Torres hexagonais (próprias), tubos em arco, monotrilho com trens passando por cima da pista | Entrega: pegar um pacote na torre Google Calendar e levar à torre Jira | Integração FM (bipes e ritmo) |
-| EVIG | Arquitetar e liderar (CTO, cloud, IA) | Amanhecer acima das nuvens | Plataformas, hangares, parabólicas, naves speeder como carros voadores, argolas | Migração: cada argola move um serviço da ilha GCP para a ilha AWS; o medidor de custo cai até −80% | Cloud FM (pads) |
-| Final | Quem é o Luis hoje | Pôr do sol retrowave | Cena original do DeLorean (sol, céu, grid) girando como showroom | Painel final: cargo, contato, CV, "recomeçar a viagem" | — |
+| Colmeia | Conectar sistemas de parceiros | Pôr do sol dourado | Torres hexagonais (próprias), tubos em arco, monotrilho cruzando a avenida acima do carro; o DeLorean voa com asas neon na altura das torres | Entrega em voo: pegar um pacote na plataforma Google Calendar e levar à plataforma Jira | Integração FM (bipes e ritmo) |
+| EVIG | Arquitetar e liderar (CTO, cloud, IA) | Órbita: estrelas, planeta com atmosfera, lua | Plataformas, hangares, parabólicas, foguetes, cristais, naves speeder; o DeLorean vira nave com motores e propulsores | Migração: cada argola move um serviço da estação GCP para a AWS; o medidor de custo cai até −80%. Depois, o último portal | Cloud FM (pads) |
+| Final | Quem é o Luis hoje | Pôr do sol retrowave | Cena original do DeLorean (sol, céu, grid); a câmera orbita o carro como showroom. Entrada pelo último portal da EVIG | Painel final: cargo, contato, CV, "recomeçar a viagem" | — |
 
 ### 3.2 Camadas comuns
 
@@ -135,7 +135,7 @@ HUD mínimo: circuitos do tempo compactos (só DESTINO e PRESENTE), velocímetro
 |------|--------|---------|
 | S1 | `lib/salto/*`, rodovia + salto + circuitos do tempo + câmera, DeLorean com portas e rodas, era Exército completa (física Rapier, comboio, telão AMAN) | Exército → rodovia → salto jogável |
 | S2 | Eras FIAP+RedBit, ValiantGroup e Colmeia (cidades, trânsito, telões com vídeo, paradas com conteúdo) | 4 eras jogáveis |
-| S3 | Era EVIG (voo, argolas, carros voadores, painéis gerados) + parada final Contato + loop | Ciclo completo |
+| S3 | Voo com asas na Colmeia, EVIG em órbita (nave, argolas, naves speeder, painéis gerados), último portal, showroom final com contato e loop | Ciclo completo |
 | S4 | Pipeline de vídeos, tier B, celular, polimento de câmera (anti-oclusão), perf | Pronto para produção |
 
 O sub-projeto de cases e mini-games (antigo F3) vem depois do S4, com spec própria.
