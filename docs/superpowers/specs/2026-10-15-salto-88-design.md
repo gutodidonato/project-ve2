@@ -59,6 +59,8 @@ Modelos: Kenney (CC0) em estilo low-poly com luz neon. Pacotes: Car Kit, City Ki
 - **Células de plutônio:** 5 por era (25 no total), algumas fora da rota. Contador no HUD. Juntar as 5 de uma era mostra um aviso; juntar as 25 libera a pintura neon do DeLorean.
 - **Modo foto:** tecla `F` ou botão. Pausa a simulação, câmera livre, filtros (normal, VHS, neon, preto e branco) e captura. No site, salvar e compartilhar com o link do portfolio.
 - **Tela cheia:** a experiência ocupa a tela inteira; o texto de apoio fica numa gaveta (`i`).
+- **Voo (Colmeia e EVIG):** `E` ou `Espaço` sobe, `Q` ou `Shift` desce, com inércia, piso e teto por era; altímetro no painel; botões ▲▼ na tela no celular. Os obstáculos de voo dependem da altura: monotrilho (passa por baixo ou por cima), torres (bloqueiam baixo, sobrevoáveis), plataformas de entrega em alturas diferentes, argolas em alturas diferentes e portal que exige mira.
+- **Pista do Exército:** largada, slalom de cones (+1 s por cone), lama (limita a velocidade), rampa sobre a vala (cair custa +3 s), chegada com tempo e melhor tempo.
 
 ## 4. Rodovia e salto
 
@@ -127,6 +129,7 @@ HUD mínimo: circuitos do tempo compactos (só DESTINO e PRESENTE), velocímetro
 
 - **Vitest:** `journey` (transições era → rodovia → salto → era seguinte e loop), `autopilot` (rota completa com paradas, sem atravessar colisores declarados), `traffic` (para atrás do jogador, batida, reaparece), `highway` (aceleração 30→88 em 6–8 s, batida derruba para ~60%, gatilho exato em 88), `timeCircuits` (datas e ÚLTIMA PARTIDA), `eras` (5 eras, datas do §3, hashes únicos).
 - **Playwright:** o modo demo atravessa as 5 eras e volta ao começo; os circuitos do tempo mudam a cada salto; cada era mostra pelo menos um telão no quadro (`snapshot` expõe os telões visíveis); colisão com carro reduz a velocidade; pit stop, versão em texto e contato continuam funcionando; nenhuma requisição a outra origem; celular sem rolagem lateral.
+- **Playwright por obstáculo (ponta a ponta, teclado real, simulação em passos fixos):** a pista completa no piloto automático sem penalidade; reto pelo slalom penaliza; lama limita; vala penaliza; rampa lança e aterrissa; cones e trânsito derrubados; parede não deixa atravessar; radar lento e rápido; praça ao vivo liga e desliga; voo sobe, desce, piso e teto; pacote só na altura certa; monotrilho bloqueia, libera por baixo e por cima; trem derruba; torre bloqueia baixo e libera alto; entrega com SLA; argola fora da altura conta erro; 6 argolas migram 6 serviços; portal exige mira; rodovia chega a 88 e salta; batida na rodovia; 25 células alcançáveis; modo foto, rádio, gaveta; altímetro e botões só no voo; demo completa sem penalidade; HUD sem sobreposição no celular. O protótipo v3.1 passa 30/30.
 - **Orçamento:** `check:bundle` continua; novo teste do peso por era.
 
 ## 11. Fases
