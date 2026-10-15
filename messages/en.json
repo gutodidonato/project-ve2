@@ -1,0 +1,141 @@
+{
+  "Meta": {
+    "title": "Luis Didonato · CTO / Tech Lead"
+  },
+  "PitStop": {
+    "title": "Pit stop",
+    "eyebrow": "Rodovia 2026 · Pit stop",
+    "nav": {
+      "label": "Sections",
+      "experiencia": "Experience",
+      "cases": "Cases",
+      "oficina": "Workshop",
+      "servicos": "Services",
+      "contato": "Contact"
+    },
+    "switchLocale": "Português",
+    "hero": {
+      "cv": "Download CV (PDF)",
+      "cvPtOnly": "Download CV (PT, PDF)",
+      "contact": "Get in touch"
+    },
+    "impact": {
+      "title": "Impact"
+    },
+    "experience": {
+      "eyebrow": "Experience",
+      "title": "Career path",
+      "present": "Present"
+    },
+    "months": {
+      "01": "Jan",
+      "02": "Feb",
+      "03": "Mar",
+      "04": "Apr",
+      "05": "May",
+      "06": "Jun",
+      "07": "Jul",
+      "08": "Aug",
+      "09": "Sep",
+      "10": "Oct",
+      "11": "Nov",
+      "12": "Dec"
+    },
+    "cases": {
+      "eyebrow": "Cases",
+      "title": "Selected work",
+      "stack": "Stack"
+    },
+    "skills": {
+      "eyebrow": "Workshop",
+      "title": "Skills"
+    },
+    "services": {
+      "eyebrow": "Services",
+      "title": "How I can help",
+      "schedule": "Book a call",
+      "talk": "Talk about a project"
+    },
+    "contact": {
+      "eyebrow": "Contact",
+      "title": "Let’s talk",
+      "email": "Email",
+      "linkedin": "LinkedIn",
+      "github": "GitHub",
+      "cv": "Résumé",
+      "cvLink": "CV (PDF)",
+      "cvLinkPtOnly": "CV (PT) · PDF",
+      "calcom": "Calendar",
+      "calcomLink": "Book a call",
+      "languages": "Languages"
+    },
+    "footer": {
+      "education": "Education",
+      "credits": "Credits",
+      "modelCredit": "Car 3D model:",
+      "copyright": "© {year} {name}"
+    }
+  },
+  "Contact": {
+    "title": "Contact",
+    "formTitle": "Send a message",
+    "name": "Name",
+    "email": "Email",
+    "message": "Message",
+    "submit": "Send message",
+    "sending": "Sending…",
+    "success": "Message sent. Thank you, I will reply soon.",
+    "errors": {
+      "name": "Enter your name (2 to 80 characters).",
+      "email": "Enter a valid email address.",
+      "message": "The message must be 10 to 2000 characters long.",
+      "rateLimited": "Too many messages in a short time. Please try again in a few minutes.",
+      "unavailable": "Could not send right now. Write to <email></email> directly.",
+      "failed": "Something went wrong while sending. Please try again."
+    }
+  },
+  "Error": {
+    "title": "Something went wrong",
+    "body": "This page could not be shown. Reload to try again.",
+    "reload": "Reload the page"
+  },
+  "Game": {
+    "title": "Rodovia 2026",
+    "pitstopOn": "Pit stop mode (P)",
+    "pitstopOff": "Enter the game",
+    "pitstopForced": "Your browser has no WebGL, so game mode is unavailable.",
+    "pitstopForcedError": "The game could not load.",
+    "hint": "Drive into a ring of light or scroll to the next stop.",
+    "keys": "WASD or arrows: drive · Space: next stop · M: map · P: pit stop · Esc: leave the panel",
+    "touch": "Drag to drive, tap a stop on the map or tap Next.",
+    "roaming": "On the road",
+    "hud": "Dashboard",
+    "speed": "Speed",
+    "mode": "Mode",
+    "next": "Next",
+    "nextStop": "Next stop",
+    "modes": {
+      "demo": "demo",
+      "manual": "manual",
+      "tour": "autopilot",
+      "goto": "travel",
+      "idle": "parked"
+    },
+    "zones": {
+      "experiencia": "Experience",
+      "cases": "Cases",
+      "oficina": "Workshop",
+      "servicos": "Services",
+      "contato": "Contact"
+    },
+    "stop": "Stop {index} of {total}",
+    "minimap": "Map",
+    "travelTo": "Go to {zone}",
+    "cv": "CV",
+    "cvPtOnly": "CV (PT)",
+    "credits": "Credits",
+    "creditsIntro": "Car 3D model:",
+    "close": "Close",
+    "textVersion": "Text version (P)"
+  }
+}

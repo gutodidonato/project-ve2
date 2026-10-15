@@ -1,0 +1,141 @@
+{
+  "Meta": {
+    "title": "Luis Didonato · CTO / Tech Lead"
+  },
+  "PitStop": {
+    "title": "Pit stop",
+    "eyebrow": "Rodovia 2026 · Pit stop",
+    "nav": {
+      "label": "Seções",
+      "experiencia": "Experiência",
+      "cases": "Cases",
+      "oficina": "Oficina",
+      "servicos": "Serviços",
+      "contato": "Contato"
+    },
+    "switchLocale": "English",
+    "hero": {
+      "cv": "Baixar CV (PDF)",
+      "cvPtOnly": "Baixar CV (PDF)",
+      "contact": "Falar comigo"
+    },
+    "impact": {
+      "title": "Impacto"
+    },
+    "experience": {
+      "eyebrow": "Experiência",
+      "title": "Trajetória",
+      "present": "atual"
+    },
+    "months": {
+      "01": "jan",
+      "02": "fev",
+      "03": "mar",
+      "04": "abr",
+      "05": "mai",
+      "06": "jun",
+      "07": "jul",
+      "08": "ago",
+      "09": "set",
+      "10": "out",
+      "11": "nov",
+      "12": "dez"
+    },
+    "cases": {
+      "eyebrow": "Cases",
+      "title": "Projetos selecionados",
+      "stack": "Stack"
+    },
+    "skills": {
+      "eyebrow": "Oficina",
+      "title": "Competências"
+    },
+    "services": {
+      "eyebrow": "Serviços",
+      "title": "Como posso ajudar",
+      "schedule": "Agendar uma conversa",
+      "talk": "Conversar sobre um projeto"
+    },
+    "contact": {
+      "eyebrow": "Contato",
+      "title": "Vamos conversar",
+      "email": "Email",
+      "linkedin": "LinkedIn",
+      "github": "GitHub",
+      "cv": "Currículo",
+      "cvLink": "CV (PDF)",
+      "cvLinkPtOnly": "CV (PT) · PDF",
+      "calcom": "Agenda",
+      "calcomLink": "Agendar uma conversa",
+      "languages": "Idiomas"
+    },
+    "footer": {
+      "education": "Formação",
+      "credits": "Créditos",
+      "modelCredit": "Modelo 3D do carro:",
+      "copyright": "© {year} {name}"
+    }
+  },
+  "Contact": {
+    "title": "Contato",
+    "formTitle": "Enviar uma mensagem",
+    "name": "Nome",
+    "email": "Email",
+    "message": "Mensagem",
+    "submit": "Enviar mensagem",
+    "sending": "Enviando…",
+    "success": "Mensagem enviada. Obrigado, respondo em breve.",
+    "errors": {
+      "name": "Informe seu nome (de 2 a 80 caracteres).",
+      "email": "Informe um email válido.",
+      "message": "A mensagem precisa ter de 10 a 2000 caracteres.",
+      "rateLimited": "Muitas mensagens em pouco tempo. Tente de novo em alguns minutos.",
+      "unavailable": "Não foi possível enviar agora. Escreva direto para <email></email>.",
+      "failed": "Algo deu errado ao enviar. Tente de novo."
+    }
+  },
+  "Error": {
+    "title": "Algo deu errado",
+    "body": "Não foi possível mostrar esta página. Recarregue para tentar de novo.",
+    "reload": "Recarregar a página"
+  },
+  "Game": {
+    "title": "Rodovia 2026",
+    "pitstopOn": "Modo pit stop (P)",
+    "pitstopOff": "Entrar no jogo",
+    "pitstopForced": "Seu navegador não tem WebGL, então o modo jogo não está disponível.",
+    "pitstopForcedError": "O jogo não pôde carregar.",
+    "hint": "Dirija até um anel de luz ou role para a próxima parada.",
+    "keys": "WASD ou setas: dirigir · Espaço: próxima parada · M: mapa · P: pit stop · Esc: sair do painel",
+    "touch": "Arraste para dirigir, toque numa parada do mapa ou em Próxima.",
+    "roaming": "Na estrada",
+    "hud": "Painel do carro",
+    "speed": "Velocidade",
+    "mode": "Modo",
+    "next": "Próxima",
+    "nextStop": "Próxima parada",
+    "modes": {
+      "demo": "demo",
+      "manual": "manual",
+      "tour": "piloto",
+      "goto": "viagem",
+      "idle": "parado"
+    },
+    "zones": {
+      "experiencia": "Experiência",
+      "cases": "Cases",
+      "oficina": "Oficina",
+      "servicos": "Serviços",
+      "contato": "Contato"
+    },
+    "stop": "Parada {index} de {total}",
+    "minimap": "Mapa",
+    "travelTo": "Ir para {zone}",
+    "cv": "CV",
+    "cvPtOnly": "CV (PT)",
+    "credits": "Créditos",
+    "creditsIntro": "Modelo 3D do carro:",
+    "close": "Fechar",
+    "textVersion": "Ver versão em texto (P)"
+  }
+}
