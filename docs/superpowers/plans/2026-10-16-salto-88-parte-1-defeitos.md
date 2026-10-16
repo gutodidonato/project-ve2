@@ -102,7 +102,7 @@
 - [ ] **Step 4: Run** os dois testes novos, `"devagar cai na vala"` e `"pista completa"`. Expected: todos PASS.
 - [ ] **Step 5: Checkpoint.**
 
-### Task 4: Nomes de região como aviso (R5)
+### Task 4: Regiões sem placa (R5)
 
 **Files:**
 - Modify: `buildExercito` (linha com `[['SELVA', …], ['CAATINGA', …], ['MONTANHA', …]]`); o atualizador da era
@@ -111,13 +111,9 @@
 **Interfaces:**
 - Produces: `regionAt(x, z)` → `'SELVA' | 'CAATINGA' | 'MONTANHA' | null`, com as mesmas zonas de `weatherAt` (montanha: `z < -50 && x > -30`; selva: `x < -18`; caatinga: `x > 22 && z > -40`).
 
-- [ ] **Step 1: Write the failing test** `exército: nomes de região aparecem ao entrar, não no céu`.
-  - Nenhum sprite da cena tem textura com o texto SELVA, CAATINGA ou MONTANHA. Para checar, marque os rótulos com `userData.region` e cheque que nenhum existe.
-  - Teleporte para (50, 8) e avance 0,5 s: `#toast` contém "CAATINGA".
-  - Saia (0, 30), volte e o aviso aparece de novo.
-  - Parado dentro da região por 5 s, o aviso aparece uma única vez.
+- [ ] **Step 1: Write the failing test** `exército: regiões sem placa no céu`. Marque os rótulos de região com `userData.region` e confirme que nenhum objeto da cena do Exército tem essa marca. Teleporte para (50, 8) e avance 1 s: `#toast` não contém CAATINGA.
 - [ ] **Step 2: Run.** Expected: FAIL.
-- [ ] **Step 3: Implement.** Remova os três rótulos. Num atualizador da era, mostre `toast(regionAt(...), 1.6)` quando a região muda para um valor não nulo.
+- [ ] **Step 3: Implement.** Remova os três rótulos. Crie `regionAt(x, z)` (usada pela Tarefa 8), sem aviso nenhum.
 - [ ] **Step 4: Run.** Expected: PASS.
 - [ ] **Step 5: Checkpoint.**
 
@@ -140,9 +136,10 @@
   - Ligue o som (M) e espere 3 s.
   - **Cidade dirigindo:** RedBit, (2,6; 60), W por 3,5 s → `drive`.
   - **Buzina segurada:** H por 2 s parado → `horn`.
-  - Asserções: `horn.rms - drive.rms <= 6`; `drive.centroidHz < 3000`; nenhum pico ≥ −1 dB.
+  - **Selva parado:** Exército, (−45, −20), 3 s → `jungle`; meça também `bus['ambiente'].rms` antes da mudança (anote no relatório).
+  - Asserções: `horn.rms - drive.rms <= 6`; `drive.centroidHz < 3000`; `jungle.centroidHz < 3000`; a chuva da selva no canal de ambiente cai pelo menos 6 dB em relação à medição de antes; nenhum pico ≥ −1 dB.
 - [ ] **Step 3: Run.** Expected: FAIL (hoje ~17 dB de diferença e 6,3 kHz).
-- [ ] **Step 4: Implement.** Baixe o alvo da buzina até a meta. A garoa (`drizzle`) ganha um laço próprio `E.drizzle` (passa-banda de 1200 Hz, ganho de partida 0.05, canal `AUD.amb`); a chuva forte da selva continua em `E.rain`. Ajuste pelos números medidos, não por ouvido.
+- [ ] **Step 4: Implement.** Baixe o alvo da buzina até a meta. A chuva forte da selva (`E.rain`, hoje 0.35) cai à metade e ganha filtro mais escuro. A garoa (`drizzle`) ganha um laço próprio `E.drizzle` (passa-banda de 1200 Hz, ganho de partida 0.05, canal `AUD.amb`). Ajuste pelos números medidos, não por ouvido.
 - [ ] **Step 5: Run** o teste novo e `"buzina: H faz os motoristas"`. Expected: PASS.
 - [ ] **Step 6: Checkpoint.**
 

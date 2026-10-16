@@ -44,8 +44,8 @@ Meta: revisão visual no tour.
 **R4 · Vala de verdade.** O chão do Exército ganha um recorte retangular na posição da vala (9 × 4,5 m em x −45, z −45), com paredes e fundo de terra. Quando o carro cai na vala, ele desce até o fundo e sai pela borda da frente. Penalidade, limite de velocidade e contagem continuam iguais.
 Meta: o teste "devagar cai na vala (+3 s)" continua passando; foto da vala mostra profundidade.
 
-**R5 · Nomes de região no lugar certo.** Os rótulos SELVA, CAATINGA e MONTANHA deixam de flutuar no céu. Ao entrar em cada região, aparece um aviso curto com o nome dela, uma vez por visita.
-Meta: nenhum rótulo de região na cena; o aviso aparece ao entrar.
+**R5 · Regiões sem placa.** Os rótulos SELVA, CAATINGA e MONTANHA saem do céu e não entra aviso nenhum: as regiões ficam só no mapa (pedido do Luis, 16 out 2026).
+Meta: nenhum rótulo de região na cena.
 
 ### Som
 
@@ -56,7 +56,7 @@ Meta: auditoria de som, cenas "buzina" e "cidade dirigindo".
 
 **R8 · Clímax das 88 mph.** O capacitor de fluxo, o salto e o estrondo sobem. Os 3 segundos antes do salto ficam pelo menos 6 dB acima de dirigir na cidade (hoje ficam 1 dB abaixo).
 
-**R9 · Garoa sem chiado.** A chuva da RedBit fica mais baixa e mais escura. Ao dirigir na cidade, a frequência média do som fica abaixo de 3 kHz (hoje 6,3 kHz).
+**R9 · Chuva mais baixa.** A garoa da RedBit e a chuva da selva do Exército ficam mais baixas e mais escuras (pedido do Luis, 16 out 2026). Ao dirigir na cidade e parado na selva, a frequência média do som fica abaixo de 3 kHz (hoje 6,3 kHz na cidade), e a chuva da selva cai pelo menos 6 dB.
 
 **R10 · Exército com ambiente.** Vento em toda a base, pássaros na selva e vento seco no deserto e na montanha. O canal de ambiente nunca fica abaixo de −45 dB em nenhuma das quatro regiões.
 
