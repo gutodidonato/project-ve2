@@ -8,17 +8,17 @@ A v3.6 passa nos 67 testes de jogabilidade, mas a auditoria de qualidade mediu d
 
 ## 2. Roteiro aprovado (16 out 2026)
 
-Abordagem: uma cidade por vez até ficar pronta, em vez de camadas espalhadas por todas as eras.
+Abordagem: uma cidade por vez até ficar pronta, em vez de camadas espalhadas por todas as eras. Em 16 out 2026 o Luis pôs o Exército à frente da RedBit, por ser a porta de entrada.
 
 | Parte | Escopo | Spec |
 |---|---|---|
 | 1 | Defeitos medidos (este documento) | este arquivo |
 | 2 | Portal do tempo único em todas as eras | a escrever |
-| 3 | RedBit + FIAP a 100%: cada item do perfil vira um lugar bem construído com interação, mais pedestres, móveis de rua, fachadas e som de rua. Vira o padrão de qualidade | a escrever |
-| 4 | ValiantGroup no padrão da parte 3 | a escrever |
-| 5 | Colmeia no padrão da parte 3 | a escrever |
-| 6 | EVIG no padrão da parte 3 | a escrever |
-| 7 | Exército no padrão da parte 3 | a escrever |
+| 3 | Exército, a porta de entrada: EsPCEx, AMAN, base e pista no padrão de preenchimento. Vira a referência de qualidade | a escrever |
+| 4 | RedBit + FIAP: Google Ads, SEO, performance e animações em JS, mais FIAP; planta v1 em artifact `BFgRsZq7jTeF3QMMFnmaMT` | a escrever |
+| 5 | ValiantGroup no padrão | a escrever |
+| 6 | Colmeia no padrão | a escrever |
+| 7 | EVIG no padrão | a escrever |
 
 Fonte de verdade do conteúdo de carreira: `content/pt/profile.ts`. Nenhuma afirmação sobre a carreira entra no jogo sem estar lá.
 
@@ -66,6 +66,11 @@ Meta: auditoria de som, cenas "buzina" e "cidade dirigindo".
 - O crédito da faixa entra na gaveta de informações.
 - A faixa só entra depois que o Luis aprovar o trecho.
 
+**R13 · Ronco encorpado.** O motor ganha graves e corpo de V6, com marchas audíveis (pedido do Luis, 16 out 2026). Metas:
+- acelerando de 0 a 60 mph no Exército, o canal de efeitos fica entre −24 e −20 dB (hoje −27,9), com frequência média entre 120 e 700 Hz;
+- nessa aceleração a frequência do motor cai pelo menos 2 vezes (trocas de marcha);
+- com o rádio ligado a 40 mph na cidade, a música fica no máximo 3 dB abaixo do motor.
+
 ### Interface
 
 **R12 · HUD sem sobreposição com o celular deitado.** Telas com até 500 px de altura usam um layout compacto:
@@ -82,7 +87,7 @@ Meta: zero sobreposições entre elementos visíveis do HUD em 1280 × 720, 375 
 - A suíte E2E ganha quatro testes:
   - nenhuma roda fora do eixo (R1);
   - HUD sem sobreposição nas três telas (R12);
-  - níveis de som por cena dentro das metas R6–R10, medidos por analisadores ligados aos canais de áudio do jogo;
+  - níveis de som por cena dentro das metas R6–R10 e R13, medidos por analisadores ligados aos canais de áudio do jogo;
   - Rádio Quartel tocando faixa (R11).
 - A auditoria de qualidade (`qa.mjs`) passa a sair com código de erro quando alguma meta desta parte falha.
 - O tour de fotos é regerado no fim para comparar antes e depois (montanha, vala, penhascos, HUD deitado).

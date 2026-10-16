@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Corrigir os 12 defeitos medidos pela auditoria da v3.6 (R1–R12 da spec), cada um travado por um teste E2E com a meta da spec.
+**Goal:** Corrigir os defeitos medidos pela auditoria da v3.6 (R1–R13 da spec), cada um travado por um teste E2E com a meta da spec.
 
 **Architecture:** O protótipo é um HTML único (`salto88v3.template.html`) montado por `build-v3.mjs` e servido em `http://localhost:3000/lab/v3/index.html`. Os testes E2E (`e2e/run.mjs`, Playwright + swiftshader) dirigem o jogo pelo gancho `window.__salto` com passos determinísticos (`advance`). Os testes de som ligam analisadores aos canais de áudio do jogo e medem em tempo real.
 
@@ -263,15 +263,39 @@
 - [ ] **Step 4: Run** o teste novo e `"mobile 375×812"`. Expected: PASS.
 - [ ] **Step 5: Checkpoint.**
 
-### Task 11: Auditoria com metas, fotos e publicação
+### Task 11: Ronco encorpado (R13)
+
+**Files:**
+- Modify: `audioInit` e `updateAudio` (motor: hoje serra + quadrada uma oitava abaixo, passa-baixa, 5 marchas; `AUD.engineF` guarda a frequência atual)
+- Test: `$S/e2e/run.mjs`
+
+**Interfaces:**
+- Consumes: `measure(ms)` da Tarefa 5; `STATIONS[i].gain` da Tarefa 6.
+- Produces: `audio().engineF` continua existindo (o teste "som: motor sobe o tom com a velocidade" depende dele).
+
+- [ ] **Step 1: Write the failing test** `som: motor encorpado com marchas`.
+  - Exército, (0, 50), segure W por 4 s com som ligado. Amostre `audio().engineF` a cada 0,1 s e meça o canal de efeitos durante a aceleração.
+  - Asserções: `bus['efeitos'].rms` entre −24 e −20; `centroidHz` entre 120 e 700; a série de `engineF` tem pelo menos 2 quedas maiores que 15% (trocas de marcha).
+  - Cidade, rádio ligado (88 FM), 40 mph por 3 s: `bus['música'].rms - bus['efeitos'].rms >= -3`.
+- [ ] **Step 2: Run.** Expected: FAIL (hoje −27,9 dB).
+- [ ] **Step 3: Implement.** Corpo de V6:
+  - fundamental em dente de serra mais uma subharmônica senoidal (meia frequência);
+  - um `WaveShaperNode` com saturação suave para dar ronco;
+  - passa-baixa que abre com a rotação (400 → 1800 Hz) e ganho que sobe com o acelerador.
+  - As 5 marchas continuam: a frequência cai na troca e sobe de novo.
+  - Ajuste pelos números do teste.
+- [ ] **Step 4: Run** o teste novo, `"som: motor sobe o tom"` e `"som: chegar a 88 mph"` (a Tarefa 7 não pode regredir). Expected: PASS.
+- [ ] **Step 5: Checkpoint.**
+
+### Task 12: Auditoria com metas, fotos e publicação
 
 **Files:**
 - Modify: `$S/e2e/qa.mjs` (metas e código de saída), `$S/e2e/tour.mjs` (fotos da serra da Tarefa 2 e da vala)
 - Modify: `docs/superpowers/specs/2026-10-15-salto-88-design.md` (som, HUD deitado, vala)
 
-- [ ] **Step 1: Add the gates.** `qa.mjs` sai com código 1 se alguma meta R1, R6–R10 ou R12 falhar, imprimindo cada meta como `OK` ou `FALHOU` com o valor medido.
+- [ ] **Step 1: Add the gates.** `qa.mjs` sai com código 1 se alguma meta R1, R6–R10, R12 ou R13 falhar, imprimindo cada meta como `OK` ou `FALHOU` com o valor medido.
 - [ ] **Step 2: Run** `node e2e/qa.mjs` (todas as seções). Expected: todas as metas da parte 1 `OK`, código 0.
-- [ ] **Step 3: Run** a suíte inteira (`node e2e/run.mjs`). Expected: 67 + 10 testes novos, todos PASS.
+- [ ] **Step 3: Run** a suíte inteira (`node e2e/run.mjs`). Expected: 67 + 11 testes novos, todos PASS.
 - [ ] **Step 4: Run** `node e2e/tour.mjs`. Revise as fotos da serra, da vala e do HUD deitado e anexe ao relatório.
 - [ ] **Step 5: Publish.** Copie `proto/salto88.html` para `$S/salto88.html` e publique no artifact `9Coz7zxBop4m3egyB7JKcU` (mesmo caminho de arquivo), incluindo a música nova em `files`.
 - [ ] **Step 6: Commit** a spec atualizada:
