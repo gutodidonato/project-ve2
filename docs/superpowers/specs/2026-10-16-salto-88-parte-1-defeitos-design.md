@@ -52,16 +52,16 @@ Meta: nenhum rótulo de região na cena.
 **R6 · Buzina proporcional.** A buzina do jogador fica no máximo 6 dB acima do volume de dirigir na cidade (hoje são 17 dB).
 Meta: auditoria de som, cenas "buzina" e "cidade dirigindo".
 
-**R7 · Músicas no mesmo volume.** Cada estação ganha um ganho próprio. Medido no canal de música, cada faixa fica a até 1 dB de −22 dB, e a diferença entre a mais alta e a mais baixa fica em no máximo 2 dB (hoje são 8 dB).
+**R7 · Músicas no mesmo volume.** Cada estação ganha um ganho próprio, calibrado pelo volume da faixa inteira (não de um trecho). Medido no canal de música, cada faixa fica a até 1 dB de −22 dB, a diferença entre a mais alta e a mais baixa fica em no máximo 2 dB (hoje são 8 dB) e o pico de cada faixa fica abaixo de −1 dBFS.
 
-**R8 · Clímax das 88 mph.** O capacitor de fluxo, o salto e o estrondo sobem. Os 3 segundos antes do salto ficam pelo menos 6 dB acima de dirigir na cidade (hoje ficam 1 dB abaixo).
+**R8 · Clímax das 88 mph.** A subida até as 88 mph fica pelo menos 6 dB acima de dirigir na cidade. O chiado do capacitor de fluxo sobe e o motor ganha um pouco acima de 70 mph; com o salto, motor e vento se calam para não ficarem por baixo do estrondo. O salto e o estrondo não sobem de nível: seus arquivos já chegam perto de −1 dBFS e o canal de efeitos não tem limitador, então subir os dois estouraria o teto. Se o Luis quiser os dois mais altos, entra um compressor no canal de efeitos antes. Meta: os 3 segundos antes do salto ficam pelo menos 6 dB acima de dirigir na cidade (hoje ficam 1 dB abaixo) e nada passa de −1 dBFS.
 
 **R9 · Chuva mais baixa.** A garoa da RedBit e a chuva da selva do Exército ficam mais baixas e mais escuras (pedido do Luis, 16 out 2026). Ao dirigir na cidade e parado na selva, a frequência média do som fica abaixo de 3 kHz (hoje 6,3 kHz na cidade), e a chuva da selva cai pelo menos 6 dB.
 
 **R10 · Exército com ambiente.** Vento em toda a base, pássaros na selva e vento seco no deserto e na montanha. O canal de ambiente nunca fica abaixo de −45 dB em nenhuma das quatro regiões.
 
 **R11 · Rádio Quartel com faixa CC0.**
-- A estação toca uma faixa CC0 do OpenGameArt: marcial ou épica, em `.ogg` de até 4 MB, normalizada como as outras (R7).
+- A estação toca uma faixa CC0 do OpenGameArt: marcial ou épica, em `.ogg` ou `.mp3` de até 4 MB (Battle Theme A, de cynicmusic, em mp3 de 3,3 MB, é uma escolha provisória feita durante a execução para não parar o trabalho; falta o OK do Luis), calibrada como as outras (R7).
 - Somem o gerador da marcha e os geradores `synth`, `broadcast`, `blips` e `pads`, que nenhuma estação usa.
 - O crédito da faixa entra na gaveta de informações.
 - A faixa só entra depois que o Luis aprovar o trecho.
