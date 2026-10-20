@@ -49,6 +49,15 @@ Data: 20 out 2026. Origem: o Luis testou a versão 18 e disse que o projeto "ain
 | Colmeia | Sede (bullets do perfil), hub de parceiros (integrações, "200 OK"), galpão da Jira (entrega vira "Feito") | Pacote no heliponto (fica genérico, sem marca Google Calendar) | Torre Google Calendar (como lugar e marca), sala de fluxos |
 | EVIG | Sede (bullets do perfil, com WhatsApp e RBAC/SSM só como itens do cartão), migração GCP → AWS (argolas e custo até −80%), assistente financeiro com IA, agente de triagem, teste de carga (onda de requisições abaixo da linha do SLA) | — | Cofre/JWKS, ilha do WhatsApp, ilha de agentes genérica (vira o agente de triagem), ilha da pós (a pós fica no showroom) |
 
+## Colmeia em detalhe
+
+Pedido do Luis (20 out): na Colmeia, mostrar a atuação dele nos projetos **Aberta Saúde**, **Concrédito** e **Pátria Cidadania**.
+
+- O **hub de parceiros** vira o lugar desses projetos. Cada um tem um prédio do anel, com o nome em texto e sem logotipo.
+- Atravessar o anel faz a integração chegar em "200 OK" em cada projeto, um após o outro.
+- O cartão diz "Atuação nos projetos Aberta Saúde, Concrédito e Pátria Cidadania" e repete o item do perfil sobre integrações com APIs de parceiros. Não há números nem resultados.
+- A sede guarda os bullets do perfil, e o galpão da Jira continua com a entrega que vira "Feito".
+
 ## EVIG em detalhe
 
 **Projetos estruturados na EVIG:**
