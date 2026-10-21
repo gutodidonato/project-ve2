@@ -84,3 +84,11 @@ Pedido do Luis (20 out): na Colmeia, mostrar a atuação dele nos projetos **Abe
   - EVIG 5.
 - O pouso na EVIG tem um teste: descer em cada plataforma termina parado em cima dela, sem sobreposição, e com o cartão aberto.
 - No fim, a suíte inteira, o `qa` completo, o tour e a página de reavaliação com as notas.
+
+## Ajuste do Luis (21 out)
+
+- Sem a ilha de teste de carga.
+- Sem "−80%" em lugar nenhum:
+  - a migração GCP → AWS mostra os serviços migrando (por exemplo, "6/6 serviços migrados"), sem porcentagem de custo;
+  - o cartão da sede omite o bullet do perfil que traz os 80%.
+- A EVIG fica com 4 lugares: sede, migração GCP → AWS, assistente financeiro com IA e agente de triagem.
