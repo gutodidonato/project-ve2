@@ -92,3 +92,42 @@ Pedido do Luis (20 out): na Colmeia, mostrar a atuação dele nos projetos **Abe
   - a migração GCP → AWS mostra os serviços migrando (por exemplo, "6/6 serviços migrados"), sem porcentagem de custo;
   - o cartão da sede omite o bullet do perfil que traz os 80%.
 - A EVIG fica com 4 lugares: sede, migração GCP → AWS, assistente financeiro com IA e agente de triagem.
+
+## Como ficou (22 out)
+
+Build 6fcfe14, publicada como versão 22 do artefato do jogo.
+
+**Lugares por era:**
+- **Exército:** 4 lugares.
+  - EsPCEx: portão e pátio de formatura.
+  - AMAN: portão e espadim. O Conjunto Principal tem fachada nas quatro faces.
+  - Engenharia: castelo e ponte na brecha.
+  - Comboio.
+- **RedBit + FIAP:** 4 lugares.
+  - Escritório.
+  - Radar.
+  - Rua das Conversões. As placas do funil (page_view → add_to_cart → purchase) se leem de dentro do carro, e o próximo passo fica aceso.
+  - Animações em JS.
+- **Valiant:** 3 lugares, só streaming.
+  - Escritório.
+  - Praça dos telões, com um telão "AO VIVO" de frente para quem chega e um mural nas faces externas.
+  - Quarteirão de clientes. As TVs trocam de conteúdo em onda quando o carro passa.
+- **Colmeia:** 3 lugares.
+  - Sede.
+  - Hub com as torres da Aberta Saúde, do Concrédito e do Pátria Cidadania. Ao atravessar o anel, cada torre passa de "conectando…" para "200 OK", uma depois da outra.
+  - Galpão da Jira, com "Entregas: N" na doca.
+- **EVIG:** 4 lugares, sem números de resultado.
+  - Sede.
+  - Migração GCP → AWS: caixas voam do GCP para a AWS até "6/6 serviços migrados".
+  - Assistente financeiro com IA.
+  - Agente de triagem.
+
+**Detalhes de jogo:**
+- Na EVIG, cada ilha tem cor e forma próprias e uma plataforma de pouso. Segurar Q pousa e E decola. O pouso dá recompensa: pulso de luz e um som curto, uma vez por pouso.
+- As naves de carga têm cabine, containers, asas e motores. Os asteroides são rochas.
+- O showroom fecha com "Sua viagem": tempo da pista, comboio, conversões, entregas, migração, pousos e plutônio. Só aparece o que o jogador fez.
+
+**Verificação:**
+- `qa`: places 5/5, gpu 6/6, hud 4/4 com 0 sobreposições.
+- Tour: 122 fotos, sem erro de console.
+- Suíte: 190/195. As 5 falhas foram corrigidas e conferidas com testes direcionados.
