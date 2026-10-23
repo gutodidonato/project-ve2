@@ -242,7 +242,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     <p>Engenheiro de Software · Backend, IA e Cloud · CTO / Tech Lead na EVIG</p>
     <p>De cadete a CTO em cinco eras. Vamos construir a próxima?</p>
     <div class="trip" id="trip" hidden><b>Sua viagem</b><div class="chips" id="tripChips"></div></div>
-    <div class="links"><span>gutodidonato@gmail.com</span><a href="https://www.linkedin.com/in/luis-didonato-66746a250/" target="_blank" rel="noopener">LinkedIn</a><a href="https://github.com/gutodidonato" target="_blank" rel="noopener">GitHub</a><a class="garage-link" href="/pt">Voltar à garagem</a></div>
+    <div class="links"><span class="mail" data-user="gutodidonato" data-domain="gmail.com"></span><a href="https://www.linkedin.com/in/luis-didonato-66746a250/" target="_blank" rel="noopener">LinkedIn</a><a href="https://github.com/gutodidonato" target="_blank" rel="noopener">GitHub</a><a class="garage-link" href="/pt">Voltar à garagem</a></div>
     <div><button type="button" id="restart">Recomeçar a viagem</button></div>
   </div>
   <aside class="drawer" id="drawer" aria-label="Sobre o protótipo">
@@ -278,6 +278,8 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
   // Served by the site (public/salto88): ?lang=en comes from the English garage. The game itself is in Portuguese; the language only picks the way back and the notice.
   const GAME_LANG = new URLSearchParams(location.search).get('lang') === 'en' ? 'en' : 'pt';
   document.querySelectorAll('a.garage-link').forEach(function (a) { a.href = '/' + GAME_LANG; });
+  // The address is assembled here, never written whole in the HTML (as on the site).
+  document.querySelectorAll('.mail').forEach(function (m) { m.textContent = m.dataset.user + '@' + m.dataset.domain; });
   const stage = $('stage'), canvas = $('c');
   function fail(msg) { $('loading').innerHTML = '<div>' + msg + '</div>'; }
   if (!window.THREE || !THREE.GLTFLoader) { fail('Não foi possível carregar o three.js. Recarregue a página.'); return; }
@@ -6207,7 +6209,6 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
   function activate() { if (active) return; active = true; stage.classList.add('active'); canvas.tabIndex = 0; canvas.focus({ preventScroll: true }); if (!started) { started = true; if (world) { S.lastDate = '--- ----'; S.plu = 0; S.trip = tripNew(); tripRender(); S.photo = false; enterEra(0); S.car.speed = 6; $('plu').textContent = '☢ 0/25'; } } S.demo = false; S.idle = 0; kick(); }
   function deactivate() { active = false; keys.clear(); stage.classList.remove('active'); S.demo = true; }
   $('start').addEventListener('click', activate);
-  if (GAME_LANG === 'en') setTimeout(function () { toast('Game in Portuguese for now', 4); }, 1500);
   function togglePhoto(on) { S.photo = on === undefined ? !S.photo : on; $('photo').classList.toggle('on', S.photo); if (S.photo) { photoCam.yaw = camYaw + 0.6; photoCam.dist = 12; toast('Modo foto: arraste para girar, scroll para zoom', 1.8); } else { $('vhs').style.display = 'none'; canvas.style.filter = ''; } }
   $('photoBtn').addEventListener('click', function () { activate(); togglePhoto(); }); $('photoExit').addEventListener('click', function () { togglePhoto(false); });
   document.querySelectorAll('.photo [data-f]').forEach(function (b) { b.addEventListener('click', function () { const f = b.getAttribute('data-f'); $('vhs').style.display = f === 'vhs' ? 'block' : 'none'; canvas.style.filter = f === 'neon' ? 'saturate(1.8) contrast(1.15) hue-rotate(-10deg)' : f === 'bw' ? 'grayscale(1) contrast(1.2)' : f === 'vhs' ? 'saturate(1.3) blur(0.4px)' : ''; }); });
@@ -6252,6 +6253,8 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     if (r[6]) { const d = r[6]; d.rotation.y = -0.787 - Math.PI / 2; const holder = new THREE.Group(); holder.add(d); holder.updateMatrixWorld(true); const box = new THREE.Box3().setFromObject(holder); const size = box.getSize(new THREE.Vector3()); const k = 4.3 / Math.max(size.x, size.z); holder.scale.setScalar(k); holder.updateMatrixWorld(true); const b2 = new THREE.Box3().setFromObject(holder); const c2 = b2.getCenter(new THREE.Vector3()); holder.position.set(-c2.x, -b2.min.y, -c2.z); carBody.add(holder); carModelReady = true; rigCar(d); }
     else { const b = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.9, 4.3), new THREE.MeshStandardMaterial({ color: 0xc9ced8, metalness: 0.6, roughness: 0.35 })); b.position.y = 0.6; carBody.add(b); const tl = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.1, 0.05), tailM); tl.position.set(0, 0.7, 2.2); car.add(tl); }
     buildHighway(); setStation(ERAS[0].radio); enterEra(0); size(); $('loading').style.display = 'none'; kick(); setTimeout(getShowroom, 3000);
+    // After the loading screen and the first era's title: the English visitor's one notice.
+    if (GAME_LANG === 'en') setTimeout(function () { toast('Game in Portuguese for now', 4); }, 3200);
     window.__salto = {
       advance: function (sec, quiet) { manual = true; let tt = last; const n = Math.max(1, Math.round(sec * 30)); for (let i = 0; i < n; i++) { skipRender = !!quiet || i < n - 1; tt += 1000 / 30; frame(tt); } skipRender = false; manual = false; last = performance.now(); },
       freeze: function (b) { frozen = !!b; },

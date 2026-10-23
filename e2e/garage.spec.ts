@@ -148,6 +148,17 @@ test.describe('garage: screen', () => {
       .toBeLessThan(2);
   });
 
+  test('the language links are at least 44 px', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await openGarage(page);
+    for (const name of ['PT', 'EN']) {
+      const box = await layer(page).getByRole('link', { name, exact: true }).boundingBox();
+      expect(box, name).not.toBeNull();
+      expect(box!.width, name).toBeGreaterThanOrEqual(44);
+      expect(box!.height, name).toBeGreaterThanOrEqual(44);
+    }
+  });
+
   test('phone keys are at least 44 px', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await openGarage(page);
@@ -167,18 +178,56 @@ test.describe('garage: screen', () => {
  */
 const GAME_COMMIT = { timeout: 60_000, waitUntil: 'commit' } as const;
 
+/** Hold the 3.5 s departure so the garage stays on screen: for tests that watch the launch, not the navigation. */
+async function holdDeparture(page: Page) {
+  await page.addInitScript(() => {
+    const start = window.setTimeout;
+    window.setTimeout = ((fn: TimerHandler, ms?: number, ...rest: unknown[]) =>
+      ms === 3500 ? 0 : start(fn, ms, ...rest)) as typeof window.setTimeout;
+  });
+}
+
 test.describe('garage: launch', () => {
   test('J rolls the door up', async ({ page }) => {
-    // Hold the 3.5 s departure so the garage stays: this test watches the door, not the navigation.
-    await page.addInitScript(() => {
-      const start = window.setTimeout;
-      window.setTimeout = ((fn: TimerHandler, ms?: number, ...rest: unknown[]) =>
-        ms === 3500 ? 0 : start(fn, ms, ...rest)) as typeof window.setTimeout;
-    });
+    await holdDeparture(page);
     await openGarage(page);
     await page.keyboard.press('j');
     await expect.poll(async () => (await snapshot(page)).door, { timeout: 30_000 }).toBeGreaterThan(0.2);
     await expect.poll(async () => (await snapshot(page)).door, { timeout: 30_000 }).toBe(1);
+  });
+
+  test('a page restored from the browser cache keeps the open screen', async ({ page }) => {
+    // Recruiter path: open the resume, follow the PDF, press Back. Playwright's Chromium runs without
+    // the back-forward cache, so the restore is the event itself.
+    await openGarage(page);
+    await page.keyboard.press('c');
+    await expect(fullScreen(page)).toBeVisible({ timeout: 30_000 });
+    await page.evaluate(() => window.dispatchEvent(new PageTransitionEvent('pageshow', { persisted: true })));
+    await page.waitForTimeout(300);
+    expect((await snapshot(page)).view).toBe('screen');
+    await expect(page).toHaveURL(/#curriculo$/);
+  });
+
+  test('a page restored from the browser cache after the launch shows the bench', async ({ page }) => {
+    await holdDeparture(page);
+    await openGarage(page);
+    await page.keyboard.press('j');
+    await expect.poll(async () => (await snapshot(page)).door, { timeout: 30_000 }).toBeGreaterThan(0.2);
+    await page.evaluate(() => window.dispatchEvent(new PageTransitionEvent('pageshow', { persisted: true })));
+    await expect.poll(async () => (await snapshot(page)).view, { timeout: 10_000 }).toBe('bench');
+    await expect.poll(async () => (await snapshot(page)).door, { timeout: 10_000 }).toBeLessThan(0.05);
+  });
+
+  test('P during the launch leaves a working garage', async ({ page }) => {
+    await holdDeparture(page);
+    await openGarage(page);
+    await page.keyboard.press('j');
+    await page.waitForTimeout(500);
+    await page.keyboard.press('p');
+    await expect(page.locator('html')).toHaveAttribute('data-mode', 'pitstop');
+    await page.keyboard.press('p');
+    await expect(layer(page).getByRole('button', { name: /Currículo/ })).toBeVisible({ timeout: 60_000 });
+    await page.waitForFunction(() => window.__garage?.snapshot().view === 'bench', null, { timeout: 60_000 });
   });
 
   test('J lands on the game', async ({ page }) => {

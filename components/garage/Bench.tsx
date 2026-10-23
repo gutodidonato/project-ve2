@@ -1,5 +1,7 @@
 'use client';
 
+import { useLayoutEffect, useRef } from 'react';
+import { Matrix4, Quaternion, Vector3, type InstancedMesh } from 'three';
 import { BENCH_TOP_Y, DOOR } from '@/lib/garage/scene';
 
 const CONCRETE = '#3A403F';
@@ -47,25 +49,48 @@ function Room() {
   );
 }
 
-/** One wall tool on the pegboard: a handle and a steel head. */
-function Tool({ x, y, handle, head, tilt = 0 }: { x: number; y: number; handle: [number, number]; head: [number, number]; tilt?: number }) {
-  return (
-    <group position={[x, y, BENCH.z0 + 0.03]} rotation={[0, 0, tilt]}>
-      <mesh position={[0, -handle[1] / 2, 0]}>
-        <boxGeometry args={[handle[0], handle[1], 0.025]} />
-        <meshStandardMaterial color={HANDLE} roughness={0.6} />
-      </mesh>
-      <mesh position={[0, head[1] / 2, 0]}>
-        <boxGeometry args={[head[0], head[1], 0.02]} />
-        <meshStandardMaterial color={STEEL} metalness={0.7} roughness={0.35} />
-      </mesh>
-    </group>
-  );
+/** Wall tools on the pegboard: x, y, handle (w, h), head (w, h), tilt. One mesh for the handles, one for the heads. */
+const TOOLS: readonly { x: number; y: number; handle: [number, number]; head: [number, number]; tilt: number }[] = [
+  { x: 0.25, y: 1.75, handle: [0.035, 0.22], head: [0.12, 0.05], tilt: 0 },
+  { x: 0.5, y: 1.78, handle: [0.03, 0.14], head: [0.022, 0.16], tilt: 0 },
+  { x: 0.72, y: 1.72, handle: [0.028, 0.12], head: [0.012, 0.18], tilt: 0.08 },
+  { x: 0.95, y: 1.8, handle: [0.04, 0.12], head: [0.03, 0.2], tilt: -0.1 },
+];
+
+const m4 = new Matrix4();
+const q = new Quaternion();
+const axisZ = new Vector3(0, 0, 1);
+const at = new Vector3();
+const size = new Vector3();
+
+/** Place unit boxes: one instance per item, positioned, turned about z and scaled. */
+function placeBoxes(mesh: InstancedMesh | null, items: readonly { p: [number, number, number]; s: [number, number, number]; tilt?: number }[]) {
+  if (!mesh) return;
+  items.forEach((it, i) => mesh.setMatrixAt(i, m4.compose(at.set(...it.p), q.setFromAxisAngle(axisZ, it.tilt ?? 0), size.set(...it.s))));
+  mesh.instanceMatrix.needsUpdate = true;
 }
 
 /** The workbench: dark wood top on four legs, and the pegboard of tools on the wall behind it. */
 export function Bench() {
   const legH = BENCH_TOP_Y - BENCH.thickness;
+  const legs = useRef<InstancedMesh>(null);
+  const handles = useRef<InstancedMesh>(null);
+  const heads = useRef<InstancedMesh>(null);
+
+  // Draw calls are the garage budget: the four legs and the tool parts are three instanced meshes.
+  useLayoutEffect(() => {
+    placeBoxes(
+      legs.current,
+      [BENCH.x0 + 0.08, BENCH.x1 - 0.08].flatMap((x) =>
+        [BENCH.z0 + 0.08, BENCH.z1 - 0.08].map((z) => ({ p: [x, legH / 2, z] as [number, number, number], s: [0.07, legH, 0.07] as [number, number, number] })),
+      ),
+    );
+    const z = BENCH.z0 + 0.03;
+    const turn = (t: (typeof TOOLS)[number], dy: number): [number, number, number] => [t.x - Math.sin(t.tilt) * dy, t.y + Math.cos(t.tilt) * dy, z];
+    placeBoxes(handles.current, TOOLS.map((t) => ({ p: turn(t, -t.handle[1] / 2), s: [t.handle[0], t.handle[1], 0.025], tilt: t.tilt })));
+    placeBoxes(heads.current, TOOLS.map((t) => ({ p: turn(t, t.head[1] / 2), s: [t.head[0], t.head[1], 0.02], tilt: t.tilt })));
+  }, [legH]);
+
   return (
     <group name="bench">
       <Room />
@@ -73,22 +98,22 @@ export function Bench() {
         <boxGeometry args={[BENCH_W, BENCH.thickness, BENCH.z1 - BENCH.z0]} />
         <meshStandardMaterial color={WOOD} roughness={0.8} />
       </mesh>
-      {[BENCH.x0 + 0.08, BENCH.x1 - 0.08].flatMap((x) =>
-        [BENCH.z0 + 0.08, BENCH.z1 - 0.08].map((z) => (
-          <mesh key={`${x}:${z}`} position={[x, legH / 2, z]}>
-            <boxGeometry args={[0.07, legH, 0.07]} />
-            <meshStandardMaterial color={WOOD} roughness={0.85} />
-          </mesh>
-        )),
-      )}
+      <instancedMesh ref={legs} args={[undefined, undefined, 4]}>
+        <boxGeometry args={[1, 1, 1]} />
+        <meshStandardMaterial color={WOOD} roughness={0.85} />
+      </instancedMesh>
       <mesh position={[0.1, 1.75, BENCH.z0 + 0.01]}>
         <boxGeometry args={[2.2, 1.0, 0.02]} />
         <meshStandardMaterial color={MASONITE} roughness={0.9} />
       </mesh>
-      <Tool x={0.25} y={1.75} handle={[0.035, 0.22]} head={[0.12, 0.05]} />
-      <Tool x={0.5} y={1.78} handle={[0.03, 0.14]} head={[0.022, 0.16]} />
-      <Tool x={0.72} y={1.72} handle={[0.028, 0.12]} head={[0.012, 0.18]} tilt={0.08} />
-      <Tool x={0.95} y={1.8} handle={[0.04, 0.12]} head={[0.03, 0.2]} tilt={-0.1} />
+      <instancedMesh ref={handles} args={[undefined, undefined, TOOLS.length]}>
+        <boxGeometry args={[1, 1, 1]} />
+        <meshStandardMaterial color={HANDLE} roughness={0.6} />
+      </instancedMesh>
+      <instancedMesh ref={heads} args={[undefined, undefined, TOOLS.length]}>
+        <boxGeometry args={[1, 1, 1]} />
+        <meshStandardMaterial color={STEEL} metalness={0.7} roughness={0.35} />
+      </instancedMesh>
     </group>
   );
 }

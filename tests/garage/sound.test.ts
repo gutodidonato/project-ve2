@@ -3,8 +3,8 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { SOUND_KEY, createGarageSound } from '@/lib/garage/sound';
 
 /** A stand-in AudioContext that counts the sources it is asked to create. */
-function fakeContext() {
-  const made = { sources: 0, contexts: 0 };
+function fakeContext(initial: AudioContextState = 'running') {
+  const made = { sources: 0, contexts: 0, resumes: 0, state: initial };
   const param = () => ({ value: 0, setValueAtTime() {}, linearRampToValueAtTime() {}, exponentialRampToValueAtTime() {} });
   const node = () => ({ connect: () => node(), gain: param(), frequency: param(), Q: param(), type: '' });
   const ctor = () => {
@@ -13,8 +13,13 @@ function fakeContext() {
       currentTime: 0,
       sampleRate: 8000,
       destination: {},
-      state: 'running',
-      resume: () => Promise.resolve(),
+      get state() {
+        return made.state;
+      },
+      resume: () => {
+        made.resumes++;
+        return Promise.resolve();
+      },
       createGain: node,
       createBiquadFilter: node,
       createBuffer: (_c: number, length: number) => ({ getChannelData: () => new Float32Array(length) }),
@@ -49,6 +54,21 @@ describe('garage sound', () => {
     sound.unlock();
     sound.key();
     expect(made.sources).toBeGreaterThan(0);
+  });
+
+  it('keeps asking a suspended context to resume on later gestures', () => {
+    // A touch pointerdown is not a user activation: the first resume() can be refused.
+    const { made, ctor } = fakeContext('suspended');
+    const sound = createGarageSound(ctor);
+    sound.unlock();
+    expect(sound.running()).toBe(false);
+    sound.unlock();
+    expect(made.contexts).toBe(1);
+    expect(made.resumes).toBe(2);
+    made.state = 'running';
+    expect(sound.running()).toBe(true);
+    sound.unlock();
+    expect(made.resumes).toBe(2);
   });
 
   it('remembers mute and stays quiet', () => {

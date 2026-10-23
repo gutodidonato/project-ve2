@@ -36,7 +36,7 @@ export function GarageChrome({ locale, act }: { locale: Locale; act(a: GarageAct
         {t('sound')}
       </button>
       <CreditsButton className={chip} />
-      <span className={`${chip} gap-1 px-2`}>
+      <span className={`${chip} gap-0 px-0`}>
         {(['pt', 'en'] as const).map((l, i) => (
           <span key={l} className="inline-flex items-center gap-1">
             {i > 0 ? <span aria-hidden="true">|</span> : null}
@@ -45,10 +45,12 @@ export function GarageChrome({ locale, act }: { locale: Locale; act(a: GarageAct
               hrefLang={l === 'pt' ? 'pt-BR' : 'en'}
               aria-current={l === locale ? 'true' : undefined}
               onClick={(e) => {
+                // A modified or middle click keeps the browser's own behaviour (new tab, new window).
+                if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
                 e.preventDefault();
                 if (l !== locale) act('language');
               }}
-              className={`inline-flex min-h-9 items-center px-1 ${l === locale ? 'text-[#FFB000]' : 'underline underline-offset-2'}`}
+              className={`inline-flex min-h-11 min-w-11 items-center justify-center ${l === locale ? 'text-[#FFB000]' : 'underline underline-offset-2'}`}
             >
               {l.toUpperCase()}
             </a>

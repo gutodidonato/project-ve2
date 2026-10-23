@@ -98,21 +98,24 @@ export function useGarageControls(locale: Locale): (a: GarageAction) => void {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [act]);
 
-  // Audio may only start after a gesture; the first one anywhere unlocks it.
+  // Audio may only start after a gesture. A touch pointerdown (or Esc) is not one, so every
+  // gesture asks again until the context is really running.
   useEffect(() => {
-    const unlock = () => garageSound().unlock();
-    window.addEventListener('pointerdown', unlock, { once: true, capture: true });
-    window.addEventListener('keydown', unlock, { once: true, capture: true });
-    return () => {
-      window.removeEventListener('pointerdown', unlock, { capture: true });
-      window.removeEventListener('keydown', unlock, { capture: true });
-    };
+    const GESTURES = ['pointerdown', 'pointerup', 'touchend', 'click', 'keydown'] as const;
+    const stop = () => GESTURES.forEach((g) => window.removeEventListener(g, unlock, { capture: true }));
+    function unlock() {
+      garageSound().unlock();
+      if (garageSound().running()) stop();
+    }
+    GESTURES.forEach((g) => window.addEventListener(g, unlock, { capture: true }));
+    return stop;
   }, []);
 
-  // Back from the game through the browser's page cache: the store still says `launch`.
+  // Back from the game through the browser's page cache: the store still says `launch`. Any other
+  // restore (back from the PDF or LinkedIn) keeps what was open.
   useEffect(() => {
     function onPageShow(e: PageTransitionEvent) {
-      if (!e.persisted) return;
+      if (!e.persisted || useGameStore.getState().garage.view !== 'launch') return;
       cancelDeparture();
       garageRuntime.door = 0;
       useGameStore.getState().setGarage(INITIAL_GARAGE, null);
@@ -140,8 +143,16 @@ export function useGarageControls(locale: Locale): (a: GarageAction) => void {
     return () => window.cancelIdleCallback(id);
   }, [locale]);
 
-  // Leaving the garage (pit stop, unmount) never leaves a navigation armed.
-  useEffect(() => cancelDeparture, [cancelDeparture]);
+  // Leaving the garage (pit stop, unmount) never leaves a navigation armed, nor a launch with
+  // nothing pending: back in the game, the bench is there again.
+  useEffect(
+    () => () => {
+      cancelDeparture();
+      const { garage, setGarage } = useGameStore.getState();
+      if (garage.view === 'launch') setGarage(INITIAL_GARAGE, null);
+    },
+    [cancelDeparture],
+  );
 
   useEffect(() => {
     writeHash(locale, useGameStore.getState().garage);

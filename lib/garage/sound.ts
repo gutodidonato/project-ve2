@@ -4,8 +4,10 @@ import { readPref, writePref } from '@/lib/storage';
 export const SOUND_KEY = 'rodovia:sound';
 
 export interface GarageSound {
-  /** Create the audio context; browsers only allow it after a gesture. */
+  /** Create the audio context and ask it to run; browsers only allow it after a gesture, so call it on each one. */
   unlock(): void;
+  /** The context exists and is running (a gesture really unlocked it). */
+  running(): boolean;
   /** A mechanical key click. */
   key(): void;
   /** The roll-up door rumbling open (1.6 s). */
@@ -59,18 +61,20 @@ export function createGarageSound(ctor: () => AudioContext = () => new AudioCont
 
   return {
     unlock() {
-      if (ctx !== null) return;
       try {
-        ctx = ctor();
-        master = ctx.createGain();
-        master.gain.value = MASTER;
-        master.connect(ctx.destination);
+        if (ctx === null) {
+          ctx = ctor();
+          master = ctx.createGain();
+          master.gain.value = MASTER;
+          master.connect(ctx.destination);
+        }
         if (ctx.state === 'suspended') void ctx.resume();
       } catch {
         ctx = null;
         master = null;
       }
     },
+    running: () => ctx !== null && ctx.state === 'running',
     key() {
       burst(0.03, 'bandpass', 2400, 0.6);
     },

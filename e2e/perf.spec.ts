@@ -126,6 +126,13 @@ test.describe('3D payload', () => {
     );
     expect(tierA, 'the scene runs in tier A').toBe(true);
 
+    // The garage budget counts every pass of a tier A frame: shadows and post-processing included.
+    await page.waitForFunction(() => window.__garage?.snapshot().arrived === true, null, { timeout: 60_000 });
+    const drawCalls = await page.evaluate(() => window.__garage!.snapshot().drawCalls);
+    console.log(`tier A draw calls: ${drawCalls}`);
+    expect(drawCalls).toBeGreaterThan(0);
+    expect(drawCalls).toBeLessThanOrEqual(60);
+
     const resources = await page.evaluate(() =>
       performance.getEntriesByType('resource').map((e) => ({
         name: new URL(e.name).pathname,

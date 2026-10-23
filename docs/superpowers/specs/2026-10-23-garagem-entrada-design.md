@@ -169,7 +169,7 @@ A mecânica do hub de 5 zonas: `Hub`, `ZoneMarker`, `ZonePanel`, `Minimap`, `Dec
   - `tests/garage`: estado, partida, câmera, homografia, tela, teclas e som.
   - `e2e/garage.spec.ts`: bancada, tela e partida, nos projetos chromium e mobile.
   - `scripts/garage-shots.mjs`: 18 fotos fixas.
-  - Sair de uma página com a cena WebGL leva cerca de 11 s no SwiftShader sem janela, contra menos de 1,5 s numa GPU real. Por isso a partida espera até 30 s pela página do jogo.
+  - Sair de uma página com a cena WebGL leva cerca de 11 s no SwiftShader sem janela, contra menos de 1,5 s numa GPU real. Por isso a partida espera até 60 s pela página do jogo.
 - **Notas finais** (`.superpowers/garagem/notas.md`):
 
   | Área | Nota |
