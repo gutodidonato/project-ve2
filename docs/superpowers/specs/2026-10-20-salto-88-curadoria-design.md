@@ -95,7 +95,7 @@ Pedido do Luis (20 out): na Colmeia, mostrar a atuação dele nos projetos **Abe
 
 ## Como ficou (22 out)
 
-Build 6fcfe14, publicada como versão 22 do artefato do jogo.
+Build 963e53c, publicada como versão 23 do artefato do jogo.
 
 **Lugares por era:**
 - **Exército:** 4 lugares.
@@ -130,4 +130,4 @@ Build 6fcfe14, publicada como versão 22 do artefato do jogo.
 **Verificação:**
 - `qa`: places 5/5, gpu 6/6, hud 4/4 com 0 sobreposições.
 - Tour: 122 fotos, sem erro de console.
-- Suíte: 190/195. As 5 falhas foram corrigidas e conferidas com testes direcionados.
+- Suíte inteira: 195/195.
