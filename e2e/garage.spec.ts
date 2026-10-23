@@ -1,9 +1,13 @@
 import { expect, test, type Page } from '@playwright/test';
 import type { GarageSnapshot } from '@/lib/garage/debug';
 
+// Each test drives a live WebGL scene under SwiftShader: run them one after another (several scenes
+// at once starve the CPU and every wait times out), with room for the slow software renderer.
+test.describe.configure({ mode: 'serial', timeout: 120_000 });
+
 /** Read-only copy of the garage, published by the scene once it runs. */
 async function snapshot(page: Page): Promise<GarageSnapshot> {
-  await page.waitForFunction(() => window.__garage !== undefined, null, { timeout: 30_000 });
+  await page.waitForFunction(() => window.__garage !== undefined, null, { timeout: 60_000 });
   return page.evaluate(() => window.__garage!.snapshot());
 }
 
@@ -11,7 +15,7 @@ async function snapshot(page: Page): Promise<GarageSnapshot> {
 async function openGarage(page: Page, path = '/pt') {
   await page.goto(path);
   await expect(page.locator('html')).toHaveAttribute('data-mode', 'game');
-  await page.waitForFunction(() => window.__garage?.snapshot().arrived === true, null, { timeout: 30_000 });
+  await page.waitForFunction(() => window.__garage?.snapshot().arrived === true, null, { timeout: 60_000 });
 }
 
 const layer = (page: Page) => page.locator('.game-layer');
@@ -138,7 +142,8 @@ test.describe('garage: screen', () => {
           const box = await page.locator('.crt-screen').boundingBox();
           return box ? Math.max(Math.abs(box.x - x), Math.abs(box.y - y), Math.abs(box.width - width)) : 999;
         },
-        { timeout: 3_000 },
+        // The camera eases to the new framing first; under SwiftShader with another worker that can take a while.
+        { timeout: 30_000 },
       )
       .toBeLessThan(2);
   });
@@ -158,18 +163,27 @@ test.describe('garage: screen', () => {
 
 /**
  * Leaving a page with a live WebGL scene takes ~11 s under SwiftShader (38 ms without the scene,
- * under 1.5 s on a real GPU), so the launch tests wait up to 30 s for the game page to commit.
+ * under 1.5 s on a real GPU), so the launch tests wait up to 60 s for the game page to commit.
  */
-const GAME_COMMIT = { timeout: 30_000, waitUntil: 'commit' } as const;
+const GAME_COMMIT = { timeout: 60_000, waitUntil: 'commit' } as const;
 
 test.describe('garage: launch', () => {
-  test('J opens the door and lands on the game', async ({ page }) => {
+  test('J rolls the door up', async ({ page }) => {
+    // Hold the 3.5 s departure so the garage stays: this test watches the door, not the navigation.
+    await page.addInitScript(() => {
+      const start = window.setTimeout;
+      window.setTimeout = ((fn: TimerHandler, ms?: number, ...rest: unknown[]) =>
+        ms === 3500 ? 0 : start(fn, ms, ...rest)) as typeof window.setTimeout;
+    });
     await openGarage(page);
     await page.keyboard.press('j');
-    await expect
-      .poll(async () => (await snapshot(page)).door, { timeout: 3_000, intervals: [50] })
-      .toBeGreaterThan(0.2);
-    expect((await snapshot(page)).door).toBeLessThan(0.95);
+    await expect.poll(async () => (await snapshot(page)).door, { timeout: 30_000 }).toBeGreaterThan(0.2);
+    await expect.poll(async () => (await snapshot(page)).door, { timeout: 30_000 }).toBe(1);
+  });
+
+  test('J lands on the game', async ({ page }) => {
+    await openGarage(page);
+    await page.keyboard.press('j');
     await page.waitForURL('**/salto88/index.html', GAME_COMMIT);
   });
 

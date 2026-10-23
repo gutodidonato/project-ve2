@@ -151,3 +151,45 @@ A mecânica do hub de 5 zonas: `Hub`, `ZoneMarker`, `ZonePanel`, `Minimap`, `Dec
 - **Parte 2: polimento do jogo.** O backlog do handoff (avisos no showroom, cartão apertado em 375×568, atlas das TVs da Valiant numa GPU real, o teste "mobile em pé" de 13 min) e a costura com a garagem: o jogo começa como continuação da partida (o DeLorean saindo para fev 2019).
 - **Parte 3: o jogo em inglês.** Cartões, missões, HUD e avisos lendo `content/en/profile.ts`; o aviso "Game in Portuguese for now" sai.
 - **Depois:** trazer o pit stop para a paleta da garagem.
+
+## 10. Como construído (23 out)
+
+- **Tela em DOM, sem o `<Html>` do drei.** O `<Html transform>` perdia o conteúdo no StrictMode do React 19, porque a raiz própria dele era desmontada depois da remontagem, e também perdia o contexto do next-intl. A tela é um `ScreenSurface` comum, fora do canvas. A cada quadro renderizado, a `GarageCamera` mapeia o layout de 800 × 600 px nos quatro cantos projetados do vidro com uma `matrix3d` (`lib/garage/homography.ts`). Na vista de tela ele vira um retângulo sem transformação sobre o vidro, recortado pela janela no celular: texto nítido e rolagem normal.
+- **Celular em pé.** Um vidro 4:3 que cabe na largura de uma janela de 390 × 844 ocupa no máximo cerca de 35% da altura. O enquadramento fica em cerca de 33% para o vidro e cerca de 46% para o monitor. O teclado vira as quatro teclas C, J, K e E num suporte inclinado, cada uma com mais de 44 px.
+- **Controles fora da tela.** O botão do pit stop ficou onde estava. Som, Créditos e PT | EN ficam no canto inferior esquerdo e somem dentro do monitor.
+- **Partida.** Com J, o portão sobe, os faróis fortes apontam pela porta para a bancada, a câmera termina a 3/4 com o DeLorean inteiro no portão aberto, vem o clarão branco e a página vai para `/salto88/index.html` uma vez só. Voltar do jogo pelo cache do navegador traz a bancada de volta. O `window.__garage.holdLaunch(ms)` congela a partida para a lista de fotos.
+- **Jogo no deploy.** `public/salto88/` tem 29 MB, contra 42 MB antes:
+  - os modelos viraram `.glb` binário com o mesmo conteúdo, porque a geometria em base64 era 85% dos bytes;
+  - as músicas foram recomprimidas em Vorbis q2 e MP3 de 128 kbps, e os testes de rádio do laboratório deram 4/4;
+  - o three r128, o `GLTFLoader`, o `SkeletonUtils` e as fontes (OFL) saem de `vendor/`, sem CDN.
+
+  O jogo tem o link "Voltar à garagem" na gaveta e no showroom, e o aviso "Game in Portuguese for now" com `?lang=en`. O script é o `scripts/shrink-game.mjs`, e a build do laboratório usa `proto/min`.
+- **O hub saiu.** Saíram 50 arquivos, com cerca de 4.700 linhas: componentes, módulos de `lib/game` e os testes deles. Ficaram `GameMount`, `GameLayer`, `ErrorBoundary`, `PitstopToggle`, `Effects`, `useRuntimeFrame`, `tier`, `assets` e o `isTypingTarget`.
+- **Testes.**
+  - `tests/garage`: estado, partida, câmera, homografia, tela, teclas e som.
+  - `e2e/garage.spec.ts`: bancada, tela e partida, nos projetos chromium e mobile.
+  - `scripts/garage-shots.mjs`: 18 fotos fixas.
+  - Sair de uma página com a cena WebGL leva cerca de 11 s no SwiftShader sem janela, contra menos de 1,5 s numa GPU real. Por isso a partida espera até 30 s pela página do jogo.
+- **Notas finais** (`.superpowers/garagem/notas.md`):
+
+  | Área | Nota |
+  |------|------|
+  | Bancada desktop | 9 |
+  | Bancada celular | 9 |
+  | Tela 375 × 568 | 8,5 |
+  | Currículo | 9 |
+  | Contato | 9 |
+  | Idioma | 9 |
+  | Partida a 1,6 s | 7 |
+  | Chegada ao carro | 8 |
+
+  Na partida a 1,6 s, a luz fria ainda não chega à bancada antes da virada. Fica no backlog.
+- **Números do fechamento** (build de produção, testes sob `low.sh`):
+  - `check:bundle`: 150,3 KB gzip de 180 KB, sem three na primeira carga.
+  - Payload 3D no tier A: 1.606 KiB (GLB de 1.131 KiB e 14 scripts somando 475 KiB), dentro do teto de 2.560 KiB.
+  - LCP: 516 ms com a CPU 4× mais lenta e 1.084 ms em 4G, os dois no `<h1>` do pit stop.
+  - Bancada: no máximo 60 chamadas de desenho (teste `garage: bench`).
+  - vitest: 185/185.
+  - e2e:
+    - os 96 testes fora da garagem: 95 passaram e 1 foi pulado (pulo que já existia);
+    - `garage.spec`: 21/21 no chromium e 21/21 no mobile, em série. Com 6 workers em paralelo, cada um com uma cena WebGL no SwiftShader, todo prazo estourava. Por isso a spec roda em série, com até 120 s por teste.
