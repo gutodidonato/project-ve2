@@ -9,7 +9,7 @@ const MASONITE = '#7a5a3e';
 const STEEL = '#8d918f';
 const HANDLE = '#9a2f22';
 
-const BENCH = { x0: -1.6, x1: 1.2, z0: -0.5, z1: 0.2, thickness: 0.05 };
+const BENCH = { x0: -1.6, x1: 1.2, z0: -0.5, z1: 0.32, thickness: 0.05 };
 const BENCH_W = BENCH.x1 - BENCH.x0;
 const BENCH_CX = (BENCH.x0 + BENCH.x1) / 2;
 const BENCH_CZ = (BENCH.z0 + BENCH.z1) / 2;

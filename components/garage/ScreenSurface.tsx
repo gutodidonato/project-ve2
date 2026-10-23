@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import type { Locale, Profile } from '@/content/types';
 import { garageRuntime } from '@/lib/garage/runtime';
@@ -28,9 +28,26 @@ export function ScreenSurface({
   const garage = useGameStore((s) => s.garage);
   const last = useGameStore((s) => s.garageLast);
 
-  const attach = useCallback((el: HTMLDivElement | null) => {
-    garageRuntime.surface = el;
+  const el = useRef<HTMLDivElement | null>(null);
+  const attach = useCallback((node: HTMLDivElement | null) => {
+    el.current = node;
+    garageRuntime.surface = node;
   }, []);
+
+  // Focus follows the camera: into the page that opened, back to the menu key that opened it.
+  const previous = useRef(garage);
+  useEffect(() => {
+    const before = previous.current;
+    previous.current = garage;
+    const node = el.current;
+    if (node === null || before === garage) return;
+    if (garage.view === 'screen' && (before.view !== 'screen' || before.content !== garage.content)) {
+      node.scrollTop = 0;
+      node.querySelector<HTMLElement>('.crt-title')?.focus({ preventScroll: true });
+    } else if (garage.view === 'bench' && before.view === 'screen' && before.content !== null) {
+      node.querySelector<HTMLElement>(`[data-action="${before.content}"]`)?.focus({ preventScroll: true });
+    }
+  }, [garage]);
 
   return (
     <div

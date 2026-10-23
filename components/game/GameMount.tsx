@@ -4,9 +4,8 @@ import { useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
 import type { Locale, Profile } from '@/content/types';
-import { resetRuntime } from '@/lib/game/runtime';
 import { isTypingTarget } from '@/lib/game/input';
-import { parseZoneHash } from '@/lib/game/zones';
+import { stateFromHash } from '@/lib/garage/state';
 import { initialPitstop, PITSTOP_KEY } from '@/lib/pitstop';
 import { readPref } from '@/lib/storage';
 import { useGameStore } from '@/lib/store';
@@ -83,7 +82,7 @@ export function GameMount({ profile, locale }: { profile: Profile; locale: Local
       stored: stored === 'on' || stored === 'off' ? stored : null,
     });
     useGameStore.getState().applyInitialPitstop(decision);
-    resetRuntime(parseZoneHash(window.location.hash));
+    useGameStore.getState().setGarage(stateFromHash(window.location.hash), null);
   }, []);
 
   // html[data-mode] drives the CSS that hides the pit stop and locks scrolling in game mode.

@@ -63,3 +63,91 @@ test.describe('garage: bench', () => {
     expect(Math.abs(menu!.width - r.width)).toBeLessThan(12);
   });
 });
+
+/** Centre of a 3D key on the window, from the scene's projection. */
+async function keyCentre(page: Page, code: string) {
+  const s = await snapshot(page);
+  const key = s.keyRects.find((k) => k.code === code);
+  expect(key, `key ${code} is projected`).toBeTruthy();
+  return { x: key!.rect.x + key!.rect.width / 2, y: key!.rect.y + key!.rect.height / 2 };
+}
+
+const fullScreen = (page: Page) => page.locator('.crt-screen[data-full="true"]');
+
+test.describe('garage: screen', () => {
+  test('C opens the resume and Esc comes back', async ({ page }) => {
+    await openGarage(page);
+    await page.keyboard.press('c');
+    await expect(fullScreen(page)).toBeVisible({ timeout: 10_000 });
+    await expect(fullScreen(page).getByRole('heading', { name: 'Experiência' })).toBeVisible();
+    await expect(page).toHaveURL(/#curriculo$/);
+    await page.keyboard.press('Escape');
+    await expect(layer(page).getByRole('button', { name: /Currículo/ })).toBeVisible();
+    await expect(page).toHaveURL(/\/pt$/);
+  });
+
+  test('clicking the 3D K key opens the contact', async ({ page }) => {
+    await openGarage(page);
+    const { x, y } = await keyCentre(page, 'KeyK');
+    await page.mouse.click(x, y);
+    await expect(fullScreen(page).getByRole('heading', { name: 'Contato' })).toBeVisible({ timeout: 10_000 });
+  });
+
+  test('typing in the contact form does not change the view', async ({ page }) => {
+    await openGarage(page);
+    await page.keyboard.press('k');
+    const name = fullScreen(page).getByRole('textbox').first();
+    await name.click();
+    await page.keyboard.type('cjke');
+    await page.keyboard.press('Escape');
+    await expect(name).toHaveValue('cjke');
+    await expect(name).not.toBeFocused();
+    expect((await snapshot(page)).view).toBe('screen');
+    await expect(page).toHaveURL(/\/pt#contato$/);
+  });
+
+  test('#contato opens straight on the contact', async ({ page }) => {
+    await openGarage(page, '/pt#contato');
+    await expect(fullScreen(page).getByRole('heading', { name: 'Contato' })).toBeVisible({ timeout: 10_000 });
+  });
+
+  test('E keeps the resume open in English', async ({ page }) => {
+    await openGarage(page, '/pt#curriculo');
+    await expect(fullScreen(page)).toBeVisible({ timeout: 10_000 });
+    await page.keyboard.press('e');
+    await expect(page).toHaveURL(/\/en#resume$/, { timeout: 20_000 });
+    await expect(page.locator('.crt-screen[data-full="true"]').getByRole('heading', { name: 'Experience' })).toBeVisible({
+      timeout: 20_000,
+    });
+  });
+
+  test('the screen follows the glass on resize', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await openGarage(page);
+    await page.keyboard.press('c');
+    await expect(fullScreen(page)).toBeVisible({ timeout: 10_000 });
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expect
+      .poll(
+        async () => {
+          const { glassRect: r } = await snapshot(page);
+          const box = await page.locator('.crt-screen').boundingBox();
+          return box ? Math.max(Math.abs(box.x - r.x), Math.abs(box.y - r.y), Math.abs(box.width - r.width)) : 999;
+        },
+        { timeout: 3_000 },
+      )
+      .toBeLessThan(2);
+  });
+
+  test('phone keys are at least 44 px', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await openGarage(page);
+    const s = await snapshot(page);
+    for (const code of ['KeyC', 'KeyJ', 'KeyK', 'KeyE']) {
+      const key = s.keyRects.find((k) => k.code === code);
+      expect(key, code).toBeTruthy();
+      expect(key!.rect.width, code).toBeGreaterThanOrEqual(44);
+      expect(key!.rect.height, code).toBeGreaterThanOrEqual(44);
+    }
+  });
+});

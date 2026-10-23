@@ -50,7 +50,7 @@ export function ScreenMenu({
       <ul className="crt-keys">
         {ITEMS.map((item) => (
           <li key={item.action}>
-            <button type="button" className="crt-key" onClick={() => onAction(item.action)}>
+            <button type="button" className="crt-key" data-action={item.action} onClick={() => onAction(item.action)}>
               <kbd>{item.key}</kbd>
               {t(item.label)}
             </button>

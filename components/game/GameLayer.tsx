@@ -1,11 +1,10 @@
 'use client';
 
-import { useCallback } from 'react';
 import type { Locale, Profile } from '@/content/types';
-import { reduceGarage, type GarageAction } from '@/lib/garage/state';
 import { useGameStore } from '@/lib/store';
 import { GarageCanvas } from '@/components/garage/GarageCanvas';
 import { ScreenSurface } from '@/components/garage/ScreenSurface';
+import { useGarageControls } from '@/components/garage/useGarageControls';
 import { ErrorBoundary } from './ErrorBoundary';
 
 export interface GameLayerProps {
@@ -26,15 +25,12 @@ function fallBackToPitstop() {
  * the DOM screen above it.
  */
 export default function GameLayer({ profile, locale }: GameLayerProps) {
-  const act = useCallback((a: GarageAction) => {
-    const { garage, setGarage } = useGameStore.getState();
-    setGarage(reduceGarage(garage, a).state, a);
-  }, []);
+  const act = useGarageControls(locale);
 
   return (
     <div className="game-layer fixed inset-0 z-0">
       <ErrorBoundary fallback={null} onError={fallBackToPitstop}>
-        <GarageCanvas />
+        <GarageCanvas act={act} />
       </ErrorBoundary>
       <ScreenSurface profile={profile} locale={locale} act={act} />
     </div>
