@@ -153,21 +153,13 @@ test.describe('garage: screen', () => {
 });
 
 /**
- * Until the game ships in public/salto88 (Task 7) the page is stubbed; after that the real one loads.
  * Leaving a page with a live WebGL scene takes ~11 s under SwiftShader (38 ms without the scene,
  * under 1.5 s on a real GPU), so the launch tests wait up to 30 s for the game page to commit.
  */
 const GAME_COMMIT = { timeout: 30_000, waitUntil: 'commit' } as const;
-async function stubGame(page: Page) {
-  if (process.env.GARAGE_REAL_GAME === '1') return;
-  await page.route('**/salto88/index.html**', (r) =>
-    r.fulfill({ body: '<!doctype html><canvas id="c"></canvas>', contentType: 'text/html' }),
-  );
-}
 
 test.describe('garage: launch', () => {
   test('J opens the door and lands on the game', async ({ page }) => {
-    await stubGame(page);
     await openGarage(page);
     await page.keyboard.press('j');
     await expect
@@ -178,7 +170,6 @@ test.describe('garage: launch', () => {
   });
 
   test('J twice navigates once', async ({ page }) => {
-    await stubGame(page);
     await openGarage(page);
     const urls: string[] = [];
     page.on('framenavigated', (f) => {
@@ -195,7 +186,6 @@ test.describe('garage: launch', () => {
   });
 
   test('Esc during the launch cancels it', async ({ page }) => {
-    await stubGame(page);
     await openGarage(page);
     await page.keyboard.press('j');
     await page.waitForTimeout(600);
@@ -206,14 +196,12 @@ test.describe('garage: launch', () => {
   });
 
   test('/en launches with lang=en', async ({ page }) => {
-    await stubGame(page);
     await openGarage(page, '/en');
     await page.keyboard.press('j');
     await page.waitForURL('**/salto88/index.html?lang=en', GAME_COMMIT);
   });
 
   test('back from the game shows the bench again', async ({ page }) => {
-    await stubGame(page);
     await openGarage(page);
     await page.keyboard.press('j');
     await page.waitForURL('**/salto88/index.html', GAME_COMMIT);
