@@ -10,6 +10,8 @@ export default defineConfig([
     'node_modules/**',
     '.superpowers/**',
     'assets-src/**',
+    // The Salto 88 build (vendored three r128 and its loaders), produced by the lab, not authored here.
+    'public/salto88/**',
     'out/**',
     'build/**',
     'playwright-report/**',

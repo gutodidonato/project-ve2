@@ -8,8 +8,6 @@ describe('useGameStore', () => {
   beforeEach(() => {
     localStorage.clear();
     useGameStore.setState({
-      zone: null,
-      mode: 'demo',
       pitstop: false,
       pitstopForced: false,
       pitstopReason: null,
@@ -24,8 +22,6 @@ describe('useGameStore', () => {
 
   it('has the documented initial state', () => {
     const s = useGameStore.getState();
-    expect(s.zone).toBeNull();
-    expect(s.mode).toBe('demo');
     expect(s.pitstop).toBe(false);
     expect(s.pitstopForced).toBe(false);
     expect(s.pitstopReason).toBeNull();
@@ -33,17 +29,9 @@ describe('useGameStore', () => {
     expect(s.tier).toBe('B');
   });
 
-  it('sets zone, mode and tier', () => {
-    const s = useGameStore.getState();
-    s.setZone('cases');
-    s.setMode('manual');
-    s.setTier('A');
-    const next = useGameStore.getState();
-    expect(next.zone).toBe('cases');
-    expect(next.mode).toBe('manual');
-    expect(next.tier).toBe('A');
-    next.setZone(null);
-    expect(useGameStore.getState().zone).toBeNull();
+  it('sets the tier', () => {
+    useGameStore.getState().setTier('A');
+    expect(useGameStore.getState().tier).toBe('A');
   });
 
   it('starts the garage on the bench and keeps the last action', () => {

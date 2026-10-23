@@ -14,7 +14,7 @@ test.describe.configure({ mode: 'serial', timeout: 120_000 });
 
 const LCP_BUDGET_CPU_MS = 2500;
 const LCP_BUDGET_4G_MS = 2000;
-const PAYLOAD_BUDGET_BYTES = 4 * 1024 * 1024;
+const PAYLOAD_BUDGET_BYTES = 2.5 * 1024 * 1024;
 
 /**
  * "4G" network profile: what Lighthouse's mobile preset simulates (150 ms round
@@ -107,7 +107,7 @@ test.describe('LCP', () => {
 });
 
 test.describe('3D payload', () => {
-  test('GLB plus every script the page loads is at most 4 MB (tier A, with post-processing)', async ({ page }) => {
+  test('GLB plus every script the page loads is at most 2.5 MB (tier A, with post-processing)', async ({ page }) => {
     await posingAsDesktopGpu(page);
     await page.goto('/pt');
     await expect(page.locator('html')).toHaveAttribute('data-mode', 'game');
@@ -120,7 +120,7 @@ test.describe('3D payload', () => {
       .toBe(true);
     await page.waitForTimeout(10_000);
 
-    // antialias is only on in tier A (WorldCanvas): proves the spoof reached the tier A path.
+    // antialias is only on in tier A (GarageCanvas): proves the spoof reached the tier A path.
     const tierA = await page.evaluate(
       () => document.querySelector('canvas')?.getContext('webgl2')?.getContextAttributes()?.antialias ?? false,
     );
