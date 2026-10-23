@@ -1,9 +1,11 @@
 'use client';
 
 import { useLayoutEffect, useRef } from 'react';
+import { useFrame } from '@react-three/fiber';
 import { Lightformer, Environment } from '@react-three/drei';
-import { Object3D, type SpotLight } from 'three';
+import { Object3D, type MeshBasicMaterial, type PointLight, type SpotLight } from 'three';
 import type { Tier } from '@/lib/game/tier';
+import { garageRuntime } from '@/lib/garage/runtime';
 import { CAR_SPOT } from '@/lib/garage/scene';
 
 const LAMP = '#FFCF8A';
@@ -12,7 +14,6 @@ const LAMP_POS: [number, number, number] = [-0.35, 2.05, -0.1];
 const LAMP_INTENSITY = 2.6;
 /** Headlights at full; the door at rest lets 0.35 of it leak under. */
 export const HEADLIGHT_MAX = 38;
-const HEADLIGHT_REST = 0.35;
 
 /** Where each headlight sits on the parked car (its nose faces +z, towards the garage). */
 const HEADLIGHT_X = [-0.55, 0.55];
@@ -22,6 +23,9 @@ const HEADLIGHT_Z = CAR_SPOT.z + 1.85;
 function Headlight({ x }: { x: number }) {
   const light = useRef<SpotLight>(null);
   const target = useRef(new Object3D());
+  useFrame(() => {
+    if (light.current) light.current.intensity = HEADLIGHT_MAX * garageRuntime.launch.headlights;
+  });
   useLayoutEffect(() => {
     target.current.position.set(x, 0.2, HEADLIGHT_Z + 6);
     target.current.updateMatrixWorld();
@@ -33,7 +37,7 @@ function Headlight({ x }: { x: number }) {
         ref={light}
         position={[x, HEADLIGHT_Y, HEADLIGHT_Z]}
         color={HEADLIGHTS}
-        intensity={HEADLIGHT_MAX * HEADLIGHT_REST}
+        intensity={HEADLIGHT_MAX * garageRuntime.launch.headlights}
         angle={0.5}
         penumbra={0.6}
         distance={12}
@@ -53,10 +57,18 @@ function Headlight({ x }: { x: number }) {
  * the same two lights (Lightformers, nothing downloaded) for the car's paint.
  */
 export function Lights({ tier }: { tier: Tier }) {
+  const lamp = useRef<PointLight>(null);
+  const bulb = useRef<MeshBasicMaterial>(null);
+  useFrame(() => {
+    const on = garageRuntime.launch.lamp;
+    if (lamp.current) lamp.current.intensity = LAMP_INTENSITY * on;
+    if (bulb.current) bulb.current.color.set(LAMP).multiplyScalar(on);
+  });
   return (
     <group name="lights">
       <hemisphereLight args={['#3b3f45', '#1a1816', 0.35]} />
       <pointLight
+        ref={lamp}
         name="lamp"
         position={LAMP_POS}
         color={LAMP}
@@ -72,7 +84,7 @@ export function Lights({ tier }: { tier: Tier }) {
       </mesh>
       <mesh position={LAMP_POS}>
         <sphereGeometry args={[0.035, 12, 8]} />
-        <meshBasicMaterial color={LAMP} />
+        <meshBasicMaterial ref={bulb} color={LAMP} />
       </mesh>
       {HEADLIGHT_X.map((x) => (
         <Headlight key={x} x={CAR_SPOT.x + x} />

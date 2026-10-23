@@ -151,3 +151,93 @@ test.describe('garage: screen', () => {
     }
   });
 });
+
+/**
+ * Until the game ships in public/salto88 (Task 7) the page is stubbed; after that the real one loads.
+ * Leaving a page with a live WebGL scene takes ~11 s under SwiftShader (38 ms without the scene,
+ * under 1.5 s on a real GPU), so the launch tests wait up to 30 s for the game page to commit.
+ */
+const GAME_COMMIT = { timeout: 30_000, waitUntil: 'commit' } as const;
+async function stubGame(page: Page) {
+  if (process.env.GARAGE_REAL_GAME === '1') return;
+  await page.route('**/salto88/index.html**', (r) =>
+    r.fulfill({ body: '<!doctype html><canvas id="c"></canvas>', contentType: 'text/html' }),
+  );
+}
+
+test.describe('garage: launch', () => {
+  test('J opens the door and lands on the game', async ({ page }) => {
+    await stubGame(page);
+    await openGarage(page);
+    await page.keyboard.press('j');
+    await expect
+      .poll(async () => (await snapshot(page)).door, { timeout: 3_000, intervals: [50] })
+      .toBeGreaterThan(0.2);
+    expect((await snapshot(page)).door).toBeLessThan(0.95);
+    await page.waitForURL('**/salto88/index.html', GAME_COMMIT);
+  });
+
+  test('J twice navigates once', async ({ page }) => {
+    await stubGame(page);
+    await openGarage(page);
+    const urls: string[] = [];
+    page.on('framenavigated', (f) => {
+      if (f === page.mainFrame()) urls.push(f.url());
+    });
+    await page.keyboard.press('j');
+    await page.keyboard.press('j');
+    await page.keyboard.press('c');
+    await page.keyboard.press('e');
+    await page.waitForURL('**/salto88/index.html', GAME_COMMIT);
+    await page.waitForTimeout(1_000);
+    expect(urls.filter((u) => u.includes('/salto88/'))).toHaveLength(1);
+    expect(urls.some((u) => u.includes('/en'))).toBe(false);
+  });
+
+  test('Esc during the launch cancels it', async ({ page }) => {
+    await stubGame(page);
+    await openGarage(page);
+    await page.keyboard.press('j');
+    await page.waitForTimeout(600);
+    await page.keyboard.press('Escape');
+    await expect(layer(page).getByRole('button', { name: /Currículo/ })).toBeVisible();
+    await page.waitForTimeout(4_000);
+    await expect(page).toHaveURL(/\/pt$/);
+  });
+
+  test('/en launches with lang=en', async ({ page }) => {
+    await stubGame(page);
+    await openGarage(page, '/en');
+    await page.keyboard.press('j');
+    await page.waitForURL('**/salto88/index.html?lang=en', GAME_COMMIT);
+  });
+
+  test('back from the game shows the bench again', async ({ page }) => {
+    await stubGame(page);
+    await openGarage(page);
+    await page.keyboard.press('j');
+    await page.waitForURL('**/salto88/index.html', GAME_COMMIT);
+    await page.goBack();
+    await expect(layer(page).getByRole('button', { name: /Currículo/ })).toBeVisible({ timeout: 30_000 });
+    const s = await snapshot(page);
+    expect(s.view).toBe('bench');
+    expect(s.door).toBeLessThan(0.05);
+  });
+
+  test('reduced motion cuts the camera', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.addInitScript(() => window.localStorage.setItem('rodovia:pitstop', 'off'));
+    await openGarage(page);
+    await page.keyboard.press('c');
+    await page.waitForTimeout(150);
+    const s = await snapshot(page);
+    expect(s.view).toBe('screen');
+    expect(s.arrived).toBe(true);
+  });
+
+  test('the credits name the car model', async ({ page }) => {
+    await openGarage(page);
+    await page.getByRole('button', { name: 'Créditos' }).click();
+    await expect(page.getByRole('dialog')).toContainText('dark_igorek');
+  });
+});

@@ -1,4 +1,5 @@
 import type { Quad } from './homography';
+import { launchFrame, type LaunchFrame } from './launch';
 
 /** A screen rectangle in CSS pixels, top-left origin. */
 export interface Rect {
@@ -13,6 +14,8 @@ export interface GarageRuntime {
   launchStart: number | null;
   /** How far the roll-up door is open beyond its resting gap, 0..1. */
   door: number;
+  /** The launch timeline at this frame (the resting frame outside the launch). */
+  launch: LaunchFrame;
   camera: [number, number, number];
   /** The camera has reached the pose of the current view. */
   arrived: boolean;
@@ -39,6 +42,7 @@ export interface GarageRuntime {
 export const garageRuntime: GarageRuntime = {
   launchStart: null,
   door: 0,
+  launch: launchFrame(0),
   camera: [0, 0, 0],
   arrived: false,
   glassRect: { x: 0, y: 0, width: 0, height: 0 },

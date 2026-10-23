@@ -6,6 +6,7 @@ import { CanvasTexture, Matrix4, SRGBColorSpace, Vector3, type InstancedMesh, ty
 import { framingFor, type Framing } from '@/lib/garage/camera';
 import { ACTION_CODES, KEY_ROWS, PORTRAIT_CODES, codeToAction, legendOf } from '@/lib/garage/keys';
 import { garageRuntime } from '@/lib/garage/runtime';
+import { garageSound } from '@/lib/garage/sound';
 import { BENCH_TOP_Y, GLASS } from '@/lib/garage/scene';
 import type { GarageAction } from '@/lib/garage/state';
 
@@ -164,6 +165,7 @@ export function Keyboard({ act }: { act(a: GarageAction): void }) {
     e.stopPropagation();
     const code = layout.caps[e.instanceId].code;
     garageRuntime.pressed.set(code, performance.now());
+    garageSound().key();
     const action = codeToAction(code);
     if (action !== null) act(action);
   };

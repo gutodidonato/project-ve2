@@ -5,6 +5,7 @@ import { useFrame } from '@react-three/fiber';
 import type { Tier } from '@/lib/game/tier';
 import type { GarageAction } from '@/lib/garage/state';
 import { registerGarageDebug } from '@/lib/garage/debug';
+import { launchFrame } from '@/lib/garage/launch';
 import { garageRuntime } from '@/lib/garage/runtime';
 import { useGameStore } from '@/lib/store';
 import { Bench } from './Bench';
@@ -25,6 +26,13 @@ const copyRect = (r: { x: number; y: number; width: number; height: number }) =>
 /** The garage: room and bench, the computer, the door and the DeLorean behind it, the two lights, the camera. */
 export function Scene({ tier, act }: SceneProps) {
   // Count every pass of a frame (tier A adds post-processing passes): reset by hand, read before the next render.
+  // The launch timeline drives the door, the lights, the camera and the flash.
+  useFrame(() => {
+    const start = garageRuntime.launchStart;
+    garageRuntime.launch = launchFrame(start === null ? 0 : performance.now() - start);
+    garageRuntime.door = garageRuntime.launch.door;
+  }, -1);
+
   useFrame(({ gl }) => {
     gl.info.autoReset = false;
     garageRuntime.drawCalls = gl.info.render.calls;

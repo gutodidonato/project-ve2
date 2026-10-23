@@ -3,6 +3,8 @@
 import type { Locale, Profile } from '@/content/types';
 import { useGameStore } from '@/lib/store';
 import { GarageCanvas } from '@/components/garage/GarageCanvas';
+import { GarageChrome } from '@/components/garage/GarageChrome';
+import { GarageFlash } from '@/components/garage/GarageFlash';
 import { ScreenSurface } from '@/components/garage/ScreenSurface';
 import { useGarageControls } from '@/components/garage/useGarageControls';
 import { ErrorBoundary } from './ErrorBoundary';
@@ -21,8 +23,8 @@ function fallBackToPitstop() {
  * The 3D boundary: the only module that may import three / R3F, directly or
  * through components/garage (it is loaded through `next/dynamic` with
  * `ssr: false` by GameMount, only when not in pit stop). A fixed
- * full-viewport layer under the pit stop toggle (z-50): the garage canvas, and
- * the DOM screen above it.
+ * full-viewport layer under the pit stop toggle (z-50): the garage canvas, the
+ * DOM screen above it, the launch flash and the sound / credits / language chrome.
  */
 export default function GameLayer({ profile, locale }: GameLayerProps) {
   const act = useGarageControls(locale);
@@ -33,6 +35,8 @@ export default function GameLayer({ profile, locale }: GameLayerProps) {
         <GarageCanvas act={act} />
       </ErrorBoundary>
       <ScreenSurface profile={profile} locale={locale} act={act} />
+      <GarageFlash />
+      <GarageChrome locale={locale} act={act} />
     </div>
   );
 }
