@@ -1,17 +1,12 @@
 'use client';
 
-import { useMemo, useRef } from 'react';
+import { useCallback } from 'react';
 import type { Locale, Profile } from '@/content/types';
+import { reduceGarage, type GarageAction } from '@/lib/garage/state';
 import { useGameStore } from '@/lib/store';
-import type { Company } from './Decor';
+import { GarageCanvas } from '@/components/garage/GarageCanvas';
+import { ScreenSurface } from '@/components/garage/ScreenSurface';
 import { ErrorBoundary } from './ErrorBoundary';
-import { Hud } from './Hud';
-import { InputController } from './InputController';
-import { Minimap } from './Minimap';
-import { useHashSync } from './useHashSync';
-import { useZoneNames } from './useZoneNames';
-import { WorldCanvas } from './WorldCanvas';
-import { ZonePanel } from './ZonePanel';
 
 export interface GameLayerProps {
   profile: Profile;
@@ -24,31 +19,24 @@ function fallBackToPitstop() {
 }
 
 /**
- * The 3D game boundary: the only module under components/game that may import
- * three / R3F (it is loaded through `next/dynamic` with `ssr: false` by
- * GameMount, only when not in pit stop). A fixed full-viewport layer under the
- * pit stop toggle (z-50): the canvas, then the DOM overlays above it (HUD, zone
- * panel, minimap).
+ * The 3D boundary: the only module that may import three / R3F, directly or
+ * through components/garage (it is loaded through `next/dynamic` with
+ * `ssr: false` by GameMount, only when not in pit stop). A fixed
+ * full-viewport layer under the pit stop toggle (z-50): the garage canvas, and
+ * the DOM screen above it.
  */
 export default function GameLayer({ profile, locale }: GameLayerProps) {
-  const names = useZoneNames();
-  const companies = useMemo<Company[]>(
-    () => [...profile.experience].reverse().map((e) => ({ name: e.company, since: e.start.slice(0, 4) })),
-    [profile],
-  );
-
-  const layerRef = useRef<HTMLDivElement>(null);
-  useHashSync();
+  const act = useCallback((a: GarageAction) => {
+    const { garage, setGarage } = useGameStore.getState();
+    setGarage(reduceGarage(garage, a).state, a);
+  }, []);
 
   return (
-    <div ref={layerRef} className="game-layer fixed inset-0 z-0">
+    <div className="game-layer fixed inset-0 z-0">
       <ErrorBoundary fallback={null} onError={fallBackToPitstop}>
-        <WorldCanvas labels={names} companies={companies} />
+        <GarageCanvas />
       </ErrorBoundary>
-      <InputController layerRef={layerRef} />
-      <Hud profile={profile} locale={locale} names={names} />
-      <ZonePanel profile={profile} locale={locale} names={names} />
-      <Minimap names={names} />
+      <ScreenSurface profile={profile} locale={locale} act={act} />
     </div>
   );
 }

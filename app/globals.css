@@ -367,3 +367,13 @@ html[data-mode="game"] .game-layer canvas {
     filter: brightness(0.97);
   }
 }
+
+/* The DOM screen on the glass: clipped on the bench, scrolling once the camera is inside. */
+.crt-screen {
+  overflow: hidden;
+}
+
+.crt-screen[data-full="true"] {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}

@@ -123,7 +123,7 @@
   export type Framing = 'wide' | 'portrait';
   export interface Pose { position: [number, number, number]; target: [number, number, number]; fov: number }
   export function framingFor(width: number, height: number): Framing; // portrait quando width / height < 0.8
-  export const BENCH_POSE: Record<Framing, Pose>; // wide: pos [-1.1,1.55,2.3] alvo [0.6,1.1,-0.6] fov 42; portrait: pos [-0.6,1.35,1.35] alvo [-0.6,1.2,0] fov 50
+  export const BENCH_POSE: Record<Framing, Pose>; // wide: pos [-1.1,1.55,2.3] alvo [0.6,1.1,-0.6] fov 42; portrait: pos [-0.6,1.2,1.02] alvo [-0.6,1.08,0] fov 50 (Ruling da Task 4)
   export const CAR_POSE: Pose; // pos [2.2,1.2,0.6] alvo [3.1,0.7,-3.2] fov 46
   export function glassDistance(fov: number, aspect: number, fit: 'contain' | 'cover'): number;
   export function screenPose(framing: Framing, aspect: number): Pose; // de frente para GLASS, wide = contain × 1.04, portrait = cover

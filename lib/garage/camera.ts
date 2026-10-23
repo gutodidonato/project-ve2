@@ -17,7 +17,7 @@ export function framingFor(width: number, height: number): Framing {
 /** The workbench at 3/4 (computer in the left third, door on the right), or straight on for phones. */
 export const BENCH_POSE: Record<Framing, Pose> = {
   wide: { position: [-1.1, 1.55, 2.3], target: [0.6, 1.1, -0.6], fov: 42 },
-  portrait: { position: [-0.6, 1.35, 1.35], target: [-0.6, 1.2, 0], fov: 50 },
+  portrait: { position: [-0.6, 1.2, 1.02], target: [-0.6, 1.08, 0], fov: 50 },
 };
 
 /** Near the door, looking at the DeLorean (end of the launch). */
