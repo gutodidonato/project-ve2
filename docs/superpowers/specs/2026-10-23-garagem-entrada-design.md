@@ -104,6 +104,7 @@ celular em pé
 ```
 
 - **Desktop:** câmera a 3/4; o portão ocupa a metade direita, o carro aparece baixo, pela abertura.
+- **Controles fora da tela (ajuste do plano):** o botão do pit stop fica onde já está (inferior direito no desktop, superior direito no celular; os testes de modo fixam isso). Som, Créditos e PT | EN ficam no canto inferior esquerdo.
 - **Celular em pé:** câmera de frente e mais perto; o monitor ocupa cerca de 55% do alto; o teclado vira uma fileira de quatro teclas grandes (C, J, K, E) que afundam ao toque. Celular deitado usa o enquadramento do desktop.
 - **Tela cheia (C/K):** o vidro enche a janela com uma moldura bege fina visível nas bordas; no celular a moldura some e sobra o vidro.
 
@@ -129,6 +130,7 @@ Mudo até o primeiro clique ou tecla, com botão para silenciar sempre visível.
 
 - **Saída da build:** `node build-v3.mjs <lab> D:/Projetos/Luis/project-ve2/public/salto88`. O endereço é `/salto88/index.html`, com o nome do arquivo explícito: o matcher do `proxy.ts` ignora caminhos com ponto, então o middleware de idioma não pega a página do jogo.
 - **Git:** `public/salto88/` entra no repositório; `public/lab/` continua no `.git/info/exclude`.
+- **Sem terceiros em runtime (achado no plano):** o jogo hoje busca o three r128, o `GLTFLoader` e o `SkeletonUtils` no cdnjs e no jsDelivr, e as fontes no Google Fonts. No deploy esses arquivos passam a sair de `public/salto88/vendor/`, como o resto do site (nenhum fetch de terceiros).
 - **Peso:** hoje são 54 MB (modelos em JSON 18 MB, música 16 MB, vídeo 5,7 MB, áudio 0,7 MB). Meta: a pasta com no máximo 30 MB. Caminho: recomprimir a música (mesmo volume medido por estação, regra do Salto 88) e compactar o `models-json`; o vídeo fica. Se depois disso passar de 30 MB, os arquivos pesados vão para o Vercel Blob e o jogo os busca de lá.
 - **Garagem:** interativa com no máximo 2,5 MB transferidos além do que o pit stop já carrega, e no máximo 60 chamadas de desenho.
 - O merge na `main` (produção) continua decisão do Luis.
