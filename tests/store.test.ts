@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { INITIAL_GARAGE } from '@/lib/garage/state';
 import { PITSTOP_KEY } from '@/lib/pitstop';
 import { useGameStore } from '@/lib/store';
 
@@ -43,6 +44,18 @@ describe('useGameStore', () => {
     expect(next.tier).toBe('A');
     next.setZone(null);
     expect(useGameStore.getState().zone).toBeNull();
+  });
+
+  it('starts the garage on the bench and keeps the last action', () => {
+    useGameStore.setState({ garage: INITIAL_GARAGE, garageLast: null });
+    expect(useGameStore.getState().garage).toEqual(INITIAL_GARAGE);
+    expect(useGameStore.getState().garageLast).toBeNull();
+    useGameStore.getState().setGarage({ view: 'screen', content: 'cv' }, 'cv');
+    expect(useGameStore.getState().garage).toEqual({ view: 'screen', content: 'cv' });
+    expect(useGameStore.getState().garageLast).toBe('cv');
+    useGameStore.getState().setGarage(INITIAL_GARAGE);
+    expect(useGameStore.getState().garage).toEqual(INITIAL_GARAGE);
+    expect(useGameStore.getState().garageLast).toBe('cv');
   });
 
   it('setPitstop persists the choice', () => {

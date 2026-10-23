@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { INITIAL_GARAGE, type GarageAction, type GarageState } from '@/lib/garage/state';
 import type { Tier } from '@/lib/game/tier';
 import type { Mode, ZoneId } from '@/lib/game/types';
 import { PITSTOP_KEY } from '@/lib/pitstop';
@@ -23,6 +24,12 @@ export interface GameStore {
   /** False until the client has made the initial pit stop decision (the server HTML is the pit stop). */
   pitstopReady: boolean;
   tier: Tier;
+  /** Garage view and screen content (lib/garage/state.ts). */
+  garage: GarageState;
+  /** The last garage action, for the `> currículo` prompt on the menu. */
+  garageLast: GarageAction | null;
+  /** Without `last`, the previous last action is kept. */
+  setGarage(s: GarageState, last?: GarageAction | null): void;
   setZone(z: ZoneId | null): void;
   setMode(m: Mode): void;
   /**
@@ -49,6 +56,9 @@ export const useGameStore = create<GameStore>()((set, get) => ({
   pitstopReason: null,
   pitstopReady: false,
   tier: 'B',
+  garage: INITIAL_GARAGE,
+  garageLast: null,
+  setGarage: (garage, last) => set(last === undefined ? { garage } : { garage, garageLast: last }),
   setZone: (zone) => set({ zone }),
   setMode: (mode) => set({ mode }),
   setPitstop: (on) => {
