@@ -166,6 +166,14 @@ html[data-mode="game"] .game-layer canvas {
   --color-bad: #ff6a4a;
   --color-cyan: #ffb000;
   --color-magenta: #ffb000;
+  --panel: #17130c;
+  --ink: #ffb000;
+  --muted: #c48e12;
+  --sun: #ffb000;
+  --line: #4a3a12;
+  --cyan: #ffb000;
+  --magenta: #ffb000;
+  --font-display: var(--font-mono);
   background: var(--crt-glass);
   color: var(--crt-phosphor);
   font-family: var(--font-mono);
@@ -213,8 +221,8 @@ html[data-mode="game"] .game-layer canvas {
   font-weight: 500;
 }
 
-/* Teletext double height: twice as tall, same width. */
-.crt-name {
+/* Teletext double height: twice as tall, same width (the margin makes room for the second half). */
+.crt-page .crt-name {
   display: inline-block;
   margin-bottom: 1.05em;
   font-size: 2em;
@@ -227,6 +235,38 @@ html[data-mode="game"] .game-layer canvas {
 .crt-title {
   font-size: 1.35em;
   font-weight: 500;
+}
+
+/* The reused pit stop form keeps its layout, not its capitals. */
+.crt label,
+.crt .eyebrow {
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+/* Under 700px the pit stop toggle sits top-right: the page starts below it. */
+@media (width < 43.75rem) {
+  .crt-screen[data-full="true"] .crt-page {
+    padding-top: 4.25rem;
+  }
+}
+
+/* The title only receives focus by script (the camera arriving): the screen itself shows where you are. */
+.crt-title:focus {
+  outline: none;
+}
+
+/* The bench menu fills the glass: bigger type than the scrolling pages, tighter rhythm to fit 600 px. */
+.crt-page.crt-menu {
+  gap: 0.45em;
+  padding: 0.9em 1.3em;
+  font-size: 32px;
+}
+
+/* On the bench the 3D keys (and on phones their big caps) are the touch targets; the menu lines stay compact. */
+.crt-menu .crt-key {
+  min-height: 0;
+  padding: 0.08em 0;
 }
 
 .crt-page h3 {

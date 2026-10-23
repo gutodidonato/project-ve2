@@ -130,9 +130,13 @@ test.describe('garage: screen', () => {
     await expect
       .poll(
         async () => {
-          const { glassRect: r } = await snapshot(page);
+          // On a phone the glass covers the window and spills past it: the page is the part inside the window.
+          const { glassRect: g } = await snapshot(page);
+          const x = Math.max(0, g.x);
+          const y = Math.max(0, g.y);
+          const width = Math.min(390, g.x + g.width) - x;
           const box = await page.locator('.crt-screen').boundingBox();
-          return box ? Math.max(Math.abs(box.x - r.x), Math.abs(box.y - r.y), Math.abs(box.width - r.width)) : 999;
+          return box ? Math.max(Math.abs(box.x - x), Math.abs(box.y - y), Math.abs(box.width - width)) : 999;
         },
         { timeout: 3_000 },
       )

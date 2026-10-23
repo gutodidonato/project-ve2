@@ -4,7 +4,6 @@ import { useEffect, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Vector3, type PerspectiveCamera } from 'three';
 import { BENCH_POSE, CAR_POSE, framingFor, screenPose, type Pose } from '@/lib/garage/camera';
-import { launchFrame } from '@/lib/garage/launch';
 import { garageRuntime } from '@/lib/garage/runtime';
 import { GLASS } from '@/lib/garage/scene';
 import { placeSurface } from '@/lib/garage/surface';
@@ -31,12 +30,12 @@ function mix(a: Pose, b: Pose, t: number): Pose {
 }
 
 /** The pose the current view asks for. */
-function goalPose(width: number, height: number, now: number): Pose {
+function goalPose(width: number, height: number): Pose {
   const framing = framingFor(width, height);
   const { view } = useGameStore.getState().garage;
   if (view === 'screen') return screenPose(framing, width / height);
   if (view === 'launch' && garageRuntime.launchStart !== null) {
-    return mix(BENCH_POSE[framing], CAR_POSE, launchFrame(now - garageRuntime.launchStart).camera);
+    return mix(BENCH_POSE[framing], CAR_POSE, garageRuntime.launch.camera);
   }
   return BENCH_POSE[framing];
 }
@@ -62,7 +61,7 @@ export function GarageCamera() {
   useFrame(({ camera, size }, dt) => {
     const cam = camera as PerspectiveCamera;
     const { view } = useGameStore.getState().garage;
-    const goal = goalPose(size.width, size.height, performance.now());
+    const goal = goalPose(size.width, size.height);
     goalPos.set(...goal.position);
     goalTarget.set(...goal.target);
 

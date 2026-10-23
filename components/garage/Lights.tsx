@@ -10,10 +10,10 @@ import { CAR_SPOT } from '@/lib/garage/scene';
 
 const LAMP = '#FFCF8A';
 const HEADLIGHTS = '#DDE8FF';
-const LAMP_POS: [number, number, number] = [-0.35, 2.05, -0.1];
+const LAMP_POS: [number, number, number] = [-0.25, 1.86, -0.05];
 const LAMP_INTENSITY = 2.6;
 /** Headlights at full; the door at rest lets 0.35 of it leak under. */
-export const HEADLIGHT_MAX = 38;
+export const HEADLIGHT_MAX = 90;
 
 /** Where each headlight sits on the parked car (its nose faces +z, towards the garage). */
 const HEADLIGHT_X = [-0.55, 0.55];
@@ -27,7 +27,8 @@ function Headlight({ x }: { x: number }) {
     if (light.current) light.current.intensity = HEADLIGHT_MAX * garageRuntime.launch.headlights;
   });
   useLayoutEffect(() => {
-    target.current.position.set(x, 0.2, HEADLIGHT_Z + 6);
+    // Aimed through the door at the bench, so the cold light reaches the warm corner as the door rises.
+    target.current.position.set(x - 1.6, 0.6, HEADLIGHT_Z + 5);
     target.current.updateMatrixWorld();
     if (light.current) light.current.target = target.current;
   }, [x]);
@@ -38,15 +39,11 @@ function Headlight({ x }: { x: number }) {
         position={[x, HEADLIGHT_Y, HEADLIGHT_Z]}
         color={HEADLIGHTS}
         intensity={HEADLIGHT_MAX * garageRuntime.launch.headlights}
-        angle={0.5}
+        angle={0.6}
         penumbra={0.6}
         distance={12}
         decay={1.6}
       />
-      <mesh position={[x, HEADLIGHT_Y, HEADLIGHT_Z + 0.01]}>
-        <circleGeometry args={[0.09, 20]} />
-        <meshBasicMaterial color={HEADLIGHTS} />
-      </mesh>
     </group>
   );
 }

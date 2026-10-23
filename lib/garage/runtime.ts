@@ -12,6 +12,8 @@ export interface Rect {
 export interface GarageRuntime {
   /** performance.now() of the J press; null outside the launch. */
   launchStart: number | null;
+  /** e2e and shots only: the launch frozen at this many ms after J (window.__garage.holdLaunch). */
+  launchHold: number | null;
   /** How far the roll-up door is open beyond its resting gap, 0..1. */
   door: number;
   /** The launch timeline at this frame (the resting frame outside the launch). */
@@ -41,6 +43,7 @@ export interface GarageRuntime {
  */
 export const garageRuntime: GarageRuntime = {
   launchStart: null,
+  launchHold: null,
   door: 0,
   launch: launchFrame(0),
   camera: [0, 0, 0],

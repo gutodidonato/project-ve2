@@ -6,6 +6,8 @@ export interface GarageSnapshot {
   view: GarageView;
   content: ScreenContent | null;
   door: number;
+  /** The launch's white flash, 0..1. */
+  whiteout: number;
   camera: [number, number, number];
   arrived: boolean;
   drawCalls: number;
@@ -15,6 +17,8 @@ export interface GarageSnapshot {
 
 export interface GarageDebug {
   snapshot(): GarageSnapshot;
+  /** Freeze the launch timeline at `ms` after J (null lets it run): for the shot list. */
+  holdLaunch(ms: number | null): void;
 }
 
 declare global {
@@ -25,8 +29,8 @@ declare global {
 }
 
 /** Publish `window.__garage`; `read` must return copies, never live objects. Returns the cleanup. */
-export function registerGarageDebug(read: () => GarageSnapshot): () => void {
-  const api: GarageDebug = { snapshot: read };
+export function registerGarageDebug(read: () => GarageSnapshot, hold: (ms: number | null) => void): () => void {
+  const api: GarageDebug = { snapshot: read, holdLaunch: hold };
   window.__garage = api;
   return () => {
     if (window.__garage === api) delete window.__garage;

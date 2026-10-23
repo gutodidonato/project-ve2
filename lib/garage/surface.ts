@@ -17,8 +17,13 @@ export function placeSurface(el: HTMLElement | null, full: boolean, rt: GarageRu
   if (!rt.glassInFront) {
     css = `visibility:hidden;width:${SCREEN_PX.width}px;height:${SCREEN_PX.height}px`;
   } else if (full) {
+    // On phones the glass covers the window and spills past it: keep the page inside the window.
     const r = rt.glassRect;
-    css = `left:${r.x}px;top:${r.y}px;width:${r.width}px;height:${r.height}px`;
+    const x0 = Math.max(0, r.x);
+    const y0 = Math.max(0, r.y);
+    const x1 = Math.min(window.innerWidth, r.x + r.width);
+    const y1 = Math.min(window.innerHeight, r.y + r.height);
+    css = `left:${x0}px;top:${y0}px;width:${x1 - x0}px;height:${y1 - y0}px`;
   } else {
     const m = toMatrix3d(quadHomography(SCREEN_PX.width, SCREEN_PX.height, rt.glassQuad));
     css = `width:${SCREEN_PX.width}px;height:${SCREEN_PX.height}px;transform:${m}`;

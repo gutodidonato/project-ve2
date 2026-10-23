@@ -29,7 +29,8 @@ export function Scene({ tier, act }: SceneProps) {
   // The launch timeline drives the door, the lights, the camera and the flash.
   useFrame(() => {
     const start = garageRuntime.launchStart;
-    garageRuntime.launch = launchFrame(start === null ? 0 : performance.now() - start);
+    const elapsed = start === null ? 0 : (garageRuntime.launchHold ?? performance.now() - start);
+    garageRuntime.launch = launchFrame(elapsed);
     garageRuntime.door = garageRuntime.launch.door;
   }, -1);
 
@@ -47,12 +48,15 @@ export function Scene({ tier, act }: SceneProps) {
           view: garage.view,
           content: garage.content,
           door: garageRuntime.door,
+          whiteout: garageRuntime.launch.whiteout,
           camera: [...garageRuntime.camera],
           arrived: garageRuntime.arrived,
           drawCalls: garageRuntime.drawCalls,
           glassRect: copyRect(garageRuntime.glassRect),
           keyRects: garageRuntime.keyRects.map((k) => ({ code: k.code, rect: copyRect(k.rect) })),
         };
+      }, (ms) => {
+        garageRuntime.launchHold = ms;
       }),
     [],
   );

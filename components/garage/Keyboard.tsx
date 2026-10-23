@@ -36,11 +36,11 @@ interface Layout {
 /** A 1988 keyboard on the bench; on phones, four big keys on a stand. */
 function layoutFor(framing: Framing): Layout {
   if (framing === 'portrait') {
-    const pitch = 0.098;
+    const pitch = 0.085;
     return {
-      caps: PORTRAIT_CODES.map((code, i) => ({ code, x: (i - 1.5) * pitch, z: 0, width: 0.085 })),
-      cap: { depth: 0.085, height: 0.035 },
-      base: { width: 0.41, depth: 0.12 },
+      caps: PORTRAIT_CODES.map((code, i) => ({ code, x: (i - 1.5) * pitch, z: 0, width: 0.072 })),
+      cap: { depth: 0.072, height: 0.03 },
+      base: { width: 0.36, depth: 0.1 },
       tilt: 0.7,
       z: 0.17,
     };

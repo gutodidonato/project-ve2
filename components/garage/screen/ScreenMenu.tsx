@@ -44,7 +44,7 @@ export function ScreenMenu({
   const prompt = promptKey === null ? '' : t(promptKey).toLowerCase();
 
   return (
-    <div className={`crt-page crt-flicker${boot ? ' crt-boot' : ''}`}>
+    <div className={`crt-page crt-menu crt-flicker${boot ? ' crt-boot' : ''}`}>
       <p className="crt-name">{profile.name}</p>
       <p className="crt-dim">{profile.headline}</p>
       <ul className="crt-keys">

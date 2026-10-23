@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import type { Locale } from '@/content/types';
 import { garageSound } from '@/lib/garage/sound';
 import type { GarageAction } from '@/lib/garage/state';
+import { useGameStore } from '@/lib/store';
 import { CreditsButton } from '@/components/game/CreditsDialog';
 
 const chip =
@@ -17,6 +18,9 @@ const chip =
 export function GarageChrome({ locale, act }: { locale: Locale; act(a: GarageAction): void }) {
   const t = useTranslations('Garage');
   const [muted, setMuted] = useState(() => garageSound().muted());
+  // Inside the monitor the page takes the window; the controls come back with the bench.
+  const inside = useGameStore((s) => s.garage.view === 'screen');
+  if (inside) return null;
 
   return (
     <div className="absolute bottom-4 left-4 z-20 flex flex-wrap gap-2">

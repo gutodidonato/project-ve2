@@ -16,12 +16,12 @@ export function framingFor(width: number, height: number): Framing {
 
 /** The workbench at 3/4 (computer in the left third, door on the right), or straight on for phones. */
 export const BENCH_POSE: Record<Framing, Pose> = {
-  wide: { position: [-1.1, 1.55, 2.3], target: [0.6, 1.1, -0.6], fov: 42 },
+  wide: { position: [-0.95, 1.42, 1.8], target: [0.62, 1.1, -0.7], fov: 42 },
   portrait: { position: [-0.6, 1.2, 1.02], target: [-0.6, 1.08, 0], fov: 50 },
 };
 
-/** Near the door, looking at the DeLorean (end of the launch). */
-export const CAR_POSE: Pose = { position: [2.2, 1.2, 0.6], target: [3.1, 0.7, -3.2], fov: 46 };
+/** From inside the garage at 3/4, the whole DeLorean in the open door (end of the launch). */
+export const CAR_POSE: Pose = { position: [1.35, 1.3, 1.5], target: [3.1, 0.55, -2.7], fov: 46 };
 
 const SCREEN_FOV = 40;
 /** Wide windows keep a thin bezel around the glass. */
