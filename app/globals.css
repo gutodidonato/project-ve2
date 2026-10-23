@@ -148,3 +148,222 @@ html[data-mode="game"] .game-layer canvas {
     padding-top: 6.5rem;
   }
 }
+
+/*
+ * Garage CRT screen (components/garage/screen). Amber phosphor on dark glass,
+ * IBM Plex Mono only. The --color-* overrides re-theme the pit stop pieces
+ * reused inside it (ContactForm, EmailLink) without touching their classes.
+ */
+.crt {
+  --crt-glass: #17130c;
+  --crt-phosphor: #ffb000;
+  --crt-dim: #c48e12;
+  --color-panel: #17130c;
+  --color-ink: #ffb000;
+  --color-muted: #c48e12;
+  --color-sun: #ffb000;
+  --color-line: #4a3a12;
+  --color-bad: #ff6a4a;
+  --color-cyan: #ffb000;
+  --color-magenta: #ffb000;
+  background: var(--crt-glass);
+  color: var(--crt-phosphor);
+  font-family: var(--font-mono);
+  font-size: 18px;
+  line-height: 1.5;
+  text-shadow: 0 0 6px rgb(255 176 0 / 0.35);
+  scrollbar-width: thin;
+  scrollbar-color: var(--crt-dim) var(--crt-glass);
+}
+
+.crt :focus-visible {
+  outline: 2px solid var(--crt-phosphor);
+  outline-offset: 2px;
+}
+
+.crt a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+/* The 1985 terminal grid: left aligned, never past 72 columns. */
+.crt-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1em;
+  max-width: 72ch;
+  padding: 1.5em 2em 2em;
+}
+
+.crt-page p,
+.crt-page h2,
+.crt-page h3,
+.crt-page ul,
+.crt-page ol,
+.crt-page dl {
+  margin: 0;
+}
+
+.crt-dim {
+  color: var(--crt-dim);
+}
+
+.crt-strong {
+  font-weight: 500;
+}
+
+/* Teletext double height: twice as tall, same width. */
+.crt-name {
+  display: inline-block;
+  margin-bottom: 1.05em;
+  font-size: 2em;
+  font-weight: 500;
+  line-height: 1;
+  transform: scaleY(2);
+  transform-origin: top left;
+}
+
+.crt-title {
+  font-size: 1.35em;
+  font-weight: 500;
+}
+
+.crt-page h3 {
+  border-bottom: 1px solid var(--color-line);
+  font-size: 1em;
+  font-weight: 500;
+  padding-bottom: 0.2em;
+  margin-bottom: 0.5em;
+}
+
+.crt-keys {
+  display: grid;
+  gap: 0.25em;
+  list-style: none;
+  padding: 0;
+}
+
+.crt-key {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0.15em 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-shadow: inherit;
+  cursor: pointer;
+}
+
+.crt-key kbd {
+  display: inline-block;
+  min-width: 1.7em;
+  margin-right: 0.7em;
+  border: 1px solid var(--crt-dim);
+  font: inherit;
+  text-align: center;
+}
+
+.crt-key:hover kbd,
+.crt-key:focus-visible kbd {
+  background: var(--crt-phosphor);
+  color: var(--crt-glass);
+  text-shadow: none;
+}
+
+.crt-bar {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8em;
+  padding: 0.4em 0;
+  background: var(--crt-glass);
+}
+
+.crt-action {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0.2em 0.9em;
+  border: 1px solid var(--crt-dim);
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.crt-action:hover {
+  border-color: var(--crt-phosphor);
+}
+
+.crt-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9em;
+  list-style: none;
+  padding: 0;
+}
+
+.crt-bullets {
+  padding-left: 1.4em;
+  list-style: '- ';
+}
+
+.crt-rows > div {
+  display: grid;
+  grid-template-columns: 7em minmax(0, 1fr);
+  gap: 0.5em;
+}
+
+.crt-rows dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .crt-cursor {
+    animation: crt-blink 1s steps(1) infinite;
+  }
+
+  .crt-boot {
+    animation: crt-boot 600ms ease-out both;
+  }
+
+  .crt-flicker {
+    animation: crt-flicker 4s ease-in-out infinite;
+  }
+}
+
+@keyframes crt-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* The tube warming up: a line opens from the centre, then the whole picture. */
+@keyframes crt-boot {
+  0% {
+    clip-path: inset(50% 50% 50% 50%);
+  }
+  40% {
+    clip-path: inset(49.6% 0 49.6% 0);
+  }
+  100% {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes crt-flicker {
+  0%,
+  100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(0.97);
+  }
+}

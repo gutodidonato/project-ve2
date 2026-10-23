@@ -137,5 +137,30 @@
     "creditsIntro": "Modelo 3D do carro:",
     "close": "Fechar",
     "textVersion": "Ver versão em texto (P)"
+  },
+  "Garage": {
+    "menuCv": "Currículo",
+    "menuPlay": "Jogar Salto 88",
+    "menuContact": "Contato",
+    "menuLanguage": "English",
+    "back": "Voltar (Esc)",
+    "pdf": "Baixar PDF",
+    "pdfPtOnly": "Baixar PDF",
+    "destination": "Destino: fev 2019",
+    "gameLanguage": "Jogo em português",
+    "summary": "Resumo",
+    "experience": "Experiência",
+    "cases": "Cases",
+    "skills": "Competências",
+    "education": "Formação",
+    "languages": "Idiomas",
+    "current": "atual",
+    "consulting": "Consultoria",
+    "email": "E-mail",
+    "book": "Agendar conversa",
+    "sound": "Som",
+    "credits": "Créditos",
+    "language": "PT | EN",
+    "screen": "Tela do computador"
   }
 }

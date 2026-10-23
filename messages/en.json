@@ -137,5 +137,30 @@
     "creditsIntro": "Car 3D model:",
     "close": "Close",
     "textVersion": "Text version (P)"
+  },
+  "Garage": {
+    "menuCv": "Resume",
+    "menuPlay": "Play Salto 88",
+    "menuContact": "Contact",
+    "menuLanguage": "Português",
+    "back": "Back (Esc)",
+    "pdf": "Download PDF",
+    "pdfPtOnly": "PDF (in Portuguese)",
+    "destination": "Destination: Feb 2019",
+    "gameLanguage": "Game in Portuguese for now",
+    "summary": "Summary",
+    "experience": "Experience",
+    "cases": "Cases",
+    "skills": "Skills",
+    "education": "Education",
+    "languages": "Languages",
+    "current": "present",
+    "consulting": "Consulting",
+    "email": "Email",
+    "book": "Book a call",
+    "sound": "Sound",
+    "credits": "Credits",
+    "language": "PT | EN",
+    "screen": "Computer screen"
   }
 }
