@@ -134,5 +134,33 @@
     "credits": "Credits",
     "language": "PT | EN",
     "screen": "Computer screen"
+  },
+  "Os": {
+    "brand": "LuisOS 88",
+    "file": "File",
+    "view": "View",
+    "help": "Help",
+    "desktop": "LuisOS 88 desktop",
+    "icons": {
+      "cv": "Resume.txt",
+      "projects": "Projects",
+      "contact": "Contact",
+      "salto88": "Salto88.exe",
+      "control": "Control panel",
+      "readme": "Readme.txt",
+      "trash": "Trash"
+    },
+    "close": "Close (Esc)",
+    "readmeHow": "Double-click an icon. Keys: C resume, K contact, J play, E Português, Esc closes.",
+    "readmePit": "P opens the text version.",
+    "bugFile": "bug_88mph.log",
+    "bugText": "Error: flux capacitor out of power. Reach 88 mph.",
+    "sound": "Sound",
+    "on": "On",
+    "off": "Off",
+    "language": "Language",
+    "credits": "Credits",
+    "stack": "Stack",
+    "starting": "Starting Salto88.exe…"
   }
 }

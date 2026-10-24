@@ -417,3 +417,260 @@ html[data-mode="game"] .game-layer canvas {
   overflow-y: auto;
   overscroll-behavior: contain;
 }
+
+/*
+ * LuisOS 88 (components/garage/os): a monochrome amber desktop, like a 1988
+ * Hercules monitor. Same palette as the screen: glass, phosphor, dim phosphor,
+ * and a 2 px stipple; no shadows, no new colour.
+ */
+.os-desktop {
+  position: relative;
+  overflow: hidden;
+  background: #17130c repeating-conic-gradient(#1f190f 0 25%, #17130c 0 50%) 0 0 / 4px 4px;
+  font-family: var(--font-mono);
+  cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' shape-rendering='crispEdges'><polygon points='1,1 1,13 4,10 6,15 8,14 6,9 10,9' fill='%23FFB000' stroke='%2317130C'/></svg>") 1 1, default;
+}
+
+.os-desktop button,
+.os-desktop a {
+  cursor: pointer;
+}
+
+.os-menubar {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 1.2em;
+  height: 28px;
+  padding: 0 0.8em;
+  background: #ffb000;
+  color: #17130c;
+  font-size: 15px;
+  text-shadow: none;
+}
+
+.os-brand {
+  font-weight: 600;
+}
+
+.os-menu-button {
+  min-height: 28px;
+  padding: 0 0.3em;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+}
+
+.os-menu-button:hover,
+.os-menu-button:focus-visible {
+  background: #17130c;
+  color: #ffb000;
+  outline: none;
+}
+
+.os-clock {
+  margin-left: auto;
+}
+
+.os-icons {
+  position: absolute;
+  top: 44px;
+  left: 16px;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-height: calc(100% - 56px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.os-desktop--compact .os-icons {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  right: 16px;
+}
+
+.os-icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 104px;
+  min-height: 72px;
+  padding: 6px 4px;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  text-align: center;
+  text-shadow: inherit;
+}
+
+.os-desktop--compact .os-icon {
+  width: 100%;
+}
+
+.os-label {
+  padding: 0 3px;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.os-icon[aria-pressed="true"] .os-label,
+.os-icon[aria-pressed="true"] .os-glyph,
+.os-icon:focus-visible .os-label {
+  background: #ffb000;
+  color: #17130c;
+  text-shadow: none;
+}
+
+.os-icon:focus-visible {
+  outline: none;
+}
+
+.os-window {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #ffb000;
+  background: #17130c;
+}
+
+.os-titlebar {
+  position: relative;
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  height: 26px;
+  border-bottom: 1px solid #ffb000;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+/* The window on top has the striped bar (Mac 1984); the others only the border. */
+.os-window--focused .os-titlebar {
+  background: repeating-linear-gradient(to bottom, #ffb000 0 1px, transparent 1px 3px) 0 5px / 100% 16px no-repeat;
+}
+
+.os-title {
+  padding: 0 0.7em;
+  background: #17130c;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.os-title:focus {
+  outline: none;
+}
+
+.os-close {
+  position: absolute;
+  top: 50%;
+  left: 6px;
+  width: 22px;
+  height: 18px;
+  padding: 0;
+  border: 1px solid #ffb000;
+  background: #17130c;
+  color: inherit;
+  font: inherit;
+  font-size: 12px;
+  line-height: 1;
+  transform: translateY(-50%);
+}
+
+/* Phone: a finger-sized title bar and close box. */
+.os-desktop--compact .os-titlebar {
+  height: 44px;
+}
+
+.os-desktop--compact .os-close {
+  width: 44px;
+  height: 44px;
+  left: 0;
+}
+
+.os-content {
+  flex: 1;
+  overflow: auto;
+  overscroll-behavior: contain;
+  font-size: 16px;
+  scrollbar-width: thin;
+  scrollbar-color: #c48e12 #17130c;
+}
+
+.os-content .crt-page {
+  padding: 1em 1.2em 1.4em;
+}
+
+.os-folder {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 1em;
+}
+
+.os-progress {
+  height: 14px;
+  border: 1px solid #ffb000;
+}
+
+.os-progress span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: #ffb000;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .os-progress span {
+    animation: os-progress 4.4s linear both;
+  }
+
+  /* The warm-up: the tube's line opens, then the menu bar and the icons appear one after another. */
+  .os-boot {
+    animation: crt-boot 600ms ease-out both;
+  }
+
+  .os-boot .os-menubar {
+    animation: os-in 180ms 420ms both;
+  }
+
+  .os-boot .os-icons li {
+    animation: os-in 140ms both;
+  }
+
+  .os-boot .os-icons li:nth-child(1) { animation-delay: 520ms; }
+  .os-boot .os-icons li:nth-child(2) { animation-delay: 560ms; }
+  .os-boot .os-icons li:nth-child(3) { animation-delay: 600ms; }
+  .os-boot .os-icons li:nth-child(4) { animation-delay: 640ms; }
+  .os-boot .os-icons li:nth-child(5) { animation-delay: 680ms; }
+  .os-boot .os-icons li:nth-child(6) { animation-delay: 720ms; }
+  .os-boot .os-icons li:nth-child(7) { animation-delay: 760ms; }
+}
+
+@keyframes os-progress {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+@keyframes os-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

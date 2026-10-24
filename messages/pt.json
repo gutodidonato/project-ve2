@@ -134,5 +134,33 @@
     "credits": "Créditos",
     "language": "PT | EN",
     "screen": "Tela do computador"
+  },
+  "Os": {
+    "brand": "LuisOS 88",
+    "file": "Arquivo",
+    "view": "Ver",
+    "help": "Ajuda",
+    "desktop": "Área de trabalho do LuisOS 88",
+    "icons": {
+      "cv": "Currículo.txt",
+      "projects": "Projetos",
+      "contact": "Contato",
+      "salto88": "Salto88.exe",
+      "control": "Painel de controle",
+      "readme": "Leia-me.txt",
+      "trash": "Lixeira"
+    },
+    "close": "Fechar (Esc)",
+    "readmeHow": "Clique duas vezes num ícone. Teclas: C currículo, K contato, J jogar, E English, Esc fecha.",
+    "readmePit": "P abre a versão em texto.",
+    "bugFile": "bug_88mph.log",
+    "bugText": "Erro: capacitor de fluxo sem energia. Acelere até 88 mph.",
+    "sound": "Som",
+    "on": "Ligado",
+    "off": "Desligado",
+    "language": "Idioma",
+    "credits": "Créditos",
+    "stack": "Tecnologias",
+    "starting": "Iniciando Salto88.exe…"
   }
 }
