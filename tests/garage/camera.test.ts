@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { framingFor, glassDistance, screenPose, screenRect } from '@/lib/garage/camera';
+import { deskPose, deskRect, framingFor, glassDistance, screenPose, screenRect } from '@/lib/garage/camera';
 import { GLASS } from '@/lib/garage/scene';
 
 describe('framingFor', () => {
@@ -61,5 +61,41 @@ describe('screenRect', () => {
     expect(page.y).toBeCloseTo(0, 6);
     expect(page.width).toBeCloseTo(390, 6);
     expect(page.height).toBeCloseTo(844, 6);
+  });
+});
+
+describe('deskRect', () => {
+  it('shows the glass on three quarters of a wide window, raised so the case shows below', () => {
+    const { glass, page } = deskRect(1440, 900);
+    expect(glass.height).toBeCloseTo(0.74 * 900, 6);
+    expect(glass.width).toBeCloseTo((glass.height * 4) / 3, 6);
+    expect(glass.x + glass.width / 2).toBeCloseTo(720, 6);
+    expect(glass.y + glass.height / 2).toBeLessThan(450);
+    expect(page).toEqual(glass);
+  });
+
+  it('covers a phone window', () => {
+    const { glass, page } = deskRect(390, 844);
+    expect(glass.height).toBeCloseTo(844, 6);
+    expect(page.x).toBe(0);
+    expect(page.y).toBeCloseTo(0, 6);
+    expect(page.width).toBeCloseTo(390, 6);
+    expect(page.height).toBeCloseTo(844, 6);
+  });
+});
+
+describe('deskPose', () => {
+  it('faces the monitor straight on, only moved down', () => {
+    const pose = deskPose('wide', 1.6);
+    expect(pose.position[0]).toBe(pose.target[0]);
+    expect(pose.position[1]).toBe(pose.target[1]);
+    expect(pose.target[0]).toBe(GLASS.center[0]);
+    expect(pose.target[1]).toBeCloseTo(GLASS.center[1] - 0.05, 9);
+    expect(pose.position[2]).toBeGreaterThan(GLASS.center[2]);
+  });
+
+  it('covers on phones with no drop', () => {
+    const pose = deskPose('portrait', 390 / 844);
+    expect(pose.target).toEqual(GLASS.center);
   });
 });

@@ -65,3 +65,39 @@ export function screenRect(width: number, height: number): { glass: Rect; page: 
   const page = { x: x0, y: y0, width: Math.min(width, glass.x + gw) - x0, height: Math.min(height, glass.y + gh) - y0 };
   return { glass, page };
 }
+
+/** The LuisOS desk: how much of the binding side (the height on wide windows) the glass fills. */
+export const DESK_SHARE = 0.74;
+/** Metres the desk camera and its target drop together: the glass rides high and the beige case shows below. */
+export const DESK_DROP = 0.05;
+const DESK_FOV = 40;
+
+/** Straight in front of the monitor, the glass on three quarters of a wide window (raised by DESK_DROP), or covering a phone. */
+export function deskPose(framing: Framing, aspect: number): Pose {
+  const [x, y, z] = GLASS.center;
+  if (framing === 'portrait') {
+    return { position: [x, y, z + glassDistance(DESK_FOV, aspect, 'cover')], target: [x, y, z], fov: DESK_FOV };
+  }
+  const d = glassDistance(DESK_FOV, aspect, 'contain') / DESK_SHARE;
+  return { position: [x, y - DESK_DROP, z + d], target: [x, y - DESK_DROP, z], fov: DESK_FOV };
+}
+
+/** Where the glass lands on the window at the desk pose (`glass`), and the part inside the window (`page`): the desktop's size. */
+export function deskRect(width: number, height: number): { glass: Rect; page: Rect } {
+  const framing = framingFor(width, height);
+  const pose = deskPose(framing, width / height);
+  const visible = 2 * (pose.position[2] - GLASS.center[2]) * Math.tan((pose.fov * Math.PI) / 360);
+  const px = height / visible;
+  const gw = GLASS.width * px;
+  const gh = GLASS.height * px;
+  const raise = (GLASS.center[1] - pose.target[1]) * px;
+  const glass = { x: (width - gw) / 2, y: height / 2 - raise - gh / 2, width: gw, height: gh };
+  if (glass.x >= 0 && glass.y >= 0 && glass.x + gw <= width && glass.y + gh <= height) return { glass, page: glass };
+  const x0 = Math.max(0, glass.x);
+  const y0 = Math.max(0, glass.y);
+  const page = { x: x0, y: y0, width: Math.min(width, glass.x + gw) - x0, height: Math.min(height, glass.y + gh) - y0 };
+  return { glass, page };
+}
+
+/** The pull-back before the jump: the whole garage, the bench on the left, the door on the right, the car behind it. */
+export const WIDE_POSE: Pose = { position: [-0.2, 1.75, 3.4], target: [1.4, 1.0, -1.2], fov: 50 };
