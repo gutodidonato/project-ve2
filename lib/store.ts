@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { INITIAL_DESKTOP, type DesktopState } from '@/lib/garage/desktop';
 import { INITIAL_GARAGE, type GarageAction, type GarageState } from '@/lib/garage/state';
 import type { Tier } from '@/lib/game/tier';
 import { PITSTOP_KEY } from '@/lib/pitstop';
@@ -21,6 +22,11 @@ export interface GameStore {
   /** False until the client has made the initial pit stop decision (the server HTML is the pit stop). */
   pitstopReady: boolean;
   tier: Tier;
+  /** The LuisOS 88 desktop: view, windows, focus (lib/garage/desktop.ts). */
+  desktop: DesktopState;
+  /** False until GameMount has built the first desktop of this page (a locale switch keeps the open windows). */
+  desktopReady: boolean;
+  setDesktop(s: DesktopState): void;
   /** Garage view and screen content (lib/garage/state.ts). */
   garage: GarageState;
   /** The last garage action, for the `> currículo` prompt on the menu. */
@@ -49,6 +55,9 @@ export const useGameStore = create<GameStore>()((set, get) => ({
   pitstopReason: null,
   pitstopReady: false,
   tier: 'B',
+  desktop: INITIAL_DESKTOP,
+  desktopReady: false,
+  setDesktop: (desktop) => set({ desktop, desktopReady: true }),
   garage: INITIAL_GARAGE,
   garageLast: null,
   setGarage: (garage, last) => set(last === undefined ? { garage } : { garage, garageLast: last }),

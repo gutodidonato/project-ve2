@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { INITIAL_DESKTOP } from '@/lib/garage/desktop';
 import { INITIAL_GARAGE } from '@/lib/garage/state';
 import { PITSTOP_KEY } from '@/lib/pitstop';
 import { useGameStore } from '@/lib/store';
@@ -32,6 +33,16 @@ describe('useGameStore', () => {
   it('sets the tier', () => {
     useGameStore.getState().setTier('A');
     expect(useGameStore.getState().tier).toBe('A');
+  });
+
+  it('starts with an empty desktop that is not ready yet', () => {
+    useGameStore.setState({ desktop: INITIAL_DESKTOP, desktopReady: false });
+    expect(useGameStore.getState().desktop).toEqual(INITIAL_DESKTOP);
+    expect(useGameStore.getState().desktopReady).toBe(false);
+    const open = { view: 'desk' as const, windows: [{ id: 'cv' as const, x: 24, y: 44 }], focus: 'cv' as const, selected: null };
+    useGameStore.getState().setDesktop(open);
+    expect(useGameStore.getState().desktop).toEqual(open);
+    expect(useGameStore.getState().desktopReady).toBe(true);
   });
 
   it('starts the garage on the bench and keeps the last action', () => {
