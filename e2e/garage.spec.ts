@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import type { GarageSnapshot } from '@/lib/garage/debug';
+import { LAUNCH_MS } from '@/lib/garage/launch';
 
 // Each test drives a live WebGL scene under SwiftShader: run them one after another (several scenes
 // at once starve the CPU and every wait times out), with room for the slow software renderer.
@@ -183,5 +184,137 @@ test.describe('keys', () => {
     await page.keyboard.type('cjk');
     await expect(windowNamed(page, 'Currículo.txt')).toHaveCount(0);
     expect((await snapshot(page)).view).toBe('desk');
+  });
+});
+
+/**
+ * Waiting for the game page: `commit` is enough (the URL changed), its load would only wait on the
+ * game's own assets.
+ */
+const GAME_COMMIT = { timeout: 60_000, waitUntil: 'commit' } as const;
+
+/** Never fire the departure: for tests that watch the launch, not the navigation. */
+async function holdDeparture(page: Page) {
+  await page.addInitScript((ms) => {
+    const start = window.setTimeout;
+    window.setTimeout = ((fn: TimerHandler, delay?: number, ...rest: unknown[]) =>
+      delay === ms ? 0 : start(fn, delay, ...rest)) as typeof window.setTimeout;
+  }, LAUNCH_MS);
+}
+
+/** Freeze the launch at `ms` after it starts (set before J, it holds from the first frame). */
+async function holdLaunch(page: Page, ms: number) {
+  await page.evaluate((t) => window.__garage!.holdLaunch(t), ms);
+}
+
+test.describe('launch', () => {
+  test('Salto88.exe opens the launch dialog and the camera pulls back', async ({ page }) => {
+    await holdDeparture(page);
+    await openGarage(page);
+    const desk = (await snapshot(page)).glassRect.height;
+    await holdLaunch(page, 1200);
+    await iconNamed(page, 'Salto88.exe').dblclick();
+    await expect(windowNamed(page, 'Salto88.exe')).toContainText('Destino: fev 2019');
+    await expect.poll(async () => (await snapshot(page)).zoom, { timeout: 30_000 }).toBeGreaterThan(0.3);
+    expect((await snapshot(page)).zoom).toBeLessThan(0.7);
+    await holdLaunch(page, 1800);
+    await expect.poll(async () => (await snapshot(page)).glassRect.height, { timeout: 30_000 }).toBeLessThan(desk / 2);
+  });
+
+  test('J reaches the game once', async ({ page }) => {
+    await openGarage(page);
+    const urls: string[] = [];
+    page.on('framenavigated', (f) => {
+      if (f === page.mainFrame()) urls.push(f.url());
+    });
+    await page.keyboard.press('j');
+    await page.keyboard.press('j');
+    await page.keyboard.press('c');
+    await page.keyboard.press('k');
+    expect((await snapshot(page)).windows).toEqual(['salto88']);
+    await page.waitForURL('**/salto88/index.html', GAME_COMMIT);
+    await page.waitForTimeout(1_000);
+    expect(urls.filter((u) => u.includes('/salto88/'))).toHaveLength(1);
+    expect(urls.some((u) => /#(curriculo|contato)$/.test(u))).toBe(false);
+  });
+
+  test('Esc during the pull-back cancels and the desktop comes back as it was', async ({ page }) => {
+    await openGarage(page);
+    await page.keyboard.press('c');
+    await expect(windowNamed(page, 'Currículo.txt')).toBeVisible();
+    await holdLaunch(page, 1200);
+    await page.keyboard.press('j');
+    await expect.poll(async () => (await snapshot(page)).view).toBe('launch');
+    await page.keyboard.press('Escape');
+    await expect.poll(async () => (await snapshot(page)).view).toBe('desk');
+    expect((await snapshot(page)).windows).toEqual(['cv']);
+    await expect(windowNamed(page, 'Salto88.exe')).toHaveCount(0);
+    await page.waitForTimeout(LAUNCH_MS + 600);
+    await expect(page).toHaveURL(/\/pt#curriculo$/);
+  });
+
+  test('Esc after the flash starts does not cancel', async ({ page }) => {
+    await holdDeparture(page);
+    await openGarage(page);
+    await holdLaunch(page, 4500);
+    await page.keyboard.press('j');
+    await expect.poll(async () => (await snapshot(page)).whiteout, { timeout: 30_000 }).toBeGreaterThan(0);
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(300);
+    expect((await snapshot(page)).view).toBe('launch');
+  });
+
+  test('/en launches with lang=en', async ({ page }) => {
+    await openGarage(page, '/en');
+    await page.keyboard.press('j');
+    await page.waitForURL('**/salto88/index.html?lang=en', GAME_COMMIT);
+  });
+
+  test('back from the game shows the desktop', async ({ page }) => {
+    await openGarage(page);
+    await page.keyboard.press('j');
+    await page.waitForURL('**/salto88/index.html', GAME_COMMIT);
+    await page.goBack();
+    await expect(desktop(page).getByTestId('os-icon')).toHaveCount(7, { timeout: 60_000 });
+    await expect.poll(async () => (await snapshot(page)).view, { timeout: 30_000 }).toBe('desk');
+    const s = await snapshot(page);
+    expect(s.door).toBeLessThan(0.05);
+    expect(s.windows).toEqual([]);
+  });
+
+  test('a page restored from the cache after the launch shows the desk', async ({ page }) => {
+    // Playwright's Chromium runs without the back-forward cache, so the restore is the event itself.
+    await holdDeparture(page);
+    await openGarage(page);
+    await page.keyboard.press('j');
+    await expect.poll(async () => (await snapshot(page)).door, { timeout: 30_000 }).toBeGreaterThan(0.2);
+    await page.evaluate(() => window.dispatchEvent(new PageTransitionEvent('pageshow', { persisted: true })));
+    await expect.poll(async () => (await snapshot(page)).view, { timeout: 10_000 }).toBe('desk');
+    await expect.poll(async () => (await snapshot(page)).door, { timeout: 10_000 }).toBeLessThan(0.05);
+    await expect(windowNamed(page, 'Salto88.exe')).toHaveCount(0);
+  });
+
+  test('P during the launch leaves a working desktop', async ({ page }) => {
+    await holdDeparture(page);
+    await openGarage(page);
+    await page.keyboard.press('j');
+    await page.waitForTimeout(500);
+    await page.keyboard.press('p');
+    await expect(page.locator('html')).toHaveAttribute('data-mode', 'pitstop');
+    await page.keyboard.press('p');
+    await expect(desktop(page).getByTestId('os-icon')).toHaveCount(7, { timeout: 60_000 });
+    await page.waitForFunction(() => window.__garage?.snapshot().view === 'desk', null, { timeout: 60_000 });
+    await page.keyboard.press('c');
+    await expect(windowNamed(page, 'Currículo.txt')).toBeVisible();
+  });
+
+  test('reduced motion navigates without the pull-back', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.addInitScript(() => window.localStorage.setItem('rodovia:pitstop', 'off'));
+    await openGarage(page);
+    const t0 = Date.now();
+    await page.keyboard.press('j');
+    await page.waitForURL('**/salto88/index.html', GAME_COMMIT);
+    expect(Date.now() - t0).toBeLessThan(LAUNCH_MS);
   });
 });

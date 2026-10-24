@@ -40,7 +40,7 @@ export type DesktopEffect = 'start-launch' | 'cancel-launch' | null;
 /** Set once the first-visit readme has been shown: later visits open on an empty desktop. */
 export const README_KEY = 'rodovia:readme';
 
-export const ICONS: readonly IconId[] =['cv', 'projects', 'contact', 'salto88', 'control', 'readme', 'trash'];
+export const ICONS: readonly IconId[] = ['cv', 'projects', 'contact', 'salto88', 'control', 'readme', 'trash'];
 
 /** Height of the menu bar: windows never go above it. */
 export const MENU_H = 28;
