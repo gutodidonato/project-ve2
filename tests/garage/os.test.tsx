@@ -96,6 +96,13 @@ describe('LuisOS 88 desktop', () => {
     expect(parseFloat(narrow.style.left) + parseFloat(narrow.style.width)).toBeLessThanOrEqual(700);
   });
 
+  it('the launch dialog is a small window, as tall as its text', () => {
+    show('pt', reduceDesktop(INITIAL_DESKTOP, { type: 'play' }).state);
+    const win = windowNamed('Salto88.exe');
+    expect(parseFloat(win.style.width)).toBeLessThanOrEqual(440);
+    expect(win.style.height).toBe('');
+  });
+
   it('a window shows its program and closes', () => {
     const { dispatch } = show('pt', withOpen('cv'));
     const win = windowNamed('Currículo.txt');

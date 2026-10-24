@@ -106,6 +106,7 @@ export function Desktop({ profile, locale, state, size, compact, dispatch, onLan
           z={i + 1}
           focused={state.focus === w.id}
           compact={compact}
+          small={w.id === 'salto88'}
           size={size}
           closeLabel={t('close')}
           onClose={() => close(w.id)}

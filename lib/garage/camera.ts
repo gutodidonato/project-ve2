@@ -15,8 +15,8 @@ export function framingFor(width: number, height: number): Framing {
   return width / height < 0.8 ? 'portrait' : 'wide';
 }
 
-/** From inside the garage at 3/4, the whole DeLorean in the open door (end of the launch). */
-export const CAR_POSE: Pose = { position: [1.35, 1.3, 1.5], target: [3.1, 0.55, -2.7], fov: 46 };
+/** From inside the garage, in line with the opening (the jamb out of frame), the whole DeLorean in the door (end of the launch). */
+export const CAR_POSE: Pose = { position: [2.6, 1.3, 1.5], target: [3.1, 0.55, -2.7], fov: 46 };
 
 /**
  * Distance from the glass at which it exactly fits the window: `contain` shows
@@ -64,3 +64,18 @@ export function deskRect(width: number, height: number): { glass: Rect; page: Re
 
 /** The pull-back before the jump: the whole garage, the bench on the left, the door on the right, the car behind it. */
 export const WIDE_POSE: Pose = { position: [-0.2, 1.75, 3.4], target: [1.4, 1.0, -1.2], fov: 50 };
+
+/**
+ * A phone held upright sees little across: the pull-back goes farther back and wider, centred
+ * nearer the bench (the computer stays in frame), and the car gets a wider lens.
+ */
+const WIDE_PORTRAIT: Pose = { position: [0.25, 1.6, 4.2], target: [0.25, 1.0, -0.8], fov: 66 };
+const CAR_PORTRAIT: Pose = { ...CAR_POSE, fov: 66 };
+
+export function widePose(framing: Framing): Pose {
+  return framing === 'portrait' ? WIDE_PORTRAIT : WIDE_POSE;
+}
+
+export function carPose(framing: Framing): Pose {
+  return framing === 'portrait' ? CAR_PORTRAIT : CAR_POSE;
+}

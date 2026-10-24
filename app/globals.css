@@ -244,13 +244,6 @@ html[data-mode="game"] .game-layer canvas {
   text-transform: none;
 }
 
-/* Under 700px the pit stop toggle sits top-right: the page starts below it. */
-@media (width < 43.75rem) {
-  .crt-screen[data-full="true"] .crt-page {
-    padding-top: 4.25rem;
-  }
-}
-
 /* The title only receives focus by script (the camera arriving): the screen itself shows where you are. */
 .crt-title:focus {
   outline: none;
@@ -511,10 +504,10 @@ html[data-mode="game"] .game-layer canvas {
   width: 100%;
 }
 
+/* Names break between words only: a long file name runs a little past its icon, as on the real thing. */
 .os-label {
   padding: 0 3px;
   line-height: 1.3;
-  overflow-wrap: anywhere;
 }
 
 .os-icon[aria-pressed="true"] .os-label,
@@ -668,4 +661,15 @@ html[data-mode="game"] .game-layer canvas {
   to {
     opacity: 1;
   }
+}
+
+/* In the garage the pit stop toggle keeps the bottom-right corner on phones too: the top is the menu bar. */
+html[data-mode="game"] .pitstop-toggle {
+  top: auto;
+  bottom: 1rem;
+}
+
+/* A phone's maximized windows scroll their last lines clear of the toggle. */
+.os-desktop--compact .os-content {
+  padding-bottom: 4.5rem;
 }

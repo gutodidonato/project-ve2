@@ -18,12 +18,19 @@ import {
 } from 'three';
 import type { Tier } from '@/lib/game/tier';
 import { garageRuntime } from '@/lib/garage/runtime';
-import { CAR_SPOT } from '@/lib/garage/scene';
+import { CAR_SPOT, GLASS } from '@/lib/garage/scene';
 
 const LAMP = '#FFCF8A';
 const HEADLIGHTS = '#DDE8FF';
 const LAMP_POS: [number, number, number] = [-0.25, 1.86, -0.05];
 const LAMP_INTENSITY = 2.6;
+/**
+ * The tube's own glow, in front of the monitor's chin: lights the case front and the keyboard the lamp
+ * behind cannot reach. Below the glass, so its reflection lands on the bezel, not on the tube.
+ */
+const GLOW = '#FFB86B';
+const GLOW_POS: [number, number, number] = [GLASS.center[0], GLASS.center[1] - 0.25, GLASS.center[2] + 0.25];
+
 /** Headlights at full; the door at rest lets 0.35 of it leak under. */
 export const HEADLIGHT_MAX = 90;
 
@@ -181,6 +188,7 @@ export function Lights({ tier }: { tier: Tier }) {
         castShadow={tier === 'A'}
         shadow-mapSize={[512, 512]}
       />
+      <pointLight name="glow" position={GLOW_POS} color={GLOW} intensity={0.35} distance={1.4} decay={1.6} />
       <mesh position={[LAMP_POS[0], LAMP_POS[1] + 0.06, LAMP_POS[2]]}>
         <coneGeometry args={[0.16, 0.14, 20, 1, true]} />
         <meshStandardMaterial color="#2f3a33" side={2} roughness={0.6} />

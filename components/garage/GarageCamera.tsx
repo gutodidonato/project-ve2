@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Vector3, type PerspectiveCamera } from 'three';
-import { CAR_POSE, WIDE_POSE, deskPose, framingFor, type Pose } from '@/lib/garage/camera';
+import { carPose, deskPose, framingFor, widePose, type Pose } from '@/lib/garage/camera';
 import { garageRuntime } from '@/lib/garage/runtime';
 import { GLASS } from '@/lib/garage/scene';
 import { placeSurface } from '@/lib/garage/surface';
@@ -31,10 +31,11 @@ function mix(a: Pose, b: Pose, t: number): Pose {
 
 /** The pose the current view asks for: the desk, or the launch's pull-back to the garage and turn to the car. */
 function goalPose(width: number, height: number): Pose {
-  const desk = deskPose(framingFor(width, height), width / height);
+  const framing = framingFor(width, height);
+  const desk = deskPose(framing, width / height);
   if (useGameStore.getState().desktop.view === 'launch' && garageRuntime.launchStart !== null) {
     const f = garageRuntime.launch;
-    return mix(mix(desk, WIDE_POSE, f.zoom), CAR_POSE, f.camera);
+    return mix(mix(desk, widePose(framing), f.zoom), carPose(framing), f.camera);
   }
   return desk;
 }

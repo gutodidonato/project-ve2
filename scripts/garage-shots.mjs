@@ -1,10 +1,10 @@
-// The fixed garage shot list for the score loop: three windows x six moments, 18 PNG.
+// The fixed LuisOS 88 shot list for the score loop: three windows x ten moments, 30 PNG.
 //
 //   node scripts/garage-shots.mjs <baseUrl> <outDir> [only]   e.g. http://localhost:3000 .superpowers/garagem/r1 launch
 //
 // `only` keeps the shots whose `<window>-<moment>` name contains it (several joined with |).
 //
-// Waits for the camera to settle (window.__garage) before each shot. SwiftShader, as in playwright.config.ts.
+// Waits for the camera to rest on the desk (window.__garage) before each shot. SwiftShader, as in playwright.config.ts.
 import { mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { chromium } from '@playwright/test';
@@ -32,26 +32,44 @@ async function until(page, test, timeout = 30_000) {
 
 async function open(page, path) {
   await page.goto(base + path);
-  await until(page, (s) => s.arrived);
-  await page.waitForTimeout(700); // the tube warm-up and fonts
+  await until(page, (s) => s.view === 'desk' && s.arrived);
+  await page.waitForTimeout(1000); // the desktop's warm-up and fonts
 }
 
-/** Press J and freeze the launch `ms` after it (the departure timer is held by the init script). */
+/** Open a desktop icon (or a file inside a window) the keyboard way, the same on a phone and a desk. */
+async function openItem(page, selector) {
+  await page.locator(selector).first().focus();
+  await page.keyboard.press('Enter');
+  await page.waitForTimeout(300);
+}
+
+/** Freeze the launch `ms` after J (set before J, it holds from the first frame; the departure timer is held). */
 async function launchAt(page, ms) {
   await open(page, '/pt');
-  await page.keyboard.press('j');
   await page.evaluate((t) => window.__garage.holdLaunch(t), ms);
+  await page.keyboard.press('j');
   await until(page, (s) => s.view === 'launch');
-  await page.waitForTimeout(1200); // the camera eases to the held pose
+  await page.waitForTimeout(1500); // the camera eases to the held pose
 }
 
 const SHOTS = [
-  { name: 'bench-pt', run: (p) => open(p, '/pt') },
-  { name: 'bench-en', run: (p) => open(p, '/en') },
-  { name: 'cv', run: async (p) => { await open(p, '/pt'); await p.keyboard.press('c'); await until(p, (s) => s.view === 'screen' && s.arrived); await p.waitForTimeout(300); } },
-  { name: 'contact', run: async (p) => { await open(p, '/pt'); await p.keyboard.press('k'); await until(p, (s) => s.view === 'screen' && s.arrived); await p.waitForTimeout(300); } },
-  { name: 'launch-mid', run: (p) => launchAt(p, 1600) },
-  { name: 'launch-late', run: (p) => launchAt(p, 3150) },
+  { name: 'desk', run: (p) => open(p, '/pt') },
+  { name: 'readme', firstVisit: true, run: (p) => open(p, '/pt') },
+  { name: 'cv', run: async (p) => { await open(p, '/pt'); await p.keyboard.press('c'); await p.waitForTimeout(300); } },
+  {
+    name: 'projects-case',
+    run: async (p) => {
+      await open(p, '/pt');
+      await openItem(p, '[data-icon="projects"]');
+      await openItem(p, '.os-window[data-program="projects"] [data-testid="os-file"]');
+    },
+  },
+  { name: 'contact', run: async (p) => { await open(p, '/pt'); await p.keyboard.press('k'); await p.waitForTimeout(300); } },
+  { name: 'control', run: async (p) => { await open(p, '/pt'); await openItem(p, '[data-icon="control"]'); } },
+  { name: 'dialog', run: (p) => launchAt(p, 300) },
+  { name: 'pull-back', run: (p) => launchAt(p, 1200) },
+  { name: 'garage', run: (p) => launchAt(p, 2700) },
+  { name: 'car', run: (p) => launchAt(p, 4200) },
 ];
 
 const browser = await chromium.launch({ args: ['--enable-unsafe-swiftshader', '--use-angle=swiftshader', '--ignore-gpu-blocklist'] });
@@ -63,11 +81,13 @@ for (const vp of VIEWPORTS) {
       continue;
     }
     const context = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: 1 });
-    // Hold the 3.5 s departure: the garage stays on screen (leaving a WebGL page stalls SwiftShader).
+    // Hold the departure: the garage stays on screen (leaving a WebGL page stalls SwiftShader).
     await context.addInitScript(() => {
       const start = window.setTimeout;
-      window.setTimeout = (fn, ms, ...rest) => (ms === 3500 ? 0 : start(fn, ms, ...rest));
+      window.setTimeout = (fn, ms, ...rest) => (ms === 4900 ? 0 : start(fn, ms, ...rest));
     });
+    // Except on the first-visit shot, the readme counts as seen and stays closed.
+    if (!shot.firstVisit) await context.addInitScript(() => window.localStorage.setItem('rodovia:readme', 'seen'));
     const page = await context.newPage();
     // The game page is not part of the shots: its request never answers, so the garage stays on screen.
     await page.route('**/salto88/**', (r) => r.abort());

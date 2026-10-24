@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { deskPose, deskRect, framingFor, glassDistance } from '@/lib/garage/camera';
+import { CAR_POSE, WIDE_POSE, carPose, deskPose, deskRect, framingFor, glassDistance, widePose } from '@/lib/garage/camera';
 import { GLASS } from '@/lib/garage/scene';
 
 describe('framingFor', () => {
@@ -59,5 +59,25 @@ describe('deskPose', () => {
   it('covers on phones with no drop', () => {
     const pose = deskPose('portrait', 390 / 844);
     expect(pose.target).toEqual(GLASS.center);
+  });
+});
+
+describe('widePose and carPose', () => {
+  /** Metres seen across at `distance` from a pose, for a window of this aspect. */
+  const across = (fov: number, aspect: number, distance: number) => 2 * distance * Math.tan((fov * Math.PI) / 360) * aspect;
+  const distance = (p: { position: number[]; target: number[] }) => Math.hypot(...p.position.map((v, i) => v - p.target[i]));
+
+  it('keeps the wide-window poses as they are', () => {
+    expect(widePose('wide')).toEqual(WIDE_POSE);
+    expect(carPose('wide')).toEqual(CAR_POSE);
+  });
+
+  it('on a phone held upright the pull-back shows the computer, and the car fits across', () => {
+    const aspect = 390 / 844;
+    const wide = widePose('portrait');
+    const half = across(wide.fov, aspect, distance(wide)) / 2;
+    expect(Math.abs(GLASS.center[0] - wide.target[0])).toBeLessThan(half);
+    const car = carPose('portrait');
+    expect(across(car.fov, aspect, distance(car))).toBeGreaterThan(2.2);
   });
 });
