@@ -79,7 +79,7 @@ test.describe('game / pit stop mode', () => {
     await expect(page.getByRole('button', { name: 'Enter the game' })).toBeVisible();
   });
 
-  test('the toggle sits bottom-right on desktop and top-right on mobile', async ({ page }) => {
+  test('the toggle sits bottom-right in the garage, leaving the top to the LuisOS menu bar', async ({ page }) => {
     await openGame(page);
     const button = page.getByRole('button', { name: 'Modo pit stop (P)' });
 
@@ -92,8 +92,14 @@ test.describe('game / pit stop mode', () => {
     await page.setViewportSize({ width: 390, height: 800 });
     box = await button.boundingBox();
     expect(box).not.toBeNull();
-    expect(box!.y).toBeLessThan(64);
+    expect(box!.y + box!.height).toBeGreaterThan(800 - 64);
     expect(box!.x + box!.width).toBeGreaterThan(390 - 64);
+
+    // The pit stop page keeps it top-right on a phone.
+    await button.click();
+    const back = page.getByRole('button', { name: 'Entrar no jogo' });
+    box = await back.boundingBox();
+    expect(box!.y).toBeLessThan(64);
   });
 });
 

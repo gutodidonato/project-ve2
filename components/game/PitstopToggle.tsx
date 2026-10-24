@@ -5,7 +5,8 @@ import { useTranslations } from 'next-intl';
 import { useGameStore } from '@/lib/store';
 
 /**
- * Fixed pit stop switch: bottom-right on desktop, top-right under 700px (`md`).
+ * Fixed pit stop switch: bottom-right on desktop, top-right under 700px (`md`) on the pit stop page;
+ * in the garage always bottom-right, the top being the LuisOS menu bar (globals.css).
  * Renders nothing until the client has decided the initial mode, so the server
  * HTML (and no-JS visitors) never get a button that cannot work. The label swaps
  * between "pit stop mode" and "enter the game", so it carries no pressed state.
@@ -33,7 +34,7 @@ export function PitstopToggle() {
   const note = forced ? t(reason === 'error' ? 'pitstopForcedError' : 'pitstopForced') : null;
 
   return (
-    <div className="fixed top-4 right-4 z-50 flex flex-col items-end md:top-auto md:bottom-4 md:flex-col-reverse">
+    <div className="pitstop-toggle fixed top-4 right-4 z-50 flex flex-col items-end md:top-auto md:bottom-4 md:flex-col-reverse">
       <button
         type="button"
         aria-disabled={forced || undefined}

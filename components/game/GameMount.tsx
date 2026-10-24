@@ -4,11 +4,10 @@ import { useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
 import type { Locale, Profile } from '@/content/types';
-import { resetRuntime } from '@/lib/game/runtime';
 import { isTypingTarget } from '@/lib/game/input';
-import { parseZoneHash } from '@/lib/game/zones';
+import { README_KEY, initialDesktop } from '@/lib/garage/desktop';
 import { initialPitstop, PITSTOP_KEY } from '@/lib/pitstop';
-import { readPref } from '@/lib/storage';
+import { readPref, writePref } from '@/lib/storage';
 import { useGameStore } from '@/lib/store';
 import { ErrorBoundary } from './ErrorBoundary';
 import { PitstopToggle } from './PitstopToggle';
@@ -83,7 +82,14 @@ export function GameMount({ profile, locale }: { profile: Profile; locale: Local
       stored: stored === 'on' || stored === 'off' ? stored : null,
     });
     useGameStore.getState().applyInitialPitstop(decision);
-    resetRuntime(parseZoneHash(window.location.hash));
+    // Once per page: a language switch keeps the open windows (the store outlives the route).
+    const { desktopReady, setDesktop } = useGameStore.getState();
+    if (!desktopReady) {
+      const desktop = initialDesktop(window.location.hash, readPref(README_KEY) === 'seen');
+      setDesktop(desktop);
+      // The readme, or the window a link opened: either way the next plain visit starts empty.
+      if (desktop.windows.length > 0) writePref(README_KEY, 'seen');
+    }
   }, []);
 
   // html[data-mode] drives the CSS that hides the pit stop and locks scrolling in game mode.

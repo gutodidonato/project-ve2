@@ -1,0 +1,102 @@
+# Salto 88 · Parte 1: defeitos medidos
+
+Data: 16 out 2026 · Base: protótipo v3.6 (artifact `9Coz7zxBop4m3egyB7JKcU`) · Origem: auditoria de qualidade (artifact `VdUc2M8PeU3abSpmUfLp1p`, script `.superpowers/proto/qa.mjs`).
+
+## 1. Contexto
+
+A v3.6 passa nos 67 testes de jogabilidade, mas a auditoria de qualidade mediu defeitos que esses testes não viam: o estepe do SUV gira fora do eixo, a mixagem de som está desequilibrada, a marcha é quase só chiado, o HUD se sobrepõe com o celular deitado e algumas peças do Exército são falsas (vala pintada no chão, neve que treme, nomes de região soltos no céu). Esta parte corrige só o que já está medido, sem conteúdo novo.
+
+## 2. Roteiro aprovado (16 out 2026)
+
+Abordagem: uma cidade por vez até ficar pronta, em vez de camadas espalhadas por todas as eras. Em 16 out 2026 o Luis pôs o Exército à frente da RedBit, por ser a porta de entrada.
+
+| Parte | Escopo | Spec |
+|---|---|---|
+| 1 | Defeitos medidos (este documento) | este arquivo |
+| 2 | Portal do tempo único em todas as eras | a escrever |
+| 3 | Exército, a porta de entrada: EsPCEx, AMAN, base e pista no padrão de preenchimento. Vira a referência de qualidade | a escrever |
+| 4 | RedBit + FIAP: Google Ads, SEO, performance e animações em JS, mais FIAP; planta v1 em artifact `BFgRsZq7jTeF3QMMFnmaMT` | a escrever |
+| 5 | ValiantGroup no padrão | a escrever |
+| 6 | Colmeia no padrão | a escrever |
+| 7 | EVIG no padrão | a escrever |
+
+Fonte de verdade do conteúdo de carreira: `content/pt/profile.ts`. Nenhuma afirmação sobre a carreira entra no jogo sem estar lá.
+
+Decisões registradas:
+- **Rádio Quartel:** a marcha gerada no navegador sai; entra uma faixa CC0 marcial ou épica do OpenGameArt. O Luis ouve o trecho e aprova antes de a faixa entrar.
+- **Pedestres (parte 3):** pacote CC0 de personagens low-poly com caminhada (Kenney ou Quaternius). Antes de baixar, informar nome, origem e tamanho.
+
+## 3. Requisitos
+
+Cada requisito tem uma meta verificada automaticamente pela auditoria (`qa.mjs`) ou pela suíte E2E (`run.mjs`).
+
+### Modelos e cena
+
+**R1 · Estepe parado.** Só os nós `wheel-front-left`, `wheel-front-right`, `wheel-back-left` e `wheel-back-right` (com ou sem sufixo `_N`) giram e esterçam. O nó `wheel-back` do SUV (estepe preso ao `body`) fica parado.
+Meta: na auditoria de rodas, nenhuma das ~250 rodas sai mais de 0,05 m do próprio centro ao girar.
+
+**R2 · Neve sem tremor.** Hoje o cone de neve de cada montanha coincide com a superfície do cone da montanha, e os dois disputam o mesmo pixel (z-fighting). O cone de neve se afasta da superfície (escala radial maior ou `polygonOffset`) até sumir o tremor.
+Meta: fotos a 60, 120 e 200 m sem listras; a causa é confirmada por foto antes e depois.
+
+**R3 · Penhascos com cor de pedra.** Os `cliff_large_rock` da serra deixam o laranja chapado e ganham tons de pedra coerentes com as montanhas.
+Meta: revisão visual no tour.
+
+**R4 · Vala de verdade.** O chão do Exército ganha um recorte retangular na posição da vala (9 × 4,5 m em x −45, z −45), com paredes e fundo de terra. Quando o carro cai na vala, ele desce até o fundo e sai pela borda da frente. Penalidade, limite de velocidade e contagem continuam iguais.
+Meta: o teste "devagar cai na vala (+3 s)" continua passando; foto da vala mostra profundidade.
+
+**R5 · Regiões sem placa.** Os rótulos SELVA, CAATINGA e MONTANHA saem do céu e não entra aviso nenhum: as regiões ficam só no mapa (pedido do Luis, 16 out 2026).
+Meta: nenhum rótulo de região na cena.
+
+### Som
+
+**R6 · Buzina proporcional.** A buzina do jogador fica no máximo 6 dB acima do volume de dirigir na cidade (hoje são 17 dB).
+Meta: auditoria de som, cenas "buzina" e "cidade dirigindo".
+
+**R7 · Músicas no mesmo volume.** Cada estação ganha um ganho próprio, calibrado pelo volume da faixa inteira (não de um trecho). Medido no canal de música, cada faixa fica a até 1 dB de −22 dB, a diferença entre a mais alta e a mais baixa fica em no máximo 2 dB (hoje são 8 dB) e o pico de cada faixa fica abaixo de −1 dBFS.
+
+**R8 · Clímax das 88 mph.** A subida até as 88 mph fica pelo menos 6 dB acima de dirigir na cidade. O chiado do capacitor de fluxo sobe e o motor ganha um pouco acima de 70 mph; com o salto, motor e vento se calam para não ficarem por baixo do estrondo. O salto e o estrondo não sobem de nível: seus arquivos já chegam perto de −1 dBFS e o canal de efeitos não tem limitador, então subir os dois estouraria o teto. Se o Luis quiser os dois mais altos, entra um compressor no canal de efeitos antes. Meta: os 3 segundos antes do salto ficam pelo menos 6 dB acima de dirigir na cidade (hoje ficam 1 dB abaixo) e nada passa de −1 dBFS.
+
+**R9 · Chuva mais baixa.** A garoa da RedBit e a chuva da selva do Exército ficam mais baixas e mais escuras (pedido do Luis, 16 out 2026). Ao dirigir na cidade e parado na selva, a frequência média do som fica abaixo de 3 kHz (hoje 6,3 kHz na cidade), e a chuva da selva cai pelo menos 6 dB.
+
+**R10 · Exército com ambiente.** Vento em toda a base, pássaros na selva e vento seco no deserto e na montanha. O canal de ambiente nunca fica abaixo de −45 dB em nenhuma das quatro regiões.
+
+**R11 · Rádio Quartel com faixa CC0.**
+- A estação toca uma faixa CC0 do OpenGameArt: marcial ou épica, em `.ogg` ou `.mp3` de até 4 MB (Battle Theme A, de cynicmusic, em mp3 de 3,3 MB, é uma escolha provisória feita durante a execução para não parar o trabalho; falta o OK do Luis), calibrada como as outras (R7).
+- Somem o gerador da marcha e os geradores `synth`, `broadcast`, `blips` e `pads`, que nenhuma estação usa.
+- O crédito da faixa entra na gaveta de informações.
+- A faixa só entra depois que o Luis aprovar o trecho.
+
+**R13 · Ronco encorpado.** O motor ganha graves e corpo de V6, com marchas audíveis (pedido do Luis, 16 out 2026). Metas:
+- acelerando de 0 a 60 mph no Exército, o canal de efeitos fica entre −24 e −20 dB (hoje −27,9), com frequência média entre 120 e 700 Hz;
+- nessa aceleração a frequência do motor cai pelo menos 2 vezes (trocas de marcha);
+- com o rádio ligado a 40 mph na cidade, a música fica no máximo 3 dB abaixo do motor.
+
+### Interface
+
+**R12 · HUD sem sobreposição com o celular deitado.** Telas com até 500 px de altura usam um layout compacto:
+- a missão vai para baixo e fica menor;
+- o relógio do tempo fica enxuto;
+- o título da era desce e diminui;
+- o cartão final do showroom não cobre o rádio nem o velocímetro.
+
+Meta: zero sobreposições entre elementos visíveis do HUD em 1280 × 720, 375 × 812 e 812 × 375. A medição é feita na chegada e dirigindo em cada era, na Marginal e no showroom.
+
+## 4. Testes
+
+- Os 67 testes atuais continuam passando.
+- A suíte E2E ganha quatro testes:
+  - nenhuma roda fora do eixo (R1);
+  - HUD sem sobreposição nas três telas (R12);
+  - níveis de som por cena dentro das metas R6–R10 e R13, medidos por analisadores ligados aos canais de áudio do jogo;
+  - Rádio Quartel tocando faixa (R11).
+- A auditoria de qualidade (`qa.mjs`) passa a sair com código de erro quando alguma meta desta parte falha.
+- O tour de fotos é regerado no fim para comparar antes e depois (montanha, vala, penhascos, HUD deitado).
+
+## 5. Fora do escopo
+
+Portal novo (parte 2); pedestres, móveis e conteúdo de carreira (partes 3 a 7); jatos da Esquadrilha e demais marcos (parte da era correspondente); som do motor e mixagem de cada cidade (parte da cidade correspondente).
+
+## 6. Riscos
+
+- Medição de som em tempo real no navegador sem tela varia de uma execução para outra. As metas usam tolerância de 1 dB e média de pelo menos 3 s.
+- Faixa CC0 marcial boa pode ser difícil de achar. Plano B, se o Luis preferir: o Exército começa no 88 FM e a estação sai.

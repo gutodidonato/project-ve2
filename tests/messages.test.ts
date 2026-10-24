@@ -13,11 +13,4 @@ describe('messages', () => {
     expect(keys(en).sort()).toEqual(keys(pt).sort());
   });
 
-  it('names every zone in both locales', () => {
-    for (const messages of [pt, en]) {
-      expect(Object.keys(messages.Game.zones).sort()).toEqual(
-        ['cases', 'contato', 'experiencia', 'oficina', 'servicos'],
-      );
-    }
-  });
 });
