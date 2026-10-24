@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { framingFor, glassDistance, screenPose } from '@/lib/garage/camera';
+import { framingFor, glassDistance, screenPose, screenRect } from '@/lib/garage/camera';
 import { GLASS } from '@/lib/garage/scene';
 
 describe('framingFor', () => {
@@ -40,5 +40,26 @@ describe('screenPose', () => {
     expect(wide.position[2] - GLASS.center[2]).toBeCloseTo(glassDistance(wide.fov, 16 / 9, 'contain') * 1.04, 9);
     const phone = screenPose('portrait', 390 / 844);
     expect(phone.position[2] - GLASS.center[2]).toBeCloseTo(glassDistance(phone.fov, 390 / 844, 'cover'), 9);
+  });
+});
+
+describe('screenRect', () => {
+  it('contains the glass with a thin bezel, centred, on a wide window', () => {
+    const { glass, page } = screenRect(1440, 900);
+    expect(glass.height).toBeCloseTo(900 / 1.04, 6);
+    expect(glass.width).toBeCloseTo((900 / 1.04) * (4 / 3), 6);
+    expect(glass.x).toBeCloseTo((1440 - glass.width) / 2, 6);
+    expect(glass.y).toBeCloseTo((900 - glass.height) / 2, 6);
+    expect(page).toEqual(glass);
+  });
+
+  it('covers a phone window, and the page is the part inside it', () => {
+    const { glass, page } = screenRect(390, 844);
+    expect(glass.height).toBeCloseTo(844, 6);
+    expect(glass.x).toBeLessThan(0);
+    expect(page.x).toBe(0);
+    expect(page.y).toBeCloseTo(0, 6);
+    expect(page.width).toBeCloseTo(390, 6);
+    expect(page.height).toBeCloseTo(844, 6);
   });
 });

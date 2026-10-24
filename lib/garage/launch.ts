@@ -9,6 +9,8 @@ export interface LaunchFrame {
   door: number;
   /** DeLorean headlights; 0.35 is the light leaking under the door at rest. */
   headlights: number;
+  /** Cold light coming through the opening door into the garage: door × the headlights' rise. */
+  spill: number;
   /** Blend of the camera from its pose to the car. */
   camera: number;
   /** White flash in front of the camera before the game page. */
@@ -26,16 +28,20 @@ const LAMP_BLINK = 0.15;
 
 /**
  * The launch timeline as a pure function of the time since J: the lamp blinks
- * twice, the door rolls up in 1.6 s, the cold headlights flood the warm garage,
- * the camera turns to the car and the frame goes white.
+ * twice, the door rolls up in 1.6 s while the headlights rise and their cold
+ * light floods the warm garage, then the camera turns to the car and the frame
+ * goes white.
  */
 export function launchFrame(ms: number): LaunchFrame {
   const t = Math.max(0, ms);
   const blinking = (t >= 400 && t < 550) || (t >= 650 && t < 800);
+  const door = smoothstep(800, 2400, t);
+  const rise = smoothstep(900, 2200, t);
   return {
     lamp: blinking ? LAMP_BLINK : 1,
-    door: smoothstep(800, 2400, t),
-    headlights: HEADLIGHTS_REST + (1 - HEADLIGHTS_REST) * smoothstep(1600, 3000, t),
+    door,
+    headlights: HEADLIGHTS_REST + (1 - HEADLIGHTS_REST) * rise,
+    spill: door * rise,
     camera: smoothstep(2200, 3200, t),
     whiteout: smoothstep(3000, LAUNCH_MS, t),
     done: t >= LAUNCH_MS,

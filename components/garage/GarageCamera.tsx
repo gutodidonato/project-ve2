@@ -9,8 +9,8 @@ import { GLASS } from '@/lib/garage/scene';
 import { placeSurface } from '@/lib/garage/surface';
 import { useGameStore } from '@/lib/store';
 
-/** Half-life of the camera ease, seconds. */
-const HALF_LIFE = 0.18;
+/** Half-life of the camera ease, seconds: the fly into the monitor settles in about 0.9 s. */
+const HALF_LIFE = 0.11;
 const ARRIVED = 0.005;
 
 const corner = new Vector3();
@@ -103,7 +103,7 @@ export function GarageCamera() {
     garageRuntime.glassInFront = inFront;
 
     // Same frame as the canvas: the DOM screen never lags behind the glass.
-    placeSurface(garageRuntime.surface, view === 'screen' && garageRuntime.arrived, garageRuntime);
+    placeSurface(garageRuntime.surface, view, garageRuntime, size.width, size.height);
   });
 
   return null;

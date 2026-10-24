@@ -3,7 +3,7 @@ import { LAUNCH_MS, launchFrame } from '@/lib/garage/launch';
 
 describe('launchFrame', () => {
   it('starts lit, closed and with the headlights leaking under the door', () => {
-    expect(launchFrame(0)).toEqual({ lamp: 1, door: 0, headlights: 0.35, camera: 0, whiteout: 0, done: false });
+    expect(launchFrame(0)).toEqual({ lamp: 1, door: 0, headlights: 0.35, spill: 0, camera: 0, whiteout: 0, done: false });
   });
 
   it('blinks the lamp twice before the door moves', () => {
@@ -17,6 +17,16 @@ describe('launchFrame', () => {
   it('rolls the door up in 1.6 s', () => {
     expect(launchFrame(1600).door).toBeCloseTo(0.5, 9);
     expect(launchFrame(2400).door).toBe(1);
+  });
+
+  it('floods the garage with cold light while the door rises, before the camera turns', () => {
+    const mid = launchFrame(1600);
+    expect(mid.headlights).toBeGreaterThan(0.6);
+    expect(mid.spill).toBeGreaterThan(0.2);
+    expect(mid.spill).toBeLessThan(0.6);
+    expect(mid.camera).toBe(0);
+    expect(launchFrame(2400).spill).toBe(1);
+    expect(launchFrame(700).spill).toBe(0);
   });
 
   it('ends in white after 3.5 s', () => {

@@ -16,39 +16,6 @@ const BENCH_W = BENCH.x1 - BENCH.x0;
 const BENCH_CX = (BENCH.x0 + BENCH.x1) / 2;
 const BENCH_CZ = (BENCH.z0 + BENCH.z1) / 2;
 
-/** Room shell: concrete floor, back wall with the door opening, the left wall, and the driveway outside. */
-function Room() {
-  const wallHeight = 3.2;
-  const leftWidth = DOOR.x0 + 3;
-  return (
-    <group name="room">
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[1.2, 0, -1.5]} receiveShadow>
-        <planeGeometry args={[12, 12]} />
-        <meshStandardMaterial color={CONCRETE} roughness={0.95} />
-      </mesh>
-      {/* Back wall, left of the door. */}
-      <mesh position={[DOOR.x0 - leftWidth / 2, wallHeight / 2, DOOR.z - 0.05]} receiveShadow>
-        <boxGeometry args={[leftWidth, wallHeight, 0.1]} />
-        <meshStandardMaterial color={WALL} roughness={0.9} />
-      </mesh>
-      {/* Above the door, and right of it. */}
-      <mesh position={[(DOOR.x0 + DOOR.x1) / 2, (DOOR.height + wallHeight) / 2, DOOR.z - 0.05]}>
-        <boxGeometry args={[DOOR.x1 - DOOR.x0, wallHeight - DOOR.height, 0.1]} />
-        <meshStandardMaterial color={WALL} roughness={0.9} />
-      </mesh>
-      <mesh position={[DOOR.x1 + 0.8, wallHeight / 2, DOOR.z - 0.05]}>
-        <boxGeometry args={[1.6, wallHeight, 0.1]} />
-        <meshStandardMaterial color={WALL} roughness={0.9} />
-      </mesh>
-      {/* Left wall. */}
-      <mesh position={[-3, wallHeight / 2, 1.5]} rotation={[0, Math.PI / 2, 0]}>
-        <boxGeometry args={[4, wallHeight, 0.1]} />
-        <meshStandardMaterial color={WALL} roughness={0.9} />
-      </mesh>
-    </group>
-  );
-}
-
 /** Wall tools on the pegboard: x, y, handle (w, h), head (w, h), tilt. One mesh for the handles, one for the heads. */
 const TOOLS: readonly { x: number; y: number; handle: [number, number]; head: [number, number]; tilt: number }[] = [
   { x: 0.25, y: 1.75, handle: [0.035, 0.22], head: [0.12, 0.05], tilt: 0 },
@@ -68,6 +35,35 @@ function placeBoxes(mesh: InstancedMesh | null, items: readonly { p: [number, nu
   if (!mesh) return;
   items.forEach((it, i) => mesh.setMatrixAt(i, m4.compose(at.set(...it.p), q.setFromAxisAngle(axisZ, it.tilt ?? 0), size.set(...it.s))));
   mesh.instanceMatrix.needsUpdate = true;
+}
+
+/** Room shell: the concrete floor, and the walls (back wall around the door opening, the left wall) as one instanced mesh. */
+function Room() {
+  const walls = useRef<InstancedMesh>(null);
+  const wallHeight = 3.2;
+  const leftWidth = DOOR.x0 + 3;
+  useLayoutEffect(() => {
+    placeBoxes(walls.current, [
+      // Back wall, left of the door; above it; right of it.
+      { p: [DOOR.x0 - leftWidth / 2, wallHeight / 2, DOOR.z - 0.05], s: [leftWidth, wallHeight, 0.1] },
+      { p: [(DOOR.x0 + DOOR.x1) / 2, (DOOR.height + wallHeight) / 2, DOOR.z - 0.05], s: [DOOR.x1 - DOOR.x0, wallHeight - DOOR.height, 0.1] },
+      { p: [DOOR.x1 + 0.8, wallHeight / 2, DOOR.z - 0.05], s: [1.6, wallHeight, 0.1] },
+      // Left wall.
+      { p: [-3, wallHeight / 2, 1.5], s: [0.1, wallHeight, 4] },
+    ]);
+  }, [leftWidth]);
+  return (
+    <group name="room">
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[1.2, 0, -1.5]} receiveShadow>
+        <planeGeometry args={[12, 12]} />
+        <meshStandardMaterial color={CONCRETE} roughness={0.95} />
+      </mesh>
+      <instancedMesh ref={walls} args={[undefined, undefined, 4]} receiveShadow>
+        <boxGeometry args={[1, 1, 1]} />
+        <meshStandardMaterial color={WALL} roughness={0.9} />
+      </instancedMesh>
+    </group>
+  );
 }
 
 /** The workbench: dark wood top on four legs, and the pegboard of tools on the wall behind it. */

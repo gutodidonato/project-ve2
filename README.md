@@ -1,6 +1,6 @@
 # Rodovia 2026
 
-Personal portfolio of Luis Didonato, built as an interactive "road" scene: a retro-wave DeLorean you drive between zones (experience, cases, workshop, services, contact), with a classic scrollable "pit stop" version of the same content for accessibility and SEO. Next.js 16 (App Router) with React Three Fiber, bilingual (pt / en).
+Personal portfolio of Luis Didonato. The home page opens on a night garage built with React Three Fiber: a 1988 computer on a workbench whose screen holds the résumé (C), the contact (K) and the language switch (E), and, behind the roll-up door, the DeLorean that takes you (J) into Salto 88, the career game. A classic scrollable "pit stop" version of the same content stays underneath for accessibility and SEO. Next.js 16 (App Router), bilingual (pt / en).
 
 Requires Node 22.
 
@@ -33,6 +33,8 @@ Until `RESEND_API_KEY` and `CONTACT_TO_EMAIL` are both set, the contact API answ
 **Sender domain.** When `CONTACT_FROM_EMAIL` is blank the form sends from `onboarding@resend.dev`, Resend's shared test sender, which only delivers to the email address of the Resend account owner. That is enough for a smoke test, but production needs a domain verified in Resend (DNS records) and a sender on that domain in `CONTACT_FROM_EMAIL`.
 
 **3D model.** The car served to visitors is `public/models/delorean.glb`, generated from the source export in `assets-src/` by `npm run assets`. Run it again after changing the pipeline or the source model, and commit the result.
+
+**Salto 88.** The game is a static page served at `/salto88/index.html` from `public/salto88/` (about 29 MB, committed). It is built in its own lab repository (`.superpowers/salto88-lab`, git-ignored here): `node scripts/shrink-game.mjs <lab>/proto` re-encodes its models and music into `<lab>/proto/min` (needs ffmpeg, through the `FFMPEG` variable or the PATH), then `node build-v3.mjs <lab> <this repo>/public/salto88`, run in the lab, writes the folder. three r128 and the fonts ship with it, so the game fetches nothing from third parties.
 
 Before promoting a build: `npm run typecheck && npm run lint && npm test && npm run build && npm run check:bundle && npm run test:e2e`.
 

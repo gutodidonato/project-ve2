@@ -184,6 +184,12 @@ A mecânica do hub de 5 zonas: `Hub`, `ZoneMarker`, `ZonePanel`, `Minimap`, `Dec
   | Chegada ao carro | 8 |
 
   Na partida a 1,6 s, a luz fria ainda não chega à bancada antes da virada. Fica no backlog.
+- **Lote de acabamento (23 out, depois da revisão):**
+  - **Partida.** Os faróis sobem com o portão, numa rampa de 0,9 a 2,2 s. Um spot frio de "spill" (porta × subida) entra pela abertura e esfria o monitor e a bancada antes da virada da câmera. Dois feixes aditivos com degradê saem dos faróis. Partida a 1,6 s: nota 9 no desktop e 8,5 no celular. Chegada ao carro: 8,5.
+  - **Voo para a tela.** No voo, a página já é montada no tamanho final (`screenRect`) e mapeada no pedaço do vidro que vai cobrir (`subQuad`). A chegada não refaz o layout. A câmera assenta em cerca de 0,9 s.
+  - **Foco.** Um link direto (`#curriculo`) ou a troca de idioma com a página aberta põe o foco no título assim que a tela aparece.
+  - **Legendas.** A família da Plex Sans é lida de `--font-plex-sans` (nome com hash do next/font), e as legendas são redesenhadas quando a fonte carrega.
+  - **Tier A.** 55 chamadas de desenho: os feixes, as pernas, as ferramentas e as paredes viraram malhas instanciadas.
 - **Números do fechamento** (build de produção, testes sob `low.sh`):
   - `check:bundle`: 150,3 KB gzip de 180 KB, sem three na primeira carga.
   - Payload 3D no tier A: 1.606 KiB (GLB de 1.131 KiB e 14 scripts somando 475 KiB), dentro do teto de 2.560 KiB.

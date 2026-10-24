@@ -34,6 +34,25 @@ export function ScreenSurface({
     garageRuntime.surface = node;
   }, []);
 
+  // Opened straight on a page (a #curriculo link, or a language switch with the page open): once
+  // the screen is on the glass (hidden elements cannot take focus), the keyboard starts in it.
+  useEffect(() => {
+    if (useGameStore.getState().garage.view !== 'screen') return;
+    let frame = 0;
+    const until = performance.now() + 30_000;
+    const tryFocus = () => {
+      const node = el.current;
+      const title = node?.querySelector<HTMLElement>('.crt-title');
+      if (node && title && node.dataset.placed !== undefined && !node.dataset.placed.startsWith('visibility:hidden')) {
+        title.focus({ preventScroll: true });
+        return;
+      }
+      if (performance.now() < until) frame = requestAnimationFrame(tryFocus);
+    };
+    frame = requestAnimationFrame(tryFocus);
+    return () => cancelAnimationFrame(frame);
+  }, []);
+
   // Focus follows the camera: into the page that opened, back to the menu key that opened it.
   const previous = useRef(garage);
   useEffect(() => {

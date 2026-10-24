@@ -110,6 +110,14 @@ test.describe('garage: screen', () => {
     await expect(page).toHaveURL(/\/pt#contato$/);
   });
 
+  test('a deep link puts the keyboard focus in the resume', async ({ page }) => {
+    await openGarage(page, '/pt#curriculo');
+    await expect(fullScreen(page).locator('.crt-title')).toBeFocused({ timeout: 30_000 });
+    await page.keyboard.press('e');
+    await expect(page).toHaveURL(/\/en#resume$/, { timeout: 20_000 });
+    await expect(fullScreen(page).locator('.crt-title')).toBeFocused({ timeout: 30_000 });
+  });
+
   test('#contato opens straight on the contact', async ({ page }) => {
     await openGarage(page, '/pt#contato');
     await expect(fullScreen(page).getByRole('heading', { name: 'Contato' })).toBeVisible({ timeout: 10_000 });

@@ -1,10 +1,11 @@
 'use client';
 
-import { useLayoutEffect, useMemo, useRef } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useFrame, useThree, type ThreeEvent } from '@react-three/fiber';
 import { CanvasTexture, Matrix4, SRGBColorSpace, Vector3, type InstancedMesh, type PerspectiveCamera } from 'three';
 import { framingFor, type Framing } from '@/lib/garage/camera';
 import { ACTION_CODES, KEY_ROWS, PORTRAIT_CODES, codeToAction, legendOf } from '@/lib/garage/keys';
+import { legendFontFamily } from '@/lib/garage/fonts';
 import { garageRuntime } from '@/lib/garage/runtime';
 import { garageSound } from '@/lib/garage/sound';
 import { BENCH_TOP_Y, GLASS } from '@/lib/garage/scene';
@@ -58,7 +59,7 @@ function layoutFor(framing: Framing): Layout {
 }
 
 /** One canvas texture with every legend, laid out like the caps (it sits on top of them). */
-function legendTexture(layout: Layout): CanvasTexture {
+function legendTexture(layout: Layout, family: string): CanvasTexture {
   const scale = 2048 / layout.base.width;
   const canvas = document.createElement('canvas');
   canvas.width = 2048;
@@ -71,7 +72,7 @@ function legendTexture(layout: Layout): CanvasTexture {
     if (label === '') continue;
     const action = codeToAction(cap.code) !== null;
     const size = layout.cap.depth * scale * (label.length > 1 ? 0.32 : 0.48);
-    ctx.font = `500 ${size}px "IBM Plex Sans", "Segoe UI", sans-serif`;
+    ctx.font = `500 ${size}px ${family}`;
     ctx.fillStyle = action ? LEGEND_ACTION : LEGEND;
     ctx.fillText(label, (cap.x + layout.base.width / 2) * scale, (cap.z + layout.base.depth / 2) * scale);
   }
@@ -95,7 +96,22 @@ export function Keyboard({ act }: { act(a: GarageAction): void }) {
   const size = useThree((s) => s.size);
   const framing = framingFor(size.width, size.height);
   const layout = useMemo(() => layoutFor(framing), [framing]);
-  const texture = useMemo(() => legendTexture(layout), [layout]);
+  // The legends are canvas text: draw them again once Plex Sans has loaded (it may arrive after the scene).
+  const [family, setFamily] = useState<string | null>(null);
+  useEffect(() => {
+    let alive = true;
+    const plex = legendFontFamily(document.documentElement);
+    document.fonts
+      .load(`500 40px ${plex}`)
+      .catch(() => [])
+      .then(() => {
+        if (alive) setFamily(plex);
+      });
+    return () => {
+      alive = false;
+    };
+  }, []);
+  const texture = useMemo(() => legendTexture(layout, family ?? legendFontFamily(document.documentElement)), [layout, family]);
   const caps = useRef<InstancedMesh>(null);
   const sunk = useRef<boolean[]>([]);
 
