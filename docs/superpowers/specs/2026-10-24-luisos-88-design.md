@@ -189,3 +189,19 @@ Começa pelo Salto88.exe, pela tecla J ou pelo item do menu.
 - A costura com o jogo (o DeLorean saindo da garagem para fev 2019 dentro do Salto 88): parte 2.
 - O jogo em inglês: parte 3.
 - O pit stop na paleta da garagem.
+
+## 8. Como construído
+
+- **Commits:** ad2f20e (máquina do desktop, teclas, âncoras, Leia-me), 9cf05f2 (câmera da mesa, plano aberto, partida com recuo), 2a914ce (desktop, janelas e programas em DOM), 5b17dd0 (desktop ligado na garagem; menu, páginas e botões de fora saem), 73868cb (testes da partida), mais o lote das fotos.
+- **Desktop no vidro:** `ScreenSurface` mede o vidro na pose da mesa (`deskRect`) só no `resize` e monta o `Desktop` nesse tamanho; `placeSurface` deixa plano quando a câmera para e mapeia no vidro enquanto ela anda (recuo da partida). A cada `resize` as janelas são presas de volta (`clamp`).
+- **Foco:** janela que abre recebe o foco no título; janela que fecha devolve o foco ao ícone ou arquivo que a abriu; na carga com janela aberta (âncora, Leia-me, troca de idioma), o título ganha foco assim que o desktop aparece no vidro.
+- **Mudanças em relação ao plano:**
+  - as janelas abrem à direita da coluna de ícones (`CASCADE.x` 136, largura até `w − 152`): em x 24 a primeira janela cobria os ícones;
+  - o diálogo do Salto88.exe é uma janela pequena (440 px, altura do texto);
+  - no modo jogo o botão do pit stop fica sempre no canto de baixo (no celular a barra de menu ocupa o topo); no pit stop ele continua em cima no celular;
+  - rótulos de ícone quebram só entre palavras;
+  - luz da tela: um ponto âmbar fraco na frente do queixo do monitor deixa a moldura bege (a lâmpada fica atrás do plano da tela); abaixo do vidro para o reflexo não cair no tubo;
+  - `CAR_POSE` foi para a linha da abertura (x 2,6), sem o batente no quadro; no celular em pé, `widePose`/`carPose` de retrato (mais longe, lente 66°) mantêm o computador no recuo e o carro inteiro.
+- **Testes:** `tests/garage/{desktop,os,camera,launch,surface,keys}` e `e2e/garage.spec.ts` (grupos desk, windows, phone, keys e launch, em série); a regra do Esc depois do clarão e o recuo foram conferidos com mutação (cada teste falha sem a regra).
+- **Fotos:** `node scripts/garage-shots.mjs <baseUrl> <outDir> [filtro]` tira 30 fotos (10 momentos × 3 janelas); notas em `.superpowers/garagem/notas.md` (os1 → os4, todas as áreas em 9).
+- **Fechamento (24 out):** typecheck e lint limpos; vitest 32 arquivos, 198 testes; `garage.spec` + `mode.spec` em série, 38/38 no chromium e 38/38 no mobile; build ok; `check:bundle` 150,8 KB de 180 KB (84%); `test:perf` LCP 764 ms (CPU ×4) e 1220 ms (4G + CPU ×4), tier A com 52 chamadas.
