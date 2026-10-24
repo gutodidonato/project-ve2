@@ -36,6 +36,18 @@ test.describe('desk', () => {
     await expect(desktop(page).getByTestId('os-icon')).toHaveCount(7);
   });
 
+  test('a short laptop window keeps the seven icons in one column, clear of the windows', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'a laptop with a mouse: a touch screen gets the compact desktop');
+    await page.setViewportSize({ width: 1366, height: 657 });
+    await openGarage(page, '/pt', { firstVisit: true });
+    const d = (await desktop(page).boundingBox())!;
+    const readme = (await windowNamed(page, 'Leia-me.txt').boundingBox())!;
+    for (const box of await desktop(page).getByTestId('os-icon').evaluateAll((els) => els.map((e) => e.getBoundingClientRect().toJSON()))) {
+      expect(box.x + box.width).toBeLessThanOrEqual(readme.x);
+      expect(box.y + box.height).toBeLessThanOrEqual(d.y + d.height);
+    }
+  });
+
   test('the glass takes about three quarters of a wide window', async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await openGarage(page);
@@ -124,6 +136,13 @@ test.describe('windows', () => {
     await openGarage(page, '/pt#contato', { firstVisit: true });
     await expect(windowNamed(page, 'Contato')).toBeVisible();
     await expect(windowNamed(page, 'Leia-me.txt')).toHaveCount(0);
+    // The visit counts: coming back without the anchor does not open the readme either.
+    await page.goto('/pt');
+    await page.waitForFunction(() => window.__garage?.snapshot().view === 'desk' && window.__garage.snapshot().arrived, null, {
+      timeout: 60_000,
+    });
+    await expect(desktop(page).getByTestId('os-icon')).toHaveCount(7);
+    await expect(windowNamed(page, 'Leia-me.txt')).toHaveCount(0);
   });
 
   test('the readme opens on the first visit only', async ({ page }) => {
@@ -156,7 +175,8 @@ test.describe('windows', () => {
     await openGarage(page);
     await iconNamed(page, 'Painel de controle').dblclick();
     await expect(windowNamed(page, 'Painel de controle')).toContainText('dark_igorek');
-    await windowNamed(page, 'Painel de controle').getByRole('button', { name: 'PT | EN' }).click();
+    // Shows PT | EN, named by the language it switches to.
+    await windowNamed(page, 'Painel de controle').getByRole('button', { name: 'English' }).click();
     await expect(page).toHaveURL(/\/en$/, { timeout: 30_000 });
   });
 });
@@ -236,6 +256,17 @@ test.describe('launch', () => {
     await page.waitForTimeout(1_000);
     expect(urls.filter((u) => u.includes('/salto88/'))).toHaveLength(1);
     expect(urls.some((u) => /#(curriculo|contato)$/.test(u))).toBe(false);
+  });
+
+  test("the dialog's close box cancels during the pull-back", async ({ page }) => {
+    await openGarage(page);
+    await holdLaunch(page, 1200);
+    await iconNamed(page, 'Salto88.exe').dblclick();
+    await expect.poll(async () => (await snapshot(page)).view).toBe('launch');
+    await windowNamed(page, 'Salto88.exe').getByRole('button', { name: 'Fechar (Esc)' }).click();
+    await expect.poll(async () => (await snapshot(page)).view).toBe('desk');
+    await page.waitForTimeout(LAUNCH_MS + 600);
+    await expect(page).toHaveURL(/\/pt$/);
   });
 
   test('Esc during the pull-back cancels and the desktop comes back as it was', async ({ page }) => {

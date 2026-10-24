@@ -87,7 +87,8 @@ export function GameMount({ profile, locale }: { profile: Profile; locale: Local
     if (!desktopReady) {
       const desktop = initialDesktop(window.location.hash, readPref(README_KEY) === 'seen');
       setDesktop(desktop);
-      if (desktop.windows.some((w) => w.id === 'readme')) writePref(README_KEY, 'seen');
+      // The readme, or the window a link opened: either way the next plain visit starts empty.
+      if (desktop.windows.length > 0) writePref(README_KEY, 'seen');
     }
   }, []);
 

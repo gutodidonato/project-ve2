@@ -2,18 +2,16 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Locale, Profile } from '@/content/types';
-import { deskRect, framingFor } from '@/lib/garage/camera';
+import { deskLayout } from '@/lib/garage/camera';
 import type { DesktopAction, DesktopState, ProgramId } from '@/lib/garage/desktop';
 import { garageRuntime } from '@/lib/garage/runtime';
 import { garageSound } from '@/lib/garage/sound';
 import { useGameStore } from '@/lib/store';
 import { Desktop } from './os/Desktop';
 
-/** The desktop's layout for this window: the glass in CSS px, and whether a phone holds it upright. */
+/** The desktop's layout for this window (lib/garage/camera.ts `deskLayout`). */
 function measure(): { size: { width: number; height: number }; compact: boolean } {
-  const { innerWidth: w, innerHeight: h } = window;
-  const { page } = deskRect(w, h);
-  return { size: { width: Math.round(page.width), height: Math.round(page.height) }, compact: framingFor(w, h) === 'portrait' };
+  return deskLayout(window.innerWidth, window.innerHeight, window.matchMedia('(pointer: coarse)').matches);
 }
 
 /** Where the keyboard lands when a window closes: the icon or file that opened it. */

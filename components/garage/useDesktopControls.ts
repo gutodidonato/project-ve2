@@ -68,8 +68,9 @@ export function useDesktopControls(locale: Locale): { dispatch(a: DesktopAction)
   const dispatch = useCallback(
     (a: DesktopAction) => {
       const { desktop, setDesktop } = useGameStore.getState();
-      // Once the flash has started the jump goes on: Esc no longer cancels.
-      if (desktop.view === 'launch' && (a.type === 'escape' || a.type === 'cancel') && launchFrame(launchElapsed()).whiteout > 0) return;
+      // Once the flash has started the jump goes on: neither Esc nor the dialog's close box cancels.
+      const cancels = a.type === 'escape' || a.type === 'cancel' || a.type === 'close';
+      if (desktop.view === 'launch' && cancels && launchFrame(launchElapsed()).whiteout > 0) return;
       const { state, effect } = reduceDesktop(desktop, a);
       if (state !== desktop) setDesktop(state);
       if (effect === 'start-launch') {

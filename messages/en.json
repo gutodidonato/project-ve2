@@ -151,6 +151,7 @@
     "language": "Language",
     "credits": "Credits",
     "stack": "Stack",
-    "starting": "Starting Salto88.exe…"
+    "starting": "Starting Salto88.exe…",
+    "languageSwitch": "PT | EN"
   }
 }

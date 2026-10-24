@@ -85,12 +85,12 @@ const NOTHING = (s: DesktopState) => ({ state: s, effect: null });
 
 /**
  * The LuisOS 88 desktop. One window per program; the last window is on top
- * and focused. During the launch only `escape` / `cancel` act (they cancel),
- * so nothing opens over the departing car.
+ * and focused. During the launch only `escape` / `cancel` and the launch
+ * dialog's close box act (they cancel), so nothing opens over the departing car.
  */
 export function reduceDesktop(s: DesktopState, a: DesktopAction): { state: DesktopState; effect: DesktopEffect } {
   if (s.view === 'launch') {
-    if (a.type === 'escape' || a.type === 'cancel') {
+    if (a.type === 'escape' || a.type === 'cancel' || (a.type === 'close' && a.id === 'salto88')) {
       return { state: { ...close(s, 'salto88'), view: 'desk' }, effect: 'cancel-launch' };
     }
     return NOTHING(s);

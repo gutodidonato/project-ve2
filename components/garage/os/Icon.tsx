@@ -5,7 +5,8 @@ import { Glyph } from './glyphs';
 
 /**
  * A desktop icon. Click selects it (on a phone, one tap opens), double click
- * opens, Enter opens straight away. Selected icons are drawn inverted.
+ * opens, Enter opens straight away, and so does a click no pointer made (Space,
+ * a screen reader's activate). Selected icons are drawn inverted.
  */
 export function Icon({
   id,
@@ -29,7 +30,7 @@ export function Icon({
       data-icon={id}
       className="os-icon"
       aria-pressed={selected}
-      onClick={() => (compact ? onOpen() : onSelect())}
+      onClick={(e) => (compact || e.detail === 0 ? onOpen() : onSelect())}
       onDoubleClick={onOpen}
       onKeyDown={(e) => {
         if (e.key !== 'Enter') return;

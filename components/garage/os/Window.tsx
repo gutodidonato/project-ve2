@@ -57,7 +57,16 @@ export function Window({ program, title, x, y, z, focused, compact, small = fals
         }}
         onPointerMove={(e) => {
           const d = drag.current;
-          if (d) onMove(d.x + e.clientX - d.px, d.y + e.clientY - d.py);
+          if (d === null) return;
+          // The button came up somewhere this bar never heard of: the drag is over.
+          if (e.buttons === 0) {
+            drag.current = null;
+            return;
+          }
+          onMove(d.x + e.clientX - d.px, d.y + e.clientY - d.py);
+        }}
+        onLostPointerCapture={() => {
+          drag.current = null;
         }}
         onPointerUp={(e) => {
           drag.current = null;

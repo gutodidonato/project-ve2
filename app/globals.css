@@ -414,6 +414,7 @@ html[data-mode="game"] .game-layer canvas {
 .os-desktop {
   position: relative;
   overflow: hidden;
+  container-type: size;
   background: #17130c repeating-conic-gradient(#1f190f 0 25%, #17130c 0 50%) 0 0 / 4px 4px;
   font-family: var(--font-mono);
   cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' shape-rendering='crispEdges'><polygon points='1,1 1,13 4,10 6,15 8,14 6,9 10,9' fill='%23FFB000' stroke='%2317130C'/></svg>") 1 1, default;
@@ -672,4 +673,23 @@ html[data-mode="game"] .pitstop-toggle {
 /* A phone's maximized windows scroll their last lines clear of the toggle. */
 .os-desktop--compact .os-content {
   padding-bottom: 4.5rem;
+}
+
+/* A short glass (a laptop window under ~820 px tall): smaller icons, so the seven still fit one column. */
+@container (height < 600px) {
+  .os-icons {
+    gap: 4px;
+  }
+
+  .os-icon {
+    gap: 2px;
+    min-height: 0;
+    padding: 3px 4px;
+    font-size: 12px;
+  }
+
+  .os-glyph {
+    width: 24px;
+    height: 24px;
+  }
 }

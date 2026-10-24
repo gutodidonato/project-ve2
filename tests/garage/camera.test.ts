@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CAR_POSE, WIDE_POSE, carPose, deskPose, deskRect, framingFor, glassDistance, widePose } from '@/lib/garage/camera';
+import { CAR_POSE, WIDE_POSE, carPose, deskLayout, deskPose, deskRect, framingFor, glassDistance, widePose } from '@/lib/garage/camera';
 import { GLASS } from '@/lib/garage/scene';
 
 describe('framingFor', () => {
@@ -79,5 +79,21 @@ describe('widePose and carPose', () => {
     expect(Math.abs(GLASS.center[0] - wide.target[0])).toBeLessThan(half);
     const car = carPose('portrait');
     expect(across(car.fov, aspect, distance(car))).toBeGreaterThan(2.2);
+  });
+});
+
+describe('deskLayout', () => {
+  it('lays the desktop out on the glass, whole pixels', () => {
+    const { size } = deskLayout(1440, 900, false);
+    const { page } = deskRect(1440, 900);
+    expect(size).toEqual({ width: Math.round(page.width), height: Math.round(page.height) });
+  });
+
+  it('is compact on a phone held upright, a short glass (a phone held sideways) or a touch screen', () => {
+    expect(deskLayout(1440, 900, false).compact).toBe(false);
+    expect(deskLayout(1366, 657, false).compact).toBe(false);
+    expect(deskLayout(390, 844, false).compact).toBe(true);
+    expect(deskLayout(844, 350, false).compact).toBe(true);
+    expect(deskLayout(1024, 768, true).compact).toBe(true);
   });
 });

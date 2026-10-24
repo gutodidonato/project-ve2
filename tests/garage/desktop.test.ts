@@ -83,6 +83,15 @@ describe('reduceDesktop', () => {
     expect(ids(cancelled.state)).toEqual(['cv']);
     expect(reduceDesktop(INITIAL_DESKTOP, { type: 'cancel' }).effect).toBeNull();
   });
+
+  it("the launch dialog's close box cancels too (a phone has no Esc); other windows stay shut during the launch", () => {
+    const exe = reduceDesktop(run({ type: 'open', id: 'cv' }), { type: 'play' }).state;
+    const closed = reduceDesktop(exe, { type: 'close', id: 'salto88' });
+    expect(closed.effect).toBe('cancel-launch');
+    expect(closed.state.view).toBe('desk');
+    expect(ids(closed.state)).toEqual(['cv']);
+    expect(reduceDesktop(exe, { type: 'close', id: 'cv' })).toEqual({ state: exe, effect: null });
+  });
 });
 
 describe('keys', () => {

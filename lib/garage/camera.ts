@@ -62,6 +62,20 @@ export function deskRect(width: number, height: number): { glass: Rect; page: Re
   return { glass, page };
 }
 
+/** Under this glass height a column of icons and floating windows no longer fit (a phone held sideways). */
+const COMPACT_BELOW = 420;
+
+/**
+ * The desktop for this window: its size (the glass inside the window, whole pixels) and whether it
+ * is compact (one tap opens, windows maximized, icons in a grid): a phone held upright, a short
+ * glass, or a touch screen, where a double tap is unreliable.
+ */
+export function deskLayout(width: number, height: number, coarse: boolean): { size: { width: number; height: number }; compact: boolean } {
+  const { page } = deskRect(width, height);
+  const size = { width: Math.round(page.width), height: Math.round(page.height) };
+  return { size, compact: coarse || framingFor(width, height) === 'portrait' || size.height < COMPACT_BELOW };
+}
+
 /** The pull-back before the jump: the whole garage, the bench on the left, the door on the right, the car behind it. */
 export const WIDE_POSE: Pose = { position: [-0.2, 1.75, 3.4], target: [1.4, 1.0, -1.2], fov: 50 };
 

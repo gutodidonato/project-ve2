@@ -96,14 +96,16 @@ export function Desktop({ profile, locale, state, size, compact, dispatch, onLan
           </li>
         ))}
       </ul>
-      {state.windows.map((w, i) => (
+      {/* A stable DOM order (by program), stacked by zIndex: raising a window never moves its node,
+          which would drop the pointer capture of a drag that started on it. */}
+      {[...state.windows].sort((a, b) => (a.id < b.id ? -1 : 1)).map((w) => (
         <Window
           key={w.id}
           program={w.id}
           title={titleOf(w.id)}
           x={w.x}
           y={w.y}
-          z={i + 1}
+          z={state.windows.indexOf(w) + 1}
           focused={state.focus === w.id}
           compact={compact}
           small={w.id === 'salto88'}

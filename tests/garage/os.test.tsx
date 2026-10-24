@@ -26,21 +26,22 @@ function show(
   const dispatch = opts.dispatch ?? vi.fn();
   const onLanguage = opts.onLanguage ?? vi.fn();
   const toggle = opts.toggle ?? vi.fn();
-  render(
+  const tree = (s: DesktopState) => (
     <NextIntlClientProvider locale={locale} messages={MESSAGES[locale]}>
       <Desktop
         profile={getProfile(locale)}
         locale={locale}
-        state={state}
+        state={s}
         size={size}
         compact={opts.compact ?? false}
         dispatch={dispatch}
         onLanguage={onLanguage}
         sound={{ muted: false, toggle }}
       />
-    </NextIntlClientProvider>,
+    </NextIntlClientProvider>
   );
-  return { dispatch, onLanguage, toggle };
+  const view = render(tree(state));
+  return { dispatch, onLanguage, toggle, rerender: (s: DesktopState) => view.rerender(tree(s)) };
 }
 
 const icon = (name: string) => screen.getByRole('button', { name: new RegExp(`^${name.replace('.', '\\.')}$`) });
@@ -68,7 +69,7 @@ describe('LuisOS 88 desktop', () => {
 
   it('click selects, double click and Enter open', () => {
     const { dispatch } = show('pt');
-    fireEvent.click(icon('Currículo.txt'));
+    fireEvent.click(icon('Currículo.txt'), { detail: 1 });
     expect(dispatch).toHaveBeenLastCalledWith({ type: 'select', icon: 'cv' });
     fireEvent.doubleClick(icon('Currículo.txt'));
     expect(dispatch).toHaveBeenLastCalledWith({ type: 'open', id: 'cv' });
@@ -83,6 +84,27 @@ describe('LuisOS 88 desktop', () => {
     const win = windowNamed('Projetos');
     expect(win.style.left).toBe('0px');
     expect(win.style.width).toBe(`${SIZE.width}px`);
+  });
+
+  it('a click with no pointer behind it (Space, a screen reader) opens, in a folder too', () => {
+    const { dispatch } = show('pt', withOpen('projects'));
+    fireEvent.click(icon('Contato'), { detail: 0 });
+    expect(dispatch).toHaveBeenLastCalledWith({ type: 'open', id: 'contact' });
+    fireEvent.click(within(windowNamed('Projetos')).getByRole('button', { name: 'migracao-gcp-aws.txt' }), { detail: 0 });
+    expect(dispatch).toHaveBeenLastCalledWith({ type: 'open', id: 'case:migracao-gcp-aws' });
+  });
+
+  it('raising a window restacks it without moving its node (a drag keeps its pointer capture)', () => {
+    const before = withOpen('cv', 'contact');
+    const view = show('pt', before);
+    const cv = windowNamed('Currículo.txt');
+    const order = () => screen.getAllByRole('dialog').map((d) => d.getAttribute('data-program'));
+    const was = order();
+    const after = reduceDesktop(before, { type: 'focus', id: 'cv' }).state;
+    view.rerender(after);
+    expect(windowNamed('Currículo.txt')).toBe(cv);
+    expect(order()).toEqual(was);
+    expect(Number(cv.style.zIndex)).toBeGreaterThan(Number(windowNamed('Contato').style.zIndex));
   });
 
   it('a window opens right of the icon column and fits the desktop', () => {
@@ -144,7 +166,9 @@ describe('LuisOS 88 desktop', () => {
     expect(win.textContent).toContain(MODEL_CREDIT.license);
     fireEvent.click(within(win).getByRole('button', { name: /Som/ }));
     expect(toggle).toHaveBeenCalled();
-    fireEvent.click(within(win).getByRole('button', { name: /PT \| EN/ }));
+    const lang = within(win).getByRole('button', { name: 'English' });
+    expect(lang.textContent).toBe(pt.Os.languageSwitch);
+    fireEvent.click(lang);
     expect(onLanguage).toHaveBeenCalled();
   });
 

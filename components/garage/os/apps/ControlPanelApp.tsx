@@ -7,6 +7,7 @@ import { MODEL_CREDIT } from '@/content/credits';
 export function ControlPanelApp({ sound, onLanguage }: { sound: { muted: boolean; toggle(): void }; onLanguage(): void }) {
   const t = useTranslations('Os');
   const tg = useTranslations('Game');
+  const tp = useTranslations('PitStop');
   return (
     <div className="crt-page">
       <dl className="crt-rows">
@@ -21,8 +22,8 @@ export function ControlPanelApp({ sound, onLanguage }: { sound: { muted: boolean
         <div>
           <dt className="crt-dim">{t('language')}</dt>
           <dd>
-            <button type="button" className="crt-action" onClick={onLanguage}>
-              PT | EN
+            <button type="button" className="crt-action" aria-label={tp('switchLocale')} onClick={onLanguage}>
+              {t('languageSwitch')}
             </button>
           </dd>
         </div>
