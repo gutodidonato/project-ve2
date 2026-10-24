@@ -11,296 +11,177 @@ async function snapshot(page: Page): Promise<GarageSnapshot> {
   return page.evaluate(() => window.__garage!.snapshot());
 }
 
-/** Open the garage and wait until the camera has settled on the bench. */
-async function openGarage(page: Page, path = '/pt') {
+/**
+ * Open the garage and wait until the camera rests on the desk. Unless the test is about the first
+ * visit, the readme counts as already seen, so it does not open over everything.
+ */
+async function openGarage(page: Page, path = '/pt', { firstVisit = false } = {}) {
+  if (!firstVisit) await page.addInitScript(() => window.localStorage.setItem('rodovia:readme', 'seen'));
   await page.goto(path);
   await expect(page.locator('html')).toHaveAttribute('data-mode', 'game');
-  await page.waitForFunction(() => window.__garage?.snapshot().arrived === true, null, { timeout: 60_000 });
+  await page.waitForFunction(() => window.__garage?.snapshot().view === 'desk' && window.__garage.snapshot().arrived, null, {
+    timeout: 60_000,
+  });
 }
 
-const layer = (page: Page) => page.locator('.game-layer');
+const desktop = (page: Page) => page.locator('.os-desktop');
+const iconNamed = (page: Page, name: string) => desktop(page).getByRole('button', { name, exact: true });
+const windowNamed = (page: Page, name: string) => desktop(page).getByRole('dialog', { name, exact: true });
 
-test.describe('garage: bench', () => {
-  test('/pt shows the menu on the screen', async ({ page }) => {
+test.describe('desk', () => {
+  test('/pt opens on the desktop with the seven icons', async ({ page }) => {
     await openGarage(page);
-    await expect(page.locator('.game-layer canvas')).toBeVisible();
-    await expect(layer(page).getByRole('button', { name: /Currículo/ })).toBeVisible({ timeout: 30_000 });
+    await expect(desktop(page)).toBeVisible();
+    await expect(desktop(page).getByTestId('os-icon')).toHaveCount(7);
   });
 
-  test('/en shows the English menu', async ({ page }) => {
-    await openGarage(page, '/en');
-    await expect(layer(page).getByRole('button', { name: /Resume/ })).toBeVisible({ timeout: 30_000 });
-    await expect(layer(page).getByRole('button', { name: /Português/ })).toBeVisible();
+  test('the glass takes about three quarters of a wide window', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await openGarage(page);
+    const { glassRect: r } = await snapshot(page);
+    expect(r.height / 900).toBeGreaterThan(0.68);
+    expect(r.height / 900).toBeLessThan(0.82);
   });
 
-  test('the bench stays under 60 draw calls', async ({ page }) => {
+  test('the glass covers a phone', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await openGarage(page);
+    const { glassRect: r } = await snapshot(page);
+    expect(r.height / 844).toBeGreaterThanOrEqual(0.95);
+  });
+
+  test('the desktop is crisp and flat when the camera rests', async ({ page }) => {
+    await openGarage(page);
+    await expect(page.locator('.crt-screen')).toHaveAttribute('data-full', 'true');
+    expect(await page.locator('.crt-screen').evaluate((e) => (e as HTMLElement).style.transform)).toBe('');
+  });
+
+  test('stays under 60 draw calls', async ({ page }) => {
     await openGarage(page);
     const s = await snapshot(page);
     expect(s.drawCalls).toBeGreaterThan(0);
     expect(s.drawCalls).toBeLessThanOrEqual(60);
   });
-
-  for (const size of [
-    { width: 1440, height: 900, minShare: 0 },
-    { width: 390, height: 844, minShare: 0.3 },
-  ]) {
-    test(`the glass is on screen at ${size.width}x${size.height}`, async ({ page }) => {
-      await page.setViewportSize({ width: size.width, height: size.height });
-      await openGarage(page);
-      const { glassRect: r } = await snapshot(page);
-      expect(r.width * r.height).toBeGreaterThan(0);
-      expect(r.x).toBeGreaterThanOrEqual(0);
-      expect(r.y).toBeGreaterThanOrEqual(0);
-      expect(r.x + r.width).toBeLessThanOrEqual(size.width);
-      expect(r.y + r.height).toBeLessThanOrEqual(size.height);
-      expect(r.height / size.height).toBeGreaterThanOrEqual(size.minShare);
-    });
-  }
-
-  test('the menu sits on the glass', async ({ page }) => {
-    await openGarage(page);
-    const { glassRect: r } = await snapshot(page);
-    const menu = await layer(page).locator('.crt-screen').boundingBox();
-    expect(menu).not.toBeNull();
-    expect(Math.abs(menu!.x - r.x)).toBeLessThan(6);
-    expect(Math.abs(menu!.y - r.y)).toBeLessThan(6);
-    expect(Math.abs(menu!.width - r.width)).toBeLessThan(12);
-  });
 });
 
-/** Centre of a 3D key on the window, from the scene's projection. */
-async function keyCentre(page: Page, code: string) {
-  const s = await snapshot(page);
-  const key = s.keyRects.find((k) => k.code === code);
-  expect(key, `key ${code} is projected`).toBeTruthy();
-  return { x: key!.rect.x + key!.rect.width / 2, y: key!.rect.y + key!.rect.height / 2 };
-}
-
-const fullScreen = (page: Page) => page.locator('.crt-screen[data-full="true"]');
-
-test.describe('garage: screen', () => {
-  test('C opens the resume and Esc comes back', async ({ page }) => {
+test.describe('windows', () => {
+  test('double click opens the resume, Esc closes it', async ({ page }) => {
     await openGarage(page);
-    await page.keyboard.press('c');
-    await expect(fullScreen(page)).toBeVisible({ timeout: 10_000 });
-    await expect(fullScreen(page).getByRole('heading', { name: 'Experiência' })).toBeVisible();
+    await iconNamed(page, 'Currículo.txt').dblclick();
+    await expect(windowNamed(page, 'Currículo.txt')).toBeVisible();
+    await expect(windowNamed(page, 'Currículo.txt').getByRole('heading', { name: 'Experiência' })).toBeVisible();
     await expect(page).toHaveURL(/#curriculo$/);
     await page.keyboard.press('Escape');
-    await expect(layer(page).getByRole('button', { name: /Currículo/ })).toBeVisible();
+    await expect(windowNamed(page, 'Currículo.txt')).toHaveCount(0);
     await expect(page).toHaveURL(/\/pt$/);
   });
 
-  test('clicking the 3D K key opens the contact', async ({ page }) => {
+  test('the projects folder opens a case', async ({ page }) => {
     await openGarage(page);
-    const { x, y } = await keyCentre(page, 'KeyK');
-    await page.mouse.click(x, y);
-    await expect(fullScreen(page).getByRole('heading', { name: 'Contato' })).toBeVisible({ timeout: 10_000 });
+    await iconNamed(page, 'Projetos').dblclick();
+    await windowNamed(page, 'Projetos').getByRole('button', { name: 'migracao-gcp-aws.txt' }).dblclick();
+    await expect(windowNamed(page, 'migracao-gcp-aws.txt')).toContainText('Migração GCP → AWS');
   });
 
-  test('typing in the contact form does not change the view', async ({ page }) => {
+  test('Esc in the contact form only leaves the field', async ({ page }) => {
     await openGarage(page);
     await page.keyboard.press('k');
-    const name = fullScreen(page).getByRole('textbox').first();
+    const name = windowNamed(page, 'Contato').getByRole('textbox').first();
     await name.click();
     await page.keyboard.type('cjke');
     await page.keyboard.press('Escape');
     await expect(name).toHaveValue('cjke');
     await expect(name).not.toBeFocused();
-    expect((await snapshot(page)).view).toBe('screen');
+    await expect(windowNamed(page, 'Contato')).toBeVisible();
     await expect(page).toHaveURL(/\/pt#contato$/);
   });
 
-  test('a deep link puts the keyboard focus in the resume', async ({ page }) => {
-    await openGarage(page, '/pt#curriculo');
-    await expect(fullScreen(page).locator('.crt-title')).toBeFocused({ timeout: 30_000 });
-    await page.keyboard.press('e');
-    await expect(page).toHaveURL(/\/en#resume$/, { timeout: 20_000 });
-    await expect(fullScreen(page).locator('.crt-title')).toBeFocused({ timeout: 30_000 });
-  });
-
-  test('#contato opens straight on the contact', async ({ page }) => {
-    await openGarage(page, '/pt#contato');
-    await expect(fullScreen(page).getByRole('heading', { name: 'Contato' })).toBeVisible({ timeout: 10_000 });
-  });
-
-  test('E keeps the resume open in English', async ({ page }) => {
-    await openGarage(page, '/pt#curriculo');
-    await expect(fullScreen(page)).toBeVisible({ timeout: 10_000 });
-    await page.keyboard.press('e');
-    await expect(page).toHaveURL(/\/en#resume$/, { timeout: 20_000 });
-    await expect(page.locator('.crt-screen[data-full="true"]').getByRole('heading', { name: 'Experience' })).toBeVisible({
-      timeout: 20_000,
-    });
-  });
-
-  test('the screen follows the glass on resize', async ({ page }) => {
+  test('a dragged window stays reachable after the window shrinks', async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await openGarage(page);
-    await page.keyboard.press('c');
-    await expect(fullScreen(page)).toBeVisible({ timeout: 10_000 });
-    await page.setViewportSize({ width: 390, height: 844 });
+    await iconNamed(page, 'Currículo.txt').dblclick();
+    const title = windowNamed(page, 'Currículo.txt').locator('.os-titlebar');
+    const box = (await title.boundingBox())!;
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width / 2 + 700, box.y + box.height / 2 + 400, { steps: 8 });
+    await page.mouse.up();
+    await page.setViewportSize({ width: 900, height: 700 });
     await expect
       .poll(
         async () => {
-          // On a phone the glass covers the window and spills past it: the page is the part inside the window.
-          const { glassRect: g } = await snapshot(page);
-          const x = Math.max(0, g.x);
-          const y = Math.max(0, g.y);
-          const width = Math.min(390, g.x + g.width) - x;
-          const box = await page.locator('.crt-screen').boundingBox();
-          return box ? Math.max(Math.abs(box.x - x), Math.abs(box.y - y), Math.abs(box.width - width)) : 999;
+          const d = (await desktop(page).boundingBox())!;
+          const t = (await title.boundingBox())!;
+          return t.x + 60 <= d.x + d.width && t.y + t.height <= d.y + d.height && t.x >= d.x - 1;
         },
-        // The camera eases to the new framing first; under SwiftShader with another worker that can take a while.
         { timeout: 30_000 },
       )
-      .toBeLessThan(2);
+      .toBe(true);
   });
 
-  test('the language links are at least 44 px', async ({ page }) => {
-    await page.setViewportSize({ width: 390, height: 844 });
-    await openGarage(page);
-    for (const name of ['PT', 'EN']) {
-      const box = await layer(page).getByRole('link', { name, exact: true }).boundingBox();
-      expect(box, name).not.toBeNull();
-      expect(box!.width, name).toBeGreaterThanOrEqual(44);
-      expect(box!.height, name).toBeGreaterThanOrEqual(44);
-    }
+  test('#contato opens straight on the contact, and the readme stays closed', async ({ page }) => {
+    await openGarage(page, '/pt#contato', { firstVisit: true });
+    await expect(windowNamed(page, 'Contato')).toBeVisible();
+    await expect(windowNamed(page, 'Leia-me.txt')).toHaveCount(0);
   });
 
-  test('phone keys are at least 44 px', async ({ page }) => {
-    await page.setViewportSize({ width: 390, height: 844 });
+  test('the readme opens on the first visit only', async ({ page }) => {
+    await openGarage(page, '/pt', { firstVisit: true });
+    await expect(windowNamed(page, 'Leia-me.txt')).toBeVisible();
+    await page.reload();
+    await page.waitForFunction(() => window.__garage?.snapshot().view === 'desk' && window.__garage.snapshot().arrived, null, {
+      timeout: 60_000,
+    });
+    await expect(desktop(page).getByTestId('os-icon')).toHaveCount(7);
+    await expect(windowNamed(page, 'Leia-me.txt')).toHaveCount(0);
+  });
+
+  test('E keeps the open windows in English', async ({ page }) => {
     await openGarage(page);
-    const s = await snapshot(page);
-    for (const code of ['KeyC', 'KeyJ', 'KeyK', 'KeyE']) {
-      const key = s.keyRects.find((k) => k.code === code);
-      expect(key, code).toBeTruthy();
-      expect(key!.rect.width, code).toBeGreaterThanOrEqual(44);
-      expect(key!.rect.height, code).toBeGreaterThanOrEqual(44);
-    }
+    // A phone's maximized windows cover the icons: the folder first, the resume last, by its key.
+    await iconNamed(page, 'Projetos').dblclick();
+    await windowNamed(page, 'Projetos').getByRole('button', { name: 'migracao-gcp-aws.txt' }).dblclick();
+    await page.locator('body').click({ position: { x: 2, y: 2 } });
+    await page.keyboard.press('c');
+    await expect(windowNamed(page, 'Currículo.txt')).toBeVisible();
+    await page.keyboard.press('e');
+    await expect(page).toHaveURL(/\/en#resume$/, { timeout: 30_000 });
+    await expect(windowNamed(page, 'Resume.txt')).toBeVisible({ timeout: 60_000 });
+    await expect(windowNamed(page, 'migracao-gcp-aws.txt')).toBeVisible();
+    await expect(windowNamed(page, 'Resume.txt').getByRole('heading', { name: 'Experience' })).toBeVisible();
+  });
+
+  test('the control panel switches the language and names the car model', async ({ page }) => {
+    await openGarage(page);
+    await iconNamed(page, 'Painel de controle').dblclick();
+    await expect(windowNamed(page, 'Painel de controle')).toContainText('dark_igorek');
+    await windowNamed(page, 'Painel de controle').getByRole('button', { name: 'PT | EN' }).click();
+    await expect(page).toHaveURL(/\/en$/, { timeout: 30_000 });
   });
 });
 
-/**
- * Leaving a page with a live WebGL scene takes ~11 s under SwiftShader (38 ms without the scene,
- * under 1.5 s on a real GPU), so the launch tests wait up to 60 s for the game page to commit.
- */
-const GAME_COMMIT = { timeout: 60_000, waitUntil: 'commit' } as const;
-
-/** Hold the 3.5 s departure so the garage stays on screen: for tests that watch the launch, not the navigation. */
-async function holdDeparture(page: Page) {
-  await page.addInitScript(() => {
-    const start = window.setTimeout;
-    window.setTimeout = ((fn: TimerHandler, ms?: number, ...rest: unknown[]) =>
-      ms === 3500 ? 0 : start(fn, ms, ...rest)) as typeof window.setTimeout;
-  });
-}
-
-test.describe('garage: launch', () => {
-  test('J rolls the door up', async ({ page }) => {
-    await holdDeparture(page);
+test.describe('phone', () => {
+  test('icons are at least 44 px and windows open maximized', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
     await openGarage(page);
-    await page.keyboard.press('j');
-    await expect.poll(async () => (await snapshot(page)).door, { timeout: 30_000 }).toBeGreaterThan(0.2);
-    await expect.poll(async () => (await snapshot(page)).door, { timeout: 30_000 }).toBe(1);
+    for (const box of await desktop(page).getByTestId('os-icon').evaluateAll((els) => els.map((e) => e.getBoundingClientRect().toJSON()))) {
+      expect(box.width).toBeGreaterThanOrEqual(44);
+      expect(box.height).toBeGreaterThanOrEqual(44);
+    }
+    await iconNamed(page, 'Currículo.txt').click();
+    const d = (await desktop(page).boundingBox())!;
+    const w = (await windowNamed(page, 'Currículo.txt').boundingBox())!;
+    expect(Math.abs(w.width - d.width)).toBeLessThan(3);
   });
+});
 
-  test('a page restored from the browser cache keeps the open screen', async ({ page }) => {
-    // Recruiter path: open the resume, follow the PDF, press Back. Playwright's Chromium runs without
-    // the back-forward cache, so the restore is the event itself.
+test.describe('keys', () => {
+  test('typing in the contact form does not open windows', async ({ page }) => {
     await openGarage(page);
-    await page.keyboard.press('c');
-    await expect(fullScreen(page)).toBeVisible({ timeout: 30_000 });
-    await page.evaluate(() => window.dispatchEvent(new PageTransitionEvent('pageshow', { persisted: true })));
-    await page.waitForTimeout(300);
-    expect((await snapshot(page)).view).toBe('screen');
-    await expect(page).toHaveURL(/#curriculo$/);
-  });
-
-  test('a page restored from the browser cache after the launch shows the bench', async ({ page }) => {
-    await holdDeparture(page);
-    await openGarage(page);
-    await page.keyboard.press('j');
-    await expect.poll(async () => (await snapshot(page)).door, { timeout: 30_000 }).toBeGreaterThan(0.2);
-    await page.evaluate(() => window.dispatchEvent(new PageTransitionEvent('pageshow', { persisted: true })));
-    await expect.poll(async () => (await snapshot(page)).view, { timeout: 10_000 }).toBe('bench');
-    await expect.poll(async () => (await snapshot(page)).door, { timeout: 10_000 }).toBeLessThan(0.05);
-  });
-
-  test('P during the launch leaves a working garage', async ({ page }) => {
-    await holdDeparture(page);
-    await openGarage(page);
-    await page.keyboard.press('j');
-    await page.waitForTimeout(500);
-    await page.keyboard.press('p');
-    await expect(page.locator('html')).toHaveAttribute('data-mode', 'pitstop');
-    await page.keyboard.press('p');
-    await expect(layer(page).getByRole('button', { name: /Currículo/ })).toBeVisible({ timeout: 60_000 });
-    await page.waitForFunction(() => window.__garage?.snapshot().view === 'bench', null, { timeout: 60_000 });
-  });
-
-  test('J lands on the game', async ({ page }) => {
-    await openGarage(page);
-    await page.keyboard.press('j');
-    await page.waitForURL('**/salto88/index.html', GAME_COMMIT);
-  });
-
-  test('J twice navigates once', async ({ page }) => {
-    await openGarage(page);
-    const urls: string[] = [];
-    page.on('framenavigated', (f) => {
-      if (f === page.mainFrame()) urls.push(f.url());
-    });
-    await page.keyboard.press('j');
-    await page.keyboard.press('j');
-    await page.keyboard.press('c');
-    await page.keyboard.press('e');
-    await page.waitForURL('**/salto88/index.html', GAME_COMMIT);
-    await page.waitForTimeout(1_000);
-    expect(urls.filter((u) => u.includes('/salto88/'))).toHaveLength(1);
-    expect(urls.some((u) => u.includes('/en'))).toBe(false);
-  });
-
-  test('Esc during the launch cancels it', async ({ page }) => {
-    await openGarage(page);
-    await page.keyboard.press('j');
-    await page.waitForTimeout(600);
-    await page.keyboard.press('Escape');
-    await expect(layer(page).getByRole('button', { name: /Currículo/ })).toBeVisible();
-    await page.waitForTimeout(4_000);
-    await expect(page).toHaveURL(/\/pt$/);
-  });
-
-  test('/en launches with lang=en', async ({ page }) => {
-    await openGarage(page, '/en');
-    await page.keyboard.press('j');
-    await page.waitForURL('**/salto88/index.html?lang=en', GAME_COMMIT);
-  });
-
-  test('back from the game shows the bench again', async ({ page }) => {
-    await openGarage(page);
-    await page.keyboard.press('j');
-    await page.waitForURL('**/salto88/index.html', GAME_COMMIT);
-    await page.goBack();
-    await expect(layer(page).getByRole('button', { name: /Currículo/ })).toBeVisible({ timeout: 30_000 });
-    const s = await snapshot(page);
-    expect(s.view).toBe('bench');
-    expect(s.door).toBeLessThan(0.05);
-  });
-
-  test('reduced motion cuts the camera', async ({ page }) => {
-    await page.emulateMedia({ reducedMotion: 'reduce' });
-    await page.addInitScript(() => window.localStorage.setItem('rodovia:pitstop', 'off'));
-    await openGarage(page);
-    await page.keyboard.press('c');
-    await page.waitForTimeout(150);
-    const s = await snapshot(page);
-    expect(s.view).toBe('screen');
-    expect(s.arrived).toBe(true);
-  });
-
-  test('the credits name the car model', async ({ page }) => {
-    await openGarage(page);
-    await page.getByRole('button', { name: 'Créditos' }).click();
-    await expect(page.getByRole('dialog')).toContainText('dark_igorek');
+    await page.keyboard.press('k');
+    await windowNamed(page, 'Contato').getByRole('textbox').first().click();
+    await page.keyboard.type('cjk');
+    await expect(windowNamed(page, 'Currículo.txt')).toHaveCount(0);
+    expect((await snapshot(page)).view).toBe('desk');
   });
 });

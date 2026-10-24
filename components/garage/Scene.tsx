@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import type { Tier } from '@/lib/game/tier';
-import type { GarageAction } from '@/lib/garage/state';
+import type { DesktopAction } from '@/lib/garage/desktop';
 import { registerGarageDebug } from '@/lib/garage/debug';
 import { launchFrame } from '@/lib/garage/launch';
 import { garageRuntime } from '@/lib/garage/runtime';
@@ -18,13 +18,13 @@ import { Lights } from './Lights';
 
 export interface SceneProps {
   tier: Tier;
-  act(a: GarageAction): void;
+  onKey(a: DesktopAction | 'language'): void;
 }
 
 const copyRect = (r: { x: number; y: number; width: number; height: number }) => ({ ...r });
 
 /** The garage: room and bench, the computer, the door and the DeLorean behind it, the two lights, the camera. */
-export function Scene({ tier, act }: SceneProps) {
+export function Scene({ tier, onKey }: SceneProps) {
   // Count every pass of a frame (tier A adds post-processing passes): reset by hand, read before the next render.
   // The launch timeline drives the door, the lights, the camera and the flash.
   useFrame(() => {
@@ -43,10 +43,12 @@ export function Scene({ tier, act }: SceneProps) {
   useEffect(
     () =>
       registerGarageDebug(() => {
-        const { garage } = useGameStore.getState();
+        const { desktop } = useGameStore.getState();
         return {
-          view: garage.view,
-          content: garage.content,
+          view: desktop.view,
+          windows: desktop.windows.map((w) => w.id),
+          focus: desktop.focus,
+          zoom: garageRuntime.launch.zoom,
           door: garageRuntime.door,
           whiteout: garageRuntime.launch.whiteout,
           camera: [...garageRuntime.camera],
@@ -67,7 +69,7 @@ export function Scene({ tier, act }: SceneProps) {
       <Lights tier={tier} />
       <Bench />
       <Computer />
-      <Keyboard act={act} />
+      <Keyboard onKey={onKey} />
       <GarageDoor />
       <DeLorean />
       <GarageCamera />

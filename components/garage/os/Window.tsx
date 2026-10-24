@@ -1,9 +1,11 @@
 'use client';
 
 import { useId, useRef, type ReactNode } from 'react';
-import { MENU_H } from '@/lib/garage/desktop';
+import { CASCADE, MENU_H } from '@/lib/garage/desktop';
 
 export interface WindowProps {
+  /** The program, for focus management (`data-program`). */
+  program: string;
   title: string;
   x: number;
   y: number;
@@ -24,18 +26,19 @@ export interface WindowProps {
  * A LuisOS window: striped title bar (close on the left, name in the middle),
  * dragged by the bar, scrolling content. A non-modal dialog named by its title.
  */
-export function Window({ title, x, y, z, focused, compact, size, closeLabel, onClose, onFocus, onMove, children }: WindowProps) {
+export function Window({ program, title, x, y, z, focused, compact, size, closeLabel, onClose, onFocus, onMove, children }: WindowProps) {
   const titleId = useId();
   const drag = useRef<{ px: number; py: number; x: number; y: number } | null>(null);
 
   const frame = compact
     ? { left: 0, top: MENU_H, width: size.width, height: size.height - MENU_H }
-    : { left: x, top: y, width: Math.min(640, size.width - 48), height: Math.min(460, size.height - MENU_H - 48) };
+    : { left: x, top: y, width: Math.min(640, size.width - CASCADE.x - 16), height: Math.min(460, size.height - MENU_H - 48) };
 
   return (
     <div
       role="dialog"
       aria-labelledby={titleId}
+      data-program={program}
       className={`os-window${focused ? ' os-window--focused' : ''}`}
       style={{ ...frame, zIndex: z }}
       onPointerDown={onFocus}

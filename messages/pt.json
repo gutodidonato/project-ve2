@@ -105,17 +105,11 @@
     "pitstopOff": "Entrar no jogo",
     "pitstopForced": "Seu navegador não tem WebGL, então o modo jogo não está disponível.",
     "pitstopForcedError": "O jogo não pôde carregar.",
-    "credits": "Créditos",
     "creditsIntro": "Modelo 3D do carro:",
-    "close": "Fechar",
     "textVersion": "Ver versão em texto (P)"
   },
   "Garage": {
-    "menuCv": "Currículo",
-    "menuPlay": "Jogar Salto 88",
     "menuContact": "Contato",
-    "menuLanguage": "English",
-    "back": "Voltar (Esc)",
     "pdf": "Baixar PDF",
     "pdfPtOnly": "Baixar PDF",
     "destination": "Destino: fev 2019",
@@ -129,11 +123,7 @@
     "current": "atual",
     "consulting": "Consultoria",
     "email": "E-mail",
-    "book": "Agendar conversa",
-    "sound": "Som",
-    "credits": "Créditos",
-    "language": "PT | EN",
-    "screen": "Tela do computador"
+    "book": "Agendar conversa"
   },
   "Os": {
     "brand": "LuisOS 88",

@@ -21,6 +21,7 @@ function show(
   locale: Locale,
   state: DesktopState = INITIAL_DESKTOP,
   opts: { compact?: boolean; dispatch?: (a: DesktopAction) => void; onLanguage?: () => void; toggle?: () => void } = {},
+  size = SIZE,
 ) {
   const dispatch = opts.dispatch ?? vi.fn();
   const onLanguage = opts.onLanguage ?? vi.fn();
@@ -31,7 +32,7 @@ function show(
         profile={getProfile(locale)}
         locale={locale}
         state={state}
-        size={SIZE}
+        size={size}
         compact={opts.compact ?? false}
         dispatch={dispatch}
         onLanguage={onLanguage}
@@ -82,6 +83,17 @@ describe('LuisOS 88 desktop', () => {
     const win = windowNamed('Projetos');
     expect(win.style.left).toBe('0px');
     expect(win.style.width).toBe(`${SIZE.width}px`);
+  });
+
+  it('a window opens right of the icon column and fits the desktop', () => {
+    show('pt', withOpen('cv'));
+    const win = windowNamed('Currículo.txt');
+    expect(win.style.left).toBe('136px');
+    expect(parseFloat(win.style.left) + parseFloat(win.style.width)).toBeLessThanOrEqual(SIZE.width);
+    cleanup();
+    show('pt', withOpen('cv'), {}, { width: 700, height: 520 });
+    const narrow = windowNamed('Currículo.txt');
+    expect(parseFloat(narrow.style.left) + parseFloat(narrow.style.width)).toBeLessThanOrEqual(700);
   });
 
   it('a window shows its program and closes', () => {

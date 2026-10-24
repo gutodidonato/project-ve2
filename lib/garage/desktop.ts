@@ -37,12 +37,15 @@ export type DesktopAction =
 /** The side effect a transition asks the controls to run; the reducer stays pure. */
 export type DesktopEffect = 'start-launch' | 'cancel-launch' | null;
 
-export const ICONS: readonly IconId[] = ['cv', 'projects', 'contact', 'salto88', 'control', 'readme', 'trash'];
+/** Set once the first-visit readme has been shown: later visits open on an empty desktop. */
+export const README_KEY = 'rodovia:readme';
+
+export const ICONS: readonly IconId[] =['cv', 'projects', 'contact', 'salto88', 'control', 'readme', 'trash'];
 
 /** Height of the menu bar: windows never go above it. */
 export const MENU_H = 28;
-/** Where new windows open, each one stepped down and right from the last. */
-export const CASCADE = { x: 24, y: 44, step: 26 };
+/** Where new windows open, right of the icon column (16 + 104 + 16 px), each one stepped down and right from the last. */
+export const CASCADE = { x: 136, y: 44, step: 26 };
 /** How much of a window stays on the desktop when it is pushed to the right or the bottom. */
 const KEEP_X = 120;
 const KEEP_Y = 32;

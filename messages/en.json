@@ -105,17 +105,11 @@
     "pitstopOff": "Enter the game",
     "pitstopForced": "Your browser has no WebGL, so game mode is unavailable.",
     "pitstopForcedError": "The game could not load.",
-    "credits": "Credits",
     "creditsIntro": "Car 3D model:",
-    "close": "Close",
     "textVersion": "Text version (P)"
   },
   "Garage": {
-    "menuCv": "Resume",
-    "menuPlay": "Play Salto 88",
     "menuContact": "Contact",
-    "menuLanguage": "Português",
-    "back": "Back (Esc)",
     "pdf": "Download PDF",
     "pdfPtOnly": "PDF (in Portuguese)",
     "destination": "Destination: Feb 2019",
@@ -129,11 +123,7 @@
     "current": "present",
     "consulting": "Consulting",
     "email": "Email",
-    "book": "Book a call",
-    "sound": "Sound",
-    "credits": "Credits",
-    "language": "PT | EN",
-    "screen": "Computer screen"
+    "book": "Book a call"
   },
   "Os": {
     "brand": "LuisOS 88",

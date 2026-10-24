@@ -24,8 +24,8 @@ describe('reduceDesktop', () => {
   it('opens a program once and brings it to the front', () => {
     const s = run({ type: 'open', id: 'cv' }, { type: 'open', id: 'contact' });
     expect(s.windows.map((w) => [w.x, w.y])).toEqual([
-      [24, 44],
-      [50, 70],
+      [136, 44],
+      [162, 70],
     ]);
     const again = reduceDesktop(s, { type: 'open', id: 'cv' }).state;
     expect(ids(again)).toEqual(['contact', 'cv']);

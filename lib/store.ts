@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import { INITIAL_DESKTOP, type DesktopState } from '@/lib/garage/desktop';
-import { INITIAL_GARAGE, type GarageAction, type GarageState } from '@/lib/garage/state';
 import type { Tier } from '@/lib/game/tier';
 import { PITSTOP_KEY } from '@/lib/pitstop';
 import { writePref } from '@/lib/storage';
@@ -10,7 +9,7 @@ export type ForcedReason = 'webgl' | 'error';
 
 /**
  * Discrete state (low frequency, drives React): pit stop mode, quality tier and
- * the garage view. Per-frame values live in `lib/garage/runtime.ts`; setters here
+ * the LuisOS desktop. Per-frame values live in `lib/garage/runtime.ts`; setters here
  * are only called from UI handlers and the garage controls, never from `useFrame`.
  */
 export interface GameStore {
@@ -27,12 +26,6 @@ export interface GameStore {
   /** False until GameMount has built the first desktop of this page (a locale switch keeps the open windows). */
   desktopReady: boolean;
   setDesktop(s: DesktopState): void;
-  /** Garage view and screen content (lib/garage/state.ts). */
-  garage: GarageState;
-  /** The last garage action, for the `> currículo` prompt on the menu. */
-  garageLast: GarageAction | null;
-  /** Without `last`, the previous last action is kept. */
-  setGarage(s: GarageState, last?: GarageAction | null): void;
   /**
    * A user choice: persisted, except while forced. While forced, turning it off
    * is ignored and nothing is written (a forced fallback is not a preference).
@@ -58,9 +51,6 @@ export const useGameStore = create<GameStore>()((set, get) => ({
   desktop: INITIAL_DESKTOP,
   desktopReady: false,
   setDesktop: (desktop) => set({ desktop, desktopReady: true }),
-  garage: INITIAL_GARAGE,
-  garageLast: null,
-  setGarage: (garage, last) => set(last === undefined ? { garage } : { garage, garageLast: last }),
   setPitstop: (on) => {
     if (get().pitstopForced) {
       if (on) set({ pitstop: true });

@@ -99,6 +99,7 @@ export function Desktop({ profile, locale, state, size, compact, dispatch, onLan
       {state.windows.map((w, i) => (
         <Window
           key={w.id}
+          program={w.id}
           title={titleOf(w.id)}
           x={w.x}
           y={w.y}

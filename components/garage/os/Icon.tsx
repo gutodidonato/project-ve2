@@ -26,6 +26,7 @@ export function Icon({
     <button
       type="button"
       data-testid={id === 'file' ? 'os-file' : 'os-icon'}
+      data-icon={id}
       className="os-icon"
       aria-pressed={selected}
       onClick={() => (compact ? onOpen() : onSelect())}

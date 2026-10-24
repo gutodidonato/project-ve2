@@ -408,14 +408,9 @@ html[data-mode="game"] .game-layer canvas {
   }
 }
 
-/* The DOM screen on the glass: clipped on the bench, scrolling once the camera is inside. */
+/* The DOM screen on the glass: the desktop is clipped to it; its windows scroll, not the screen. */
 .crt-screen {
   overflow: hidden;
-}
-
-.crt-screen[data-full="true"] {
-  overflow-y: auto;
-  overscroll-behavior: contain;
 }
 
 /*

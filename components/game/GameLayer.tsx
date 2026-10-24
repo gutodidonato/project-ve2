@@ -1,12 +1,13 @@
 'use client';
 
+import { useCallback } from 'react';
 import type { Locale, Profile } from '@/content/types';
+import type { DesktopAction } from '@/lib/garage/desktop';
 import { useGameStore } from '@/lib/store';
 import { GarageCanvas } from '@/components/garage/GarageCanvas';
-import { GarageChrome } from '@/components/garage/GarageChrome';
 import { GarageFlash } from '@/components/garage/GarageFlash';
 import { ScreenSurface } from '@/components/garage/ScreenSurface';
-import { useGarageControls } from '@/components/garage/useGarageControls';
+import { useDesktopControls } from '@/components/garage/useDesktopControls';
 import { ErrorBoundary } from './ErrorBoundary';
 
 export interface GameLayerProps {
@@ -24,19 +25,19 @@ function fallBackToPitstop() {
  * through components/garage (it is loaded through `next/dynamic` with
  * `ssr: false` by GameMount, only when not in pit stop). A fixed
  * full-viewport layer under the pit stop toggle (z-50): the garage canvas, the
- * DOM screen above it, the launch flash and the sound / credits / language chrome.
+ * LuisOS desktop on the glass above it and the launch flash.
  */
 export default function GameLayer({ profile, locale }: GameLayerProps) {
-  const act = useGarageControls(locale);
+  const { dispatch, language } = useDesktopControls(locale);
+  const onKey = useCallback((a: DesktopAction | 'language') => (a === 'language' ? language() : dispatch(a)), [dispatch, language]);
 
   return (
     <div className="game-layer fixed inset-0 z-0">
       <ErrorBoundary fallback={null} onError={fallBackToPitstop}>
-        <GarageCanvas act={act} />
+        <GarageCanvas onKey={onKey} />
       </ErrorBoundary>
-      <ScreenSurface profile={profile} locale={locale} act={act} />
+      <ScreenSurface profile={profile} locale={locale} dispatch={dispatch} onLanguage={language} />
       <GarageFlash />
-      <GarageChrome locale={locale} act={act} />
     </div>
   );
 }

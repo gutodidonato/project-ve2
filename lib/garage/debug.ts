@@ -1,13 +1,16 @@
 import type { Rect } from './runtime';
-import type { GarageView, ScreenContent } from './state';
 
 /** Read-only view of the garage for e2e tests and the console. */
 export interface GarageSnapshot {
-  view: GarageView;
-  content: ScreenContent | null;
+  view: 'desk' | 'launch';
+  /** Open windows, back to front. */
+  windows: string[];
+  focus: string | null;
   door: number;
   /** The launch's white flash, 0..1. */
   whiteout: number;
+  /** The launch's pull-back from the desk to the whole garage, 0..1. */
+  zoom: number;
   camera: [number, number, number];
   arrived: boolean;
   drawCalls: number;

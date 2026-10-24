@@ -5,8 +5,8 @@ import { Canvas } from '@react-three/fiber';
 import { PerformanceMonitor } from '@react-three/drei';
 import { getGPUTier } from 'detect-gpu';
 import { tierFrom, type Tier } from '@/lib/game/tier';
-import { BENCH_POSE } from '@/lib/garage/camera';
-import type { GarageAction } from '@/lib/garage/state';
+import { WIDE_POSE } from '@/lib/garage/camera';
+import type { DesktopAction } from '@/lib/garage/desktop';
 import { useGameStore } from '@/lib/store';
 import { Scene } from './Scene';
 
@@ -51,7 +51,7 @@ function declineTier() {
  * context-creation option, so it cannot change later), then renders. A failed
  * WebGL context throws out of <Canvas>, for GameLayer's boundary to catch.
  */
-export function GarageCanvas({ act }: { act(a: GarageAction): void }) {
+export function GarageCanvas({ onKey }: { onKey(a: DesktopAction | 'language'): void }) {
   const tier = useGameStore((s) => s.tier);
   const [ready, setReady] = useState(false);
 
@@ -73,15 +73,11 @@ export function GarageCanvas({ act }: { act(a: GarageAction): void }) {
       flat
       shadows={tier === 'A'}
       dpr={tier === 'A' ? [1, 2] : 1}
-      camera={{ fov: BENCH_POSE.wide.fov, near: 0.05, far: 40, position: BENCH_POSE.wide.position }}
+      camera={{ fov: WIDE_POSE.fov, near: 0.05, far: 40, position: WIDE_POSE.position }}
       gl={{ antialias: tier === 'A', powerPreference: 'high-performance' }}
-      onPointerDown={() => {
-        // Inside the monitor, a press anywhere off the glass (the DOM screen covers the glass) goes back.
-        if (useGameStore.getState().garage.view === 'screen') act('back');
-      }}
     >
       <PerformanceMonitor onDecline={declineTier} />
-      <Scene tier={tier} act={act} />
+      <Scene tier={tier} onKey={onKey} />
       {tier === 'A' ? (
         <Suspense fallback={null}>
           <Effects />

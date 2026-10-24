@@ -1,4 +1,4 @@
-import type { GarageAction } from './state';
+import type { DesktopAction } from './desktop';
 
 const letters = (s: string) => [...s].map((c) => `Key${c}`);
 
@@ -11,23 +11,20 @@ export const KEY_ROWS: readonly (readonly string[])[] = [
   ['Space'],
 ];
 
-/** The physical key of each action (the letter printed on it). */
-export const ACTION_CODES: Record<GarageAction, string> = {
-  cv: 'KeyC',
-  play: 'KeyJ',
-  contact: 'KeyK',
-  language: 'KeyE',
-  back: 'Escape',
+/** The keys that act, by `KeyboardEvent.code` (the letter printed on them): the same as typing it. */
+const ACTIONS: Record<string, DesktopAction | 'language'> = {
+  KeyC: { type: 'open', id: 'cv' },
+  KeyK: { type: 'open', id: 'contact' },
+  KeyJ: { type: 'play' },
+  KeyE: 'language',
+  Escape: { type: 'escape' },
 };
 
-/** On a phone held upright the keyboard is only the four menu keys, big, in menu order. */
-export const PORTRAIT_CODES: readonly string[] = [ACTION_CODES.cv, ACTION_CODES.play, ACTION_CODES.contact, ACTION_CODES.language];
-
-const BY_CODE = new Map(Object.entries(ACTION_CODES).map(([action, code]) => [code, action as GarageAction]));
+export const ACTION_CODES: readonly string[] = Object.keys(ACTIONS);
 
 /** The action of a clicked 3D key; null for keys that only move. */
-export function codeToAction(code: string): GarageAction | null {
-  return BY_CODE.get(code) ?? null;
+export function codeToAction(code: string): DesktopAction | 'language' | null {
+  return ACTIONS[code] ?? null;
 }
 
 /** What is printed on a key cap. */

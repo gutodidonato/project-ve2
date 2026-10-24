@@ -3,13 +3,12 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useFrame, useThree, type ThreeEvent } from '@react-three/fiber';
 import { CanvasTexture, Matrix4, SRGBColorSpace, Vector3, type InstancedMesh, type PerspectiveCamera } from 'three';
-import { framingFor, type Framing } from '@/lib/garage/camera';
-import { ACTION_CODES, KEY_ROWS, PORTRAIT_CODES, codeToAction, legendOf } from '@/lib/garage/keys';
+import { ACTION_CODES, KEY_ROWS, codeToAction, legendOf } from '@/lib/garage/keys';
 import { legendFontFamily } from '@/lib/garage/fonts';
 import { garageRuntime } from '@/lib/garage/runtime';
 import { garageSound } from '@/lib/garage/sound';
 import { BENCH_TOP_Y, GLASS } from '@/lib/garage/scene';
-import type { GarageAction } from '@/lib/garage/state';
+import type { DesktopAction } from '@/lib/garage/desktop';
 
 const BEIGE = '#D6CBB0';
 const BASE = '#bdb193';
@@ -34,18 +33,8 @@ interface Layout {
   z: number;
 }
 
-/** A 1988 keyboard on the bench; on phones, four big keys on a stand. */
-function layoutFor(framing: Framing): Layout {
-  if (framing === 'portrait') {
-    const pitch = 0.085;
-    return {
-      caps: PORTRAIT_CODES.map((code, i) => ({ code, x: (i - 1.5) * pitch, z: 0, width: 0.072 })),
-      cap: { depth: 0.072, height: 0.03 },
-      base: { width: 0.36, depth: 0.1 },
-      tilt: 0.7,
-      z: 0.17,
-    };
-  }
+/** The 1988 keyboard on the bench (on phones the desktop icons are the touch targets). */
+function keyboardLayout(): Layout {
   const pitch = 0.03;
   const stagger = [0, 0.008, 0.013, 0.022, 0];
   const caps = KEY_ROWS.flatMap((row, r) =>
@@ -92,10 +81,9 @@ const ACTION_SET = new Set(Object.values(ACTION_CODES));
  * click); clicking a menu key acts like typing it. Projects the action keys
  * for the e2e hook.
  */
-export function Keyboard({ act }: { act(a: GarageAction): void }) {
+export function Keyboard({ onKey }: { onKey(a: DesktopAction | 'language'): void }) {
   const size = useThree((s) => s.size);
-  const framing = framingFor(size.width, size.height);
-  const layout = useMemo(() => layoutFor(framing), [framing]);
+  const layout = useMemo(() => keyboardLayout(), []);
   // The legends are canvas text: draw them again once Plex Sans has loaded (it may arrive after the scene).
   const [family, setFamily] = useState<string | null>(null);
   useEffect(() => {
@@ -183,7 +171,7 @@ export function Keyboard({ act }: { act(a: GarageAction): void }) {
     garageRuntime.pressed.set(code, performance.now());
     garageSound().key();
     const action = codeToAction(code);
-    if (action !== null) act(action);
+    if (action !== null) onKey(action);
   };
 
   return (
@@ -193,7 +181,6 @@ export function Keyboard({ act }: { act(a: GarageAction): void }) {
         <meshStandardMaterial color={BASE} roughness={0.75} />
       </mesh>
       <instancedMesh
-        key={framing}
         ref={caps}
         args={[undefined, undefined, layout.caps.length]}
         onClick={onClick}

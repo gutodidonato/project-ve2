@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Vector3, type PerspectiveCamera } from 'three';
-import { BENCH_POSE, CAR_POSE, framingFor, screenPose, type Pose } from '@/lib/garage/camera';
+import { CAR_POSE, WIDE_POSE, deskPose, framingFor, type Pose } from '@/lib/garage/camera';
 import { garageRuntime } from '@/lib/garage/runtime';
 import { GLASS } from '@/lib/garage/scene';
 import { placeSurface } from '@/lib/garage/surface';
@@ -29,15 +29,14 @@ function mix(a: Pose, b: Pose, t: number): Pose {
   return { position: m(a.position, b.position), target: m(a.target, b.target), fov: a.fov + (b.fov - a.fov) * t };
 }
 
-/** The pose the current view asks for. */
+/** The pose the current view asks for: the desk, or the launch's pull-back to the garage and turn to the car. */
 function goalPose(width: number, height: number): Pose {
-  const framing = framingFor(width, height);
-  const { view } = useGameStore.getState().garage;
-  if (view === 'screen') return screenPose(framing, width / height);
-  if (view === 'launch' && garageRuntime.launchStart !== null) {
-    return mix(BENCH_POSE[framing], CAR_POSE, garageRuntime.launch.camera);
+  const desk = deskPose(framingFor(width, height), width / height);
+  if (useGameStore.getState().desktop.view === 'launch' && garageRuntime.launchStart !== null) {
+    const f = garageRuntime.launch;
+    return mix(mix(desk, WIDE_POSE, f.zoom), CAR_POSE, f.camera);
   }
-  return BENCH_POSE[framing];
+  return desk;
 }
 
 /**
@@ -60,7 +59,7 @@ export function GarageCamera() {
 
   useFrame(({ camera, size }, dt) => {
     const cam = camera as PerspectiveCamera;
-    const { view } = useGameStore.getState().garage;
+    const { view } = useGameStore.getState().desktop;
     const goal = goalPose(size.width, size.height);
     goalPos.set(...goal.position);
     goalTarget.set(...goal.target);

@@ -4,40 +4,44 @@ import { useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import type { Locale } from '@/content/types';
 import { isTypingTarget } from '@/lib/game/input';
-import { LAUNCH_MS } from '@/lib/garage/launch';
-import { garageRuntime } from '@/lib/garage/runtime';
-import { garageSound } from '@/lib/garage/sound';
 import {
   gameUrl,
-  INITIAL_GARAGE,
+  hashOf,
   keyToAction,
   otherLocale,
-  reduceGarage,
-  screenHash,
-  stateFromHash,
-  type GarageAction,
-  type GarageState,
-} from '@/lib/garage/state';
+  parseScreenHash,
+  reduceDesktop,
+  type DesktopAction,
+} from '@/lib/garage/desktop';
+import { LAUNCH_MS, launchFrame } from '@/lib/garage/launch';
+import { garageRuntime } from '@/lib/garage/runtime';
+import { garageSound } from '@/lib/garage/sound';
 import { useGameStore } from '@/lib/store';
 
-/** Point the URL at the open screen (or at nothing) without a history entry; a no-op when it already does. */
-function writeHash(locale: Locale, garage: GarageState): void {
+/** Point the URL at the anchor of the open resume or contact (or at nothing), without a history entry. */
+function writeHash(next: string): void {
   const { hash, pathname, search } = window.location;
-  const next = screenHash(locale, garage.view === 'screen' ? garage.content : null);
   if (hash === next) return;
   window.history.replaceState(null, '', next === '' ? pathname + search : next);
 }
 
+/** Milliseconds since Salto88.exe started (the e2e hold freezes it); 0 outside the launch. */
+function launchElapsed(): number {
+  const start = garageRuntime.launchStart;
+  return start === null ? 0 : (garageRuntime.launchHold ?? performance.now() - start);
+}
+
 /**
- * The garage's input: returns `act`, which runs the state machine and its
- * effects (the language switch, the launch and its one navigation to the game,
- * its cancel), and listens to the keyboard (C, J, K, E, Esc; every key also
- * sinks its 3D cap and clicks), keeps the URL anchor on the open screen,
- * follows anchors typed into the address bar, prefetches the game page once
- * the page is idle and resets the garage when the browser brings the page
- * back from its cache after the game.
+ * The garage's input around the LuisOS desktop: `dispatch` runs the desktop
+ * machine and its effects (the launch and its one navigation to the game,
+ * the cancel, which Esc can only ask for before the flash), `language`
+ * switches the locale keeping the open windows. Also listens to the keyboard
+ * (C, K, J, E, Esc; every key sinks its 3D cap and clicks), keeps the anchor on
+ * the open resume or contact, follows anchors typed into the address bar,
+ * prefetches the game page, unlocks the sound on a real gesture and brings the
+ * desk back when the browser restores the page after the game.
  */
-export function useGarageControls(locale: Locale): (a: GarageAction) => void {
+export function useDesktopControls(locale: Locale): { dispatch(a: DesktopAction): void; language(): void } {
   const router = useRouter();
   /** The pending navigation to the game: one per launch, whatever is pressed meanwhile. */
   const departure = useRef<number | null>(null);
@@ -48,15 +52,27 @@ export function useGarageControls(locale: Locale): (a: GarageAction) => void {
     garageRuntime.launchStart = null;
   }, []);
 
-  const act = useCallback(
-    (a: GarageAction) => {
-      const { garage, setGarage } = useGameStore.getState();
-      const { state, effect } = reduceGarage(garage, a);
-      setGarage(state, a);
-      if (effect === 'switch-locale') {
-        const other = otherLocale(locale);
-        router.replace(`/${other}${screenHash(other, state.view === 'screen' ? state.content : null)}`);
-      } else if (effect === 'start-launch') {
+  /** Back to the desk now, whatever the timeline says (page restored from cache, garage unmounted). */
+  const forceDesk = useCallback(() => {
+    cancelDeparture();
+    garageRuntime.door = 0;
+    const { desktop, setDesktop } = useGameStore.getState();
+    if (desktop.view === 'launch') setDesktop(reduceDesktop(desktop, { type: 'cancel' }).state);
+  }, [cancelDeparture]);
+
+  const language = useCallback(() => {
+    const other = otherLocale(locale);
+    router.replace(`/${other}${hashOf(other, useGameStore.getState().desktop)}`);
+  }, [locale, router]);
+
+  const dispatch = useCallback(
+    (a: DesktopAction) => {
+      const { desktop, setDesktop } = useGameStore.getState();
+      // Once the flash has started the jump goes on: Esc no longer cancels.
+      if (desktop.view === 'launch' && (a.type === 'escape' || a.type === 'cancel') && launchFrame(launchElapsed()).whiteout > 0) return;
+      const { state, effect } = reduceDesktop(desktop, a);
+      if (state !== desktop) setDesktop(state);
+      if (effect === 'start-launch') {
         const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         garageRuntime.launchStart = performance.now();
         garageSound().door();
@@ -72,7 +88,7 @@ export function useGarageControls(locale: Locale): (a: GarageAction) => void {
         cancelDeparture();
       }
     },
-    [locale, router, cancelDeparture],
+    [locale, cancelDeparture],
   );
 
   useEffect(() => {
@@ -80,7 +96,6 @@ export function useGarageControls(locale: Locale): (a: GarageAction) => void {
       // `key` can be missing on synthetic events (e.g. browser autofill).
       if (typeof e.key !== 'string') return;
       if (e.repeat || e.isComposing || e.ctrlKey || e.metaKey || e.altKey) return;
-      // An open modal (the credits) keeps the keyboard.
       if (document.querySelector('dialog[open]') !== null) return;
       if (isTypingTarget(e.target)) {
         // Esc in a form field only leaves the field; letters are just typed.
@@ -92,11 +107,12 @@ export function useGarageControls(locale: Locale): (a: GarageAction) => void {
       const action = keyToAction(e.key);
       if (action === null) return;
       e.preventDefault();
-      act(action);
+      if (action === 'language') language();
+      else dispatch(action);
     }
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [act]);
+  }, [dispatch, language]);
 
   // Audio may only start after a gesture. A touch pointerdown (or Esc) is not one, so every
   // gesture asks again until the context is really running.
@@ -111,20 +127,16 @@ export function useGarageControls(locale: Locale): (a: GarageAction) => void {
     return stop;
   }, []);
 
-  // Back from the game through the browser's page cache: the store still says `launch`. Any other
-  // restore (back from the PDF or LinkedIn) keeps what was open.
+  // Back from the game through the browser's page cache: the store still says `launch`.
   useEffect(() => {
     function onPageShow(e: PageTransitionEvent) {
-      if (!e.persisted || useGameStore.getState().garage.view !== 'launch') return;
-      cancelDeparture();
-      garageRuntime.door = 0;
-      useGameStore.getState().setGarage(INITIAL_GARAGE, null);
+      if (e.persisted) forceDesk();
     }
     window.addEventListener('pageshow', onPageShow);
     return () => window.removeEventListener('pageshow', onPageShow);
-  }, [cancelDeparture]);
+  }, [forceDesk]);
 
-  // Fetch the game page ahead, once the garage is idle, so J never lands on a blank page.
+  // Fetch the game page ahead, once the garage is idle, so the jump never lands on a blank page.
   useEffect(() => {
     const href = gameUrl(locale);
     const add = () => {
@@ -143,32 +155,24 @@ export function useGarageControls(locale: Locale): (a: GarageAction) => void {
     return () => window.cancelIdleCallback(id);
   }, [locale]);
 
-  // Leaving the garage (pit stop, unmount) never leaves a navigation armed, nor a launch with
-  // nothing pending: back in the game, the bench is there again.
-  useEffect(
-    () => () => {
-      cancelDeparture();
-      const { garage, setGarage } = useGameStore.getState();
-      if (garage.view === 'launch') setGarage(INITIAL_GARAGE, null);
-    },
-    [cancelDeparture],
-  );
+  // Leaving the garage (pit stop, unmount) never leaves a navigation armed, nor a launch with nothing pending.
+  useEffect(() => forceDesk, [forceDesk]);
 
   useEffect(() => {
-    writeHash(locale, useGameStore.getState().garage);
+    writeHash(hashOf(locale, useGameStore.getState().desktop));
     const unsubscribe = useGameStore.subscribe((s, prev) => {
-      if (s.garage !== prev.garage) writeHash(locale, s.garage);
+      if (s.desktop !== prev.desktop) writeHash(hashOf(locale, s.desktop));
     });
     function onHashChange() {
-      if (useGameStore.getState().garage.view === 'launch') return;
-      useGameStore.getState().setGarage(stateFromHash(window.location.hash), null);
+      const id = parseScreenHash(window.location.hash);
+      if (id !== null) dispatch({ type: 'open', id });
     }
     window.addEventListener('hashchange', onHashChange);
     return () => {
       unsubscribe();
       window.removeEventListener('hashchange', onHashChange);
     };
-  }, [locale]);
+  }, [locale, dispatch]);
 
-  return act;
+  return { dispatch, language };
 }
