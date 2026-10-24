@@ -5506,8 +5506,12 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
         const k = n.name.replace(/^character-/, ''); L.kinds[k] = { src: n, body: body, head: head, k: PEOPLE_H / Math.max(0.1, box.max.y) }; L.list.push(k); L.mat = body.material;
       });
       const json = g.parser && g.parser.json, uri = json && json.images && json.images[0] && json.images[0].uri;
-      if (!L.list.length || !L.mat || !L.mat.map || !uri) { resolve(); return; }
-      const img = new Image(); img.onload = function () { try { fardaTexture(img); suitTexture(img); L.ok = true; } catch (e) { console.warn('farda texture failed: no people', e); L.ok = false; } resolve(); }; img.onerror = function () { resolve(); }; img.src = uri;
+      // The atlas the farda and suit are painted from: a data URI in the old .json model; the shipped .glb keeps it in a buffer, so there it is the body map's image, already decoded (an ImageBitmap or an Image, both drawable)
+      const decoded = L.mat && L.mat.map && L.mat.map.image;
+      if (!L.list.length || !L.mat || !L.mat.map || (!uri && !decoded)) { resolve(); return; }
+      const build = function (img) { try { fardaTexture(img); suitTexture(img); L.ok = true; } catch (e) { console.warn('farda texture failed: no people', e); L.ok = false; } resolve(); };
+      if (!uri) { build(decoded); return; }
+      const img = new Image(); img.onload = function () { build(img); }; img.onerror = function () { resolve(); }; img.src = uri;
     });
   }
   function Person() {}
