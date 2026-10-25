@@ -1215,6 +1215,20 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
   }
   const VC_M = function () { return new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.78, metalness: 0.2 }); };
   // indexed geometries (position, normal, uv) of one material merged into one: boxes that share a colour are a single draw call
+  // A sign on two posts. The painted face looks along +z turned by ry; a plain back covers its reverse (no mirrored text from
+  // behind); the posts stand behind the board, never through it. Built in world coordinates: the face's position is the sign's.
+  function postSign(g, o) {
+    const ry = o.ry || 0, c = Math.cos(ry), sn = Math.sin(ry), at = function (lx, lz) { return [o.x + lx * c + lz * sn, o.z - lx * sn + lz * c]; };
+    const face = new THREE.Mesh(new THREE.PlaneGeometry(o.w, o.h), new THREE.MeshStandardMaterial({ map: o.tex, roughness: o.rough || 0.7 }));
+    face.position.set(o.x, o.y, o.z); face.rotation.y = ry; g.add(face);
+    const bp = at(0, -0.02), back = new THREE.Mesh(new THREE.PlaneGeometry(o.w, o.h), o.backMat); back.position.set(bp[0], o.y, bp[1]); back.rotation.y = ry + Math.PI; g.add(back);
+    const top = o.y + o.h / 2, posts = o.posts.map(function (d) {
+      const q = new THREE.BoxGeometry(0.14, top, 0.14); q.translate(d, top / 2, -0.11); q.rotateY(ry); q.translate(o.x, 0, o.z);
+      const pp = at(d, -0.11); addCircleCol(pp[0], pp[1], 0.2, 0, top).name = o.colName || 'placa'; return q;
+    });
+    g.add(new THREE.Mesh(mergeStatic(posts), o.postMat));
+    return face;
+  }
   function mergeStatic(parts) {
     const geo = new THREE.BufferGeometry(); let n = 0, ni = 0; parts.forEach(function (p) { n += p.attributes.position.count; ni += p.index.count; });
     ['position', 'normal', 'uv'].forEach(function (k) { const sz = parts[0].attributes[k].itemSize, arr = new Float32Array(n * sz); let o = 0; parts.forEach(function (p) { arr.set(p.attributes[k].array, o); o += p.attributes[k].count * sz; }); geo.setAttribute(k, new THREE.BufferAttribute(arr, sz)); });
@@ -1256,9 +1270,9 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     const hutRoof = new THREE.Mesh(new THREE.BoxGeometry(2.8, 0.22, 2.8), oliveM); hutRoof.position.set(GX, 2.5, GHZ); g.add(hutRoof);
     const hutWin = new THREE.Mesh(new THREE.PlaneGeometry(1.1, 0.8), new THREE.MeshStandardMaterial({ color: 0x1a2430, roughness: 0.3, metalness: 0.4 })); hutWin.rotation.y = -Math.PI / 2; hutWin.position.set(GX - 1.012, 1.5, GHZ); g.add(hutWin);
     addBoxCol(GX, GHZ, 1.0, 1.0, 0, 0, 2.7).name = 'guarita';
-    const boardTex = canvasTex(512, 154, function (c, w, h) { c.fillStyle = '#26391f'; c.fillRect(0, 0, w, h); c.strokeStyle = '#d9b84a'; c.lineWidth = 6; c.strokeRect(6, 6, w - 12, h - 12); c.fillStyle = '#f2ead0'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.font = "700 44px 'IBM Plex Mono', monospace"; c.fillText('EsPCEx · Campinas · SP', w / 2, h / 2 + 3); });
-    const board = new THREE.Mesh(new THREE.PlaneGeometry(3.0, 0.9), new THREE.MeshStandardMaterial({ map: boardTex, side: THREE.DoubleSide, roughness: 0.8 })); board.position.set(GX, 1.95, 57.4); g.add(board);
-    g.add(new THREE.Mesh(mergeStatic([box(0.14, 2.4, 0.14, GX - 1.3, 1.2, 57.35), box(0.14, 2.4, 0.14, GX + 1.3, 1.2, 57.35)]), oliveM)); [-1.3, 1.3].forEach(function (d) { addCircleCol(GX + d, 57.35, 0.16, 0, 2.4).name = 'placa'; });
+    const boardTex = canvasTex(512, 154, function (c, w, h) { c.fillStyle = '#26391f'; c.fillRect(0, 0, w, h); c.strokeStyle = '#d9b84a'; c.lineWidth = 6; c.strokeRect(6, 6, w - 12, h - 12); c.fillStyle = '#f2ead0'; c.textAlign = 'center'; c.textBaseline = 'middle'; const T = 'EsPCEx · Campinas · SP'; c.font = "700 44px 'IBM Plex Mono', monospace"; const fs = Math.min(44, 44 * (w - 48) / c.measureText(T).width); c.font = '700 ' + fs + "px 'IBM Plex Mono', monospace"; c.fillText(T, w / 2, h / 2 + 3); });
+    // just past the gate on the right, turned a little to the road: the car reads it ahead, clear of the guard house and the pillar
+    postSign(g, { tex: boardTex, w: 3.0, h: 0.9, y: 1.95, x: 8.2, z: 54.5, ry: -0.3, posts: [-1.3, 1.3], backMat: oliveM, postMat: oliveM, rough: 0.8 }); keepOut.push({ x0: 6.2, x1: 10.3, z0: 53.4, z1: 55.8 });
     const bPost = new THREE.Mesh(new THREE.BoxGeometry(0.3, 1.1, 0.3), new THREE.MeshStandardMaterial({ color: 0xe8e4d8 })); bPost.position.set(7.4, 0.55, 62.8); g.add(bPost); addCircleCol(7.4, 62.8, 0.3, 0, 1.2).name = 'cancela';
     const stripe = canvasTex(256, 32, function (c, w, h) { for (let i = 0; i < 8; i++) { c.fillStyle = i % 2 ? '#f2f0e8' : '#c0322a'; c.fillRect(i * w / 8, 0, w / 8 + 1, h); } });
     const hinge = new THREE.Group(); hinge.position.set(7.4, 1.1, 62.8); hinge.rotation.z = -1.4; const arm = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.14, 0.14), new THREE.MeshStandardMaterial({ map: stripe })); arm.position.x = -2.1; hinge.add(arm); g.add(hinge);
@@ -1407,8 +1421,9 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     const fac = new THREE.Mesh(new THREE.PlaneGeometry(24, 8), lightM); fac.rotation.y = -Math.PI / 2; fac.position.set(X0 - 0.03, 4, PZ); g.add(fac);
     // the rooftop sign
     const signTex = canvasTex(1024, 128, function (c, w, h) { c.fillStyle = '#26391f'; c.fillRect(0, 0, w, h); c.strokeStyle = '#d9b84a'; c.lineWidth = 6; c.strokeRect(8, 8, w - 16, h - 16); c.font = "700 76px 'IBM Plex Mono', monospace"; c.fillStyle = '#f2d98a'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('PAVILHÃO DE AULAS', w / 2, h / 2 + 4); });
-    const sign = new THREE.Mesh(new THREE.PlaneGeometry(9, 1.125), new THREE.MeshStandardMaterial({ map: signTex, side: THREE.DoubleSide, roughness: 0.7 })); sign.rotation.y = -Math.PI / 2; sign.position.set(X0 + 0.5, TOP + 0.4 + 0.6, PZ); g.add(sign);
-    g.add(new THREE.Mesh(mergeStatic([box(0.12, 0.7, 0.12, X0 + 0.5, TOP + 0.75, PZ - 3.8), box(0.12, 0.7, 0.12, X0 + 0.5, TOP + 0.75, PZ + 3.8)]), woodM));
+    const sign = new THREE.Mesh(new THREE.PlaneGeometry(9, 1.125), new THREE.MeshStandardMaterial({ map: signTex, roughness: 0.7 })); sign.rotation.y = -Math.PI / 2; sign.position.set(X0 + 0.5, TOP + 0.4 + 0.6, PZ); g.add(sign);
+    const signBack = new THREE.Mesh(new THREE.PlaneGeometry(9, 1.125), new THREE.MeshStandardMaterial({ color: 0x26391f, roughness: 0.8 })); signBack.rotation.y = Math.PI / 2; signBack.position.set(X0 + 0.52, TOP + 0.4 + 0.6, PZ); g.add(signBack);
+    g.add(new THREE.Mesh(mergeStatic([box(0.12, 0.7, 0.12, X0 + 0.61, TOP + 0.75, PZ - 3.8), box(0.12, 0.7, 0.12, X0 + 0.61, TOP + 0.75, PZ + 3.8)]), woodM));
     // the dormitory: four double bunks along the back wall (frames, mattresses and pillows are boxes), eight desks with their stools in a row, the students seated at them
     const wood = [], blanket = [], sheet = [], stool = [];
     let bunks = 0;
@@ -1439,8 +1454,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
       boardTex.needsUpdate = true;
     }
     drawBoard(0);
-    const board = new THREE.Mesh(new THREE.PlaneGeometry(3.4, 2.125), new THREE.MeshStandardMaterial({ map: boardTex, side: THREE.DoubleSide, roughness: 0.8 })); board.rotation.y = -Math.PI / 2; board.position.set(8.6, 1.9, 44); g.add(board);
-    g.add(new THREE.Mesh(mergeStatic([box(0.14, 2.9, 0.14, 8.6, 1.45, 42.4), box(0.14, 2.9, 0.14, 8.6, 1.45, 45.6)]), woodM)); [42.4, 45.6].forEach(function (z) { addCircleCol(8.6, z, 0.2, 0, 2.9).name = 'poste do quadro'; });
+    postSign(g, { tex: boardTex, w: 3.4, h: 2.125, y: 1.9, x: 8.6, z: 44, ry: -Math.PI / 2, posts: [-1.6, 1.6], backMat: woodM, postMat: woodM, rough: 0.8, colName: 'poste do quadro' });
   }
 
   /* ------------------------------------------------ the AMAN: the highway sign, the Portão Monumental, the Conjunto Principal, the company and the espadim (C4, C5) ------------------------------------------------ */
@@ -1469,8 +1483,8 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
       const T = 'Resende · AMAN 2020'; c.font = "700 80px 'IBM Plex Mono', monospace"; const fs = Math.min(80, 80 * (w - 90) / c.measureText(T).width);
       c.font = '700 ' + fs + "px 'IBM Plex Mono', monospace"; c.fillStyle = '#f4f1e6'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(T, w / 2, h / 2 + 4);
     });
-    const plaque = new THREE.Mesh(new THREE.PlaneGeometry(3.2, 1.0), new THREE.MeshStandardMaterial({ map: plaqueTex, side: THREE.DoubleSide, roughness: 0.6 })); plaque.name = 'placa-aman'; plaque.userData.text = 'Resende · AMAN 2020'; plaque.position.set(SX, 2.5, SZ); g.add(plaque);
-    g.add(new THREE.Mesh(mergeStatic([box(0.14, 3.0, 0.14, SX - 1.2, 1.5, SZ - 0.05), box(0.14, 3.0, 0.14, SX + 1.2, 1.5, SZ - 0.05)]), woodM)); [-1.2, 1.2].forEach(function (d) { addCircleCol(SX + d, SZ - 0.05, 0.2, 0, 3.0).name = 'placa'; });
+    const plaque = postSign(g, { tex: plaqueTex, w: 3.2, h: 1.0, y: 2.5, x: SX, z: SZ, ry: -0.25, posts: [-1.2, 1.2], backMat: new THREE.MeshStandardMaterial({ color: 0x8d938d, roughness: 0.5, metalness: 0.4 }), postMat: woodM, rough: 0.6 });
+    plaque.name = 'placa-aman'; plaque.userData.text = 'Resende · AMAN 2020';
     /* ---- the Portão Monumental: z 18.5, columns at x -9.7, -7.5, 7.5 and 9.7 (14 m clear between the inner ones), entablature and pediment ---- */
     const GZ = 18.5, gate = new THREE.Group(); gate.name = 'portao-aman'; gate.position.set(0, 0, GZ); g.add(gate); keepOut.push({ x0: -12.5, x1: 12.5, z0: 15.5, z1: 21.5 });
     const parts = [];
@@ -1620,7 +1634,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
   const TFM_SLOW = 8;
   let TFMI = null, COURSE_FINISH = null; // COURSE_FINISH: the finish of the course in the era (the test hook courseTest calls it)
   function buildTfm(g, upd, keepOut, CX) {
-    const BX = CX - 8.8, BZ = -50.4, box = function (w, h, d, x, y, z) { const q = new THREE.BoxGeometry(w, h, d); q.translate(x, y, z); return q; };
+    const BX = CX - 8.8, BZ = -50.4;
     keepOut.push({ x0: CX - 12, x1: CX - 8.9, z0: -58, z1: -8 });
     const BW = 512, BH = 256, bc = document.createElement('canvas'); bc.width = BW; bc.height = BH; const b2 = bc.getContext('2d'), tex = new THREE.CanvasTexture(bc); tex.anisotropy = 4; tex.encoding = THREE.sRGBEncoding;
     const T = { last: '--', best: '--', live: '' }, fmt = function (v) { return v === null || v === undefined ? '--' : v.toFixed(1); }, cm = function (s) { return s.replace('.', ','); };
@@ -1632,10 +1646,13 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     }
     draw();
     const board = new THREE.Mesh(new THREE.PlaneGeometry(4, 2), new THREE.MeshStandardMaterial({ map: tex, emissive: 0xffffff, emissiveMap: tex, emissiveIntensity: 0.45, roughness: 0.6 })); board.name = 'placar'; board.userData.text = T;
-    board.rotation.y = Math.PI / 2; board.position.set(BX, 2.9, BZ); g.add(board);
-    g.add(new THREE.Mesh(mergeStatic([box(0.12, 2.3, 4.3, BX - 0.09, 2.9, BZ), box(0.16, 3.0, 0.16, BX - 0.09, 1.5, BZ - 1.8), box(0.16, 3.0, 0.16, BX - 0.09, 1.5, BZ + 1.8)]), new THREE.MeshStandardMaterial({ color: 0x2f3a2a, roughness: 0.8 })));
-    [-1.8, 1.8].forEach(function (d) { addCircleCol(BX - 0.09, BZ + d, 0.2, 0, 3.0).name = 'poste do placar'; });
-    const inst = spawnPerson({ kind: 'male-f', outfit: 'farda', x: CX - 6.9, z: -47.4, h: -Math.PI / 2, anim: 'idle' }); inst.attention(true); // beside the board (its z span is -52.4 to -48.4), not in front of it: from the road he would hide "segundos"
+    // turned 26° from facing the course towards the cadets who come down it: it reads from the road, not only from beside it
+    const BRY = Math.PI / 2 - 0.45, brc = Math.cos(BRY), brs = Math.sin(BRY);
+    board.rotation.y = BRY; board.position.set(BX, 2.9, BZ); g.add(board);
+    const bparts = [[4.3, 2.3, 0.12, 0, 2.9, -0.09], [0.16, 3.0, 0.16, -1.8, 1.5, -0.09], [0.16, 3.0, 0.16, 1.8, 1.5, -0.09]].map(function (b) { const q = new THREE.BoxGeometry(b[0], b[1], b[2]); q.translate(b[3], b[4], b[5]); q.rotateY(BRY); q.translate(BX, 0, BZ); return q; });
+    g.add(new THREE.Mesh(mergeStatic(bparts), new THREE.MeshStandardMaterial({ color: 0x2f3a2a, roughness: 0.8 })));
+    [-1.8, 1.8].forEach(function (d) { addCircleCol(BX + d * brc - 0.09 * brs, BZ - d * brs - 0.09 * brc, 0.2, 0, 3.0).name = 'poste do placar'; });
+    const inst = spawnPerson({ kind: 'male-f', outfit: 'farda', x: CX - 7.0, z: -54.5, h: -Math.PI / 2, anim: 'idle' }); inst.attention(true); // past the board's south edge and behind its face: from the road he never hides "segundos"
     // the platoon: a loop of 22.5 x 2 m along the west side (x 7 m and 9 m from the road's axis), the runners spread along it
     const V = [[CX - 7, -17.5], [CX - 7, -40], [CX - 9, -40], [CX - 9, -17.5]], LEN = [22.5, 2, 22.5, 2], PER = 49, K8 = ['male-a', 'female-c', 'male-b', 'female-e', 'male-d', 'female-a', 'male-e', 'female-d'], platoon = [];
     function lap(p, to) { p.play('sprint', 0); p.walkTo(V[to][0], V[to][1], function () { lap(p, (to + 1) % 4); }); }
@@ -2313,9 +2330,12 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     // checkpoint on the main road: crates and barrels to plough through
     for (let i = 0; i < 12; i++) { const b = model(i % 3 ? 'box-large' : 'barrel', { fit: { h: i % 3 ? 1.1 : 1.3 }, x: -2.4 + (i % 4) * 1.6, z: -18 - Math.floor(i / 4) * 1.6 }); g.add(b); prop(b, i % 3 ? 0.35 : 0.45); }
     // obstacle course on the jungle road (x = -45): start, cone slalom, mud pit, ramp over a trench, finish
-    g.add(model('overheadRound', { fit: { w: 15 }, x: CX, z: -12 })); g.add(model('overheadLights', { fit: { w: 15 }, x: CX, z: -53 })); gantryLegs(CX, -12, 15); gantryLegs(CX, -53, 15);
+    const gStart = model('overheadRound', { fit: { w: 15 }, x: CX, z: -12 }), gEnd = model('overheadLights', { fit: { w: 15 }, x: CX, z: -53 }); g.add(gStart); g.add(gEnd); gantryLegs(CX, -12, 15); gantryLegs(CX, -53, 15);
+    const topOf = function (m) { return new THREE.Box3().setFromObject(m).max.y; };
     keepOut.push({ x0: CX - 9, x1: CX + 9, z0: -58, z1: -8 });
-    const cs = label('PISTA DE OBSTÁCULOS', '#b8d46a', 'largada', 0.9); cs.position.set(CX, 13, -12); g.add(cs); const cf = label('CHEGADA', '#b8d46a', null, 0.9); cf.position.set(CX, 13, -53); g.add(cf);
+    // the labels sit just over their gantries (they used to float 13 m up, dark specks from the road), and larger
+    const cs = label('PISTA DE OBSTÁCULOS', '#b8d46a', 'largada', 1.3); cs.position.set(CX, topOf(gStart) + 0.4 + cs.scale.y / 2, -12); g.add(cs);
+    const cf = label('CHEGADA', '#b8d46a', null, 1.3); cf.position.set(CX, topOf(gEnd) + 0.4 + cf.scale.y / 2, -53); g.add(cf);
     const courseCones = [];
     [[-16, -1.6], [-22.5, 1.6], [-29, -1.6]].forEach(function (sl) { [-2.8, 2.8].forEach(function (d) { const cone = model('cone', { fit: { h: 1.1 }, x: CX + sl[1] + d, z: sl[0] }); g.add(cone); const b = prop(cone, 0.1); b.course = true; courseCones.push(b); }); });
     const mud = new THREE.Mesh(new THREE.PlaneGeometry(9, 4.5), new THREE.MeshStandardMaterial({ color: 0x4a3218, roughness: 0.3, metalness: 0.15, polygonOffset: true, polygonOffsetFactor: -3, polygonOffsetUnits: -3 })); mud.rotation.x = -Math.PI / 2; mud.position.set(CX, 0.04, -34); g.add(mud);
@@ -6432,6 +6452,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
       traffic: function () { return DYN.filter(function (b) { return b.lane; }).map(function (b) { return { kind: b.kind || 'car', x: b.x, z: b.z, h: b.h, knock: b.awake ? 1 : 0, awake: b.awake, axis: b.lane.axis, dir: b.lane.dir, cur: b.lane.cur, held: !!b.lane.held, pos: b.lane.pos, zc: b.lane.road }; }); },
       bodies: function () { return DYN.map(function (b, i) { return { i: i, x: b.x, y: b.y, z: b.z, h: b.h, awake: b.awake, mass: b.mass, prop: b.prop, lane: !!b.lane, path: !!b.path, convoy: !!(b.path && b.path.convoy), flying: b.flying, r: b.r, off: b.off, home: b.home }; }); },
       overlap: function () { return carOverlap(); },
+      route: function () { return { spawn: world.spawn ? [world.spawn.x, world.spawn.z] : null, wps: (world.waypoints || []).map(function (w) { return [w.x, w.z]; }) }; },
       statics: function (x, z, rad) { return STATICS.filter(function (o) { return Math.hypot(o.x - x, o.z - z) < rad; }).map(function (o) { return { t: o.t, x: o.x, z: o.z, r: o.r, hx: o.hx, hz: o.hz, a: o.a, y0: o.y0, y1: o.y1, name: o.name }; }); },
       blocked: function (x, y, z) { return STATICS.some(function (o) { return !(y >= o.y1 - 0.05 || y + CAR_H <= o.y0) && circleVs(o, x, z, CAR_R); }); }, scene: scene, sky: sky, car: car, S: S, camera: camera, goto: function (i) { enterEra(i); }, highway: function () { enterHighway(); }, fps: function () { return Math.round(fpsAvg); }, state: function () { return { era: S.era.id, mode: S.mode, mph: Math.round(S.mode === 'highway' ? S.hwSpeed * 2.2 : Math.abs(S.car.speed) * 2.2), plu: S.plu, migr: S.migr }; } };
   }).catch(function (e) { fail('Falha ao carregar os modelos: ' + (e && e.message ? e.message : e)); });
