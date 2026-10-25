@@ -936,7 +936,14 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
   function addCircleCol(x, z, r, y0, y1) { const o = { t: 0, x: x, z: z, r: r, R: r, y0: y0 === undefined ? -50 : y0, y1: y1 === undefined ? 60 : y1 }; STATICS.push(o); gridAdd(o); return o; }
   function addBoxCol(x, z, hx, hz, a, y0, y1) { const o = { t: 1, x: x, z: z, hx: hx, hz: hz, a: a || 0, c: Math.cos(a || 0), s: Math.sin(a || 0), R: Math.hypot(hx, hz), y0: y0 === undefined ? -50 : y0, y1: y1 === undefined ? 60 : y1 }; STATICS.push(o); gridAdd(o); return o; }
   function colFrom(t, s, x, z, ry, kind, y) { const b = t.base, c = Math.cos(ry || 0), sn = Math.sin(ry || 0); const wx = x + (b.cx * c + b.cz * sn) * s, wz = z + (-b.cx * sn + b.cz * c) * s, y0 = y || 0, y1 = y0 + t.size.y * s; const o = kind === 'circle' ? addCircleCol(wx, wz, Math.max(0.18, Math.max(b.hx, b.hz) * s), y0, y1) : addBoxCol(wx, wz, Math.max(0.15, b.hx * s), Math.max(0.15, b.hz * s), ry || 0, y0, y1); o.name = t.name; return o; }
-  function gantryLegs(x, z, w) { addCircleCol(x - w / 2 + 0.6, z, 0.55, 0, 12).name = 'pórtico'; addCircleCol(x + w / 2 - 0.6, z, 0.55, 0, 12).name = 'pórtico'; }
+  // The legs of a gantry as drawn: on each side of its middle, the box of what the model has under 1.2 m (two 0.55 m circles
+  // used to stand inside legs far wider, so the car hit air on one side and drove into the leg on the other).
+  function gantryLegs(m) {
+    m.updateMatrixWorld(true);
+    const v = new THREE.Vector3(), mid = new THREE.Box3().setFromObject(m).getCenter(new THREE.Vector3()), sides = [[Infinity, -Infinity, Infinity, -Infinity], [Infinity, -Infinity, Infinity, -Infinity]];
+    m.traverse(function (o) { if (!o.isMesh) return; const p = o.geometry.attributes.position; for (let i = 0; i < p.count; i++) { v.fromBufferAttribute(p, i).applyMatrix4(o.matrixWorld); if (v.y > 1.2) continue; const b = sides[v.x < mid.x ? 0 : 1]; b[0] = Math.min(b[0], v.x); b[1] = Math.max(b[1], v.x); b[2] = Math.min(b[2], v.z); b[3] = Math.max(b[3], v.z); } });
+    sides.forEach(function (b) { if (isFinite(b[0])) addBoxCol((b[0] + b[1]) / 2, (b[2] + b[3]) / 2, Math.max(0.3, (b[1] - b[0]) / 2), Math.max(0.3, (b[3] - b[2]) / 2), 0, 0, 12).name = 'pórtico'; });
+  }
   const nearBuf = [];
   function queryStatics(x, z, pad) { nearBuf.length = 0; const ix0 = Math.floor((x - pad) / CELL), ix1 = Math.floor((x + pad) / CELL), iz0 = Math.floor((z - pad) / CELL), iz1 = Math.floor((z + pad) / CELL); for (let ix = ix0; ix <= ix1; ix++) for (let iz = iz0; iz <= iz1; iz++) { const a = GRID.get(ix * 4096 + iz); if (a) for (let i = 0; i < a.length; i++) if (nearBuf.indexOf(a[i]) < 0) nearBuf.push(a[i]); } return nearBuf; }
   const HIT = { nx: 0, nz: 0, pen: 0 };
@@ -1189,7 +1196,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
   function addPlutonium(g, spots) {
     const list = [];
     spots.forEach(function (p) {
-      const grp = new THREE.Group(); const body = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 1.1, 12), new THREE.MeshStandardMaterial({ color: 0xc8ff3d, emissive: 0x9fff1a, emissiveIntensity: 0.9, roughness: 0.3 })); body.position.y = 0.55; grp.add(body);
+      const grp = new THREE.Group(); grp.name = 'plutônio'; const body = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 1.1, 12), new THREE.MeshStandardMaterial({ color: 0xc8ff3d, emissive: 0x9fff1a, emissiveIntensity: 0.9, roughness: 0.3 })); body.position.y = 0.55; grp.add(body);
       [0.12, 0.98].forEach(function (y) { const r = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 0.12, 12), new THREE.MeshStandardMaterial({ color: 0x2a2a30, metalness: 0.8, roughness: 0.3 })); r.position.y = y; grp.add(r); });
       const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: softDot, color: 0xc8ff3d, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending })); glow.scale.set(3.4, 3.4, 1); glow.position.y = 0.6; grp.add(glow);
       grp.position.set(p[0], (p[2] || 0) + 0.4, p[1]); g.add(grp); list.push({ g: grp, got: false, y0: (p[2] || 0) + 0.4 }); cellRefs.push(list[list.length - 1]);
@@ -1254,7 +1261,8 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     /* ---- the gate: z 60, 14 m between the pillars, 9 m high, the pillars off the road (the plinths at 6.75 m from the axis) ---- */
     const GZ = 60, gate = new THREE.Group(); gate.name = 'portao-espcex'; gate.position.set(0, 0, GZ); g.add(gate);
     keepOut.push({ x0: -11.5, x1: 13.5, z0: 56, z1: 64 });
-    const stoneParts = []; [-1, 1].forEach(function (sd) { stoneParts.push(box(1.3, 7.6, 1.3, sd * 7.65, 3.8, 0), box(1.8, 0.5, 1.8, sd * 7.65, 0.25, 0)); addBoxCol(sd * 7.65, GZ, 0.9, 0.9, 0, 0, 9).name = 'pilar do portão'; });
+    // the pillars stop under the lintel (6.9 m): at 7.6 m they stood 10 cm proud of it and covered both ends of the sign
+    const stoneParts = []; [-1, 1].forEach(function (sd) { stoneParts.push(box(1.3, 6.9, 1.3, sd * 7.65, 3.45, 0), box(1.8, 0.5, 1.8, sd * 7.65, 0.25, 0)); addBoxCol(sd * 7.65, GZ, 0.9, 0.9, 0, 0, 9).name = 'pilar do portão'; });
     stoneParts.push(box(17.6, 0.3, 1.4, 0, 8.85, 0)); gate.add(new THREE.Mesh(mergeStatic(stoneParts), stoneM));
     const lintel = new THREE.Mesh(new THREE.BoxGeometry(17.2, 1.8, 1.1), greenM); lintel.position.set(0, 7.8, 0); gate.add(lintel);
     const signTex = canvasTex(2048, 224, function (c, w, h) {
@@ -1454,7 +1462,8 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
       boardTex.needsUpdate = true;
     }
     drawBoard(0);
-    postSign(g, { tex: boardTex, w: 3.4, h: 2.125, y: 1.9, x: 8.6, z: 44, ry: -Math.PI / 2, posts: [-1.6, 1.6], backMat: woodM, postMat: woodM, rough: 0.8, colName: 'poste do quadro' });
+    // its lower edge at 1.39 m, over the car's roof (at 0.84 m the car drove through the board between the posts)
+    postSign(g, { tex: boardTex, w: 3.4, h: 2.125, y: 2.45, x: 8.6, z: 44, ry: -Math.PI / 2, posts: [-1.6, 1.6], backMat: woodM, postMat: woodM, rough: 0.8, colName: 'poste do quadro' });
   }
 
   /* ------------------------------------------------ the AMAN: the highway sign, the Portão Monumental, the Conjunto Principal, the company and the espadim (C4, C5) ------------------------------------------------ */
@@ -2330,7 +2339,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     // checkpoint on the main road: crates and barrels to plough through
     for (let i = 0; i < 12; i++) { const b = model(i % 3 ? 'box-large' : 'barrel', { fit: { h: i % 3 ? 1.1 : 1.3 }, x: -2.4 + (i % 4) * 1.6, z: -18 - Math.floor(i / 4) * 1.6 }); g.add(b); prop(b, i % 3 ? 0.35 : 0.45); }
     // obstacle course on the jungle road (x = -45): start, cone slalom, mud pit, ramp over a trench, finish
-    const gStart = model('overheadRound', { fit: { w: 15 }, x: CX, z: -12 }), gEnd = model('overheadLights', { fit: { w: 15 }, x: CX, z: -53 }); g.add(gStart); g.add(gEnd); gantryLegs(CX, -12, 15); gantryLegs(CX, -53, 15);
+    const gStart = model('overheadRound', { fit: { w: 15 }, x: CX, z: -12 }), gEnd = model('overheadLights', { fit: { w: 15 }, x: CX, z: -53 }); g.add(gStart); g.add(gEnd); gantryLegs(gStart); gantryLegs(gEnd);
     const topOf = function (m) { return new THREE.Box3().setFromObject(m).max.y; };
     keepOut.push({ x0: CX - 9, x1: CX + 9, z0: -58, z1: -8 });
     // the labels sit just over their gantries (they used to float 13 m up, dark specks from the road), and larger
@@ -6452,6 +6461,8 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
       traffic: function () { return DYN.filter(function (b) { return b.lane; }).map(function (b) { return { kind: b.kind || 'car', x: b.x, z: b.z, h: b.h, knock: b.awake ? 1 : 0, awake: b.awake, axis: b.lane.axis, dir: b.lane.dir, cur: b.lane.cur, held: !!b.lane.held, pos: b.lane.pos, zc: b.lane.road }; }); },
       bodies: function () { return DYN.map(function (b, i) { return { i: i, x: b.x, y: b.y, z: b.z, h: b.h, awake: b.awake, mass: b.mass, prop: b.prop, lane: !!b.lane, path: !!b.path, convoy: !!(b.path && b.path.convoy), flying: b.flying, r: b.r, off: b.off, home: b.home }; }); },
       overlap: function () { return carOverlap(); },
+      dynamicMeshes: function () { return DYN.map(function (b) { return b.mesh; }); },
+      ramps: function () { return (world.ramps || []).map(function (r) { return { x: r.x, z: r.z, len: r.len, w: r.w }; }); },
       route: function () { return { spawn: world.spawn ? [world.spawn.x, world.spawn.z] : null, wps: (world.waypoints || []).map(function (w) { return [w.x, w.z]; }) }; },
       statics: function (x, z, rad) { return STATICS.filter(function (o) { return Math.hypot(o.x - x, o.z - z) < rad; }).map(function (o) { return { t: o.t, x: o.x, z: o.z, r: o.r, hx: o.hx, hz: o.hz, a: o.a, y0: o.y0, y1: o.y1, name: o.name }; }); },
       blocked: function (x, y, z) { return STATICS.some(function (o) { return !(y >= o.y1 - 0.05 || y + CAR_H <= o.y0) && circleVs(o, x, z, CAR_R); }); }, scene: scene, sky: sky, car: car, S: S, camera: camera, goto: function (i) { enterEra(i); }, highway: function () { enterHighway(); }, fps: function () { return Math.round(fpsAvg); }, state: function () { return { era: S.era.id, mode: S.mode, mph: Math.round(S.mode === 'highway' ? S.hwSpeed * 2.2 : Math.abs(S.car.speed) * 2.2), plu: S.plu, migr: S.migr }; } };
