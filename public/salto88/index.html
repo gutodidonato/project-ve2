@@ -118,6 +118,26 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
 .card .vals:empty { display: none; }
 .card .vals span { font-family: var(--font-mono); font-size: 0.64rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink); background: rgba(255, 255, 255, 0.06); border: 1px solid var(--accent, var(--flux)); border-radius: 999px; padding: 2px 8px; }
 .stage.flying .card { left: calc(var(--sl) + 70px); }
+.kiosk { z-index: 4; overflow-y: auto; overscroll-behavior: contain; padding: 14px 16px 12px; border-left: 3px solid var(--accent, var(--flux)); display: flex; flex-direction: column; gap: 10px; animation: kioskIn 0.28s ease-out; }
+.kiosk[hidden] { display: none; }
+.kiosk.photo-off { visibility: hidden; }
+@keyframes kioskIn { from { opacity: 0; transform: translateY(8px); } }
+@media (prefers-reduced-motion: reduce) { .kiosk { animation: none; } }
+.kiosk .head b { display: block; font-family: var(--font-display); font-weight: 400; font-size: 1rem; letter-spacing: 0.03em; color: var(--accent, var(--flux)); }
+.kiosk .per { font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.1em; color: var(--muted); }
+.kiosk p { margin: 0; font-size: 0.86rem; line-height: 1.45; color: var(--ink); white-space: pre-line; }
+.kiosk h3 { margin: 0 0 5px; font-family: var(--font-mono); font-size: 0.66rem; font-weight: 400; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.kiosk ul { margin: 0; padding-left: 1.1em; display: flex; flex-direction: column; gap: 5px; font-size: 0.84rem; line-height: 1.42; color: var(--ink); }
+.kiosk .case { border: 1px solid var(--line); border-radius: 4px; padding: 8px 10px; display: flex; flex-direction: column; gap: 5px; }
+.kiosk .case b { font-size: 0.86rem; font-weight: 600; color: var(--ink); }
+.kiosk .stack { display: flex; flex-wrap: wrap; gap: 5px; }
+.kiosk .stack span { font-family: var(--font-mono); font-size: 0.64rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink); background: rgba(255, 255, 255, 0.06); border: 1px solid var(--line); border-radius: 3px; padding: 2px 6px; }
+.kiosk video { width: 100%; aspect-ratio: 16 / 9; border: 1px solid var(--line); border-radius: 4px; background: #000; cursor: pointer; }
+.kiosk .acts { display: flex; gap: 8px; margin-top: auto; padding-top: 4px; }
+.kiosk .acts button { flex: 1; min-height: 44px; padding: 9px 12px; font-family: var(--font-mono); font-size: 0.8rem; color: var(--ink); background: #120e1e; border: 1px solid var(--line); border-radius: 3px; cursor: pointer; }
+.kiosk .acts button.primary { color: #0d0a16; background: var(--ink); border-color: var(--ink); font-weight: 600; }
+.kiosk .acts button:focus-visible { outline: 2px solid var(--flux); outline-offset: 2px; }
+.stage.kiosk-open .zoom { display: none; }
 #sndBtn.on { border-color: var(--led-green); color: var(--led-green); }
 .guide { position: absolute; z-index: 3; left: 50%; top: calc(66px + env(safe-area-inset-top, 0px)); transform: translateX(-50%); display: flex; align-items: center; gap: 8px; padding: 4px 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; font-family: var(--font-mono); font-size: 0.78rem; pointer-events: none; }
 .guide[hidden] { display: none; }
@@ -232,6 +252,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     <span class="ctrl"><button type="button" id="rPrev" aria-label="Estação anterior">◀</button><button type="button" id="rPower">Ligar (R)</button><button type="button" id="rNext" aria-label="Próxima estação">▶</button></span>
   </div>
   <div class="panel card" id="card" hidden aria-live="polite"><div class="head"><b id="cardTitle"></b><span class="per" id="cardPeriod"></span></div><p id="cardText"></p><div class="vals" id="cardVals"></div></div>
+  <aside class="panel kiosk" id="kiosk" role="dialog" aria-modal="false" aria-labelledby="kTitle" hidden><div class="head"><b id="kTitle"></b><span class="per" id="kPer"></span></div><p id="kLead"></p><section id="kDid"><h3 id="kDidH"></h3><ul id="kList"></ul></section><div id="kCase"></div><video id="kVid" muted loop playsinline preload="none" hidden></video><div class="acts"><button type="button" class="primary" id="kNext"></button><button type="button" id="kDrive"></button></div></aside>
   <div class="toast" id="toast" aria-live="polite"></div>
   <div class="guide" id="guide" hidden><span class="arrow" id="guideArrow">➤</span><span id="guideText">PORTAL</span></div>
   <div class="sp" id="sp" aria-live="polite"><b>VOCÊ CAIU EM SÃO PAULO :)</b><span>Marginal Tietê · 18h07 · 112 km de lentidão · motoboys no corredor</span></div>
@@ -5847,7 +5868,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
   function updateLineCards(dt) {
     if (LCQ.cur) { if (cardShown === LCQ.cur) LCQ.shown += dt; else LCQ.cur = null; }
     if (!LCQ.q.length) return;
-    for (let i = 0; i < STOPS.length; i++) if (STOPS[i].active) return;
+    if (KS.open) return;
     for (let i = LCQ.q.length - 1; i >= 0; i--) { LCQ.q[i].left -= dt; if (LCQ.q[i].left <= 0) LCQ.q.splice(i, 1); }
     if (LCQ.q.length && active && (toastTimer <= 0 || innerHeight > 500) && (!LCQ.cur || LCQ.shown >= 4)) { const e = LCQ.q.shift(); LCQ.cur = e.card; LCQ.shown = 0; showCard(e.card, { ttl: e.ttl }); }
   }
@@ -5863,7 +5884,64 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     const st = { id: o.id, x: o.x, z: o.z, y: o.y, h: o.h || 0, card: o.card || null, onArrive: o.onArrive || null, onLeave: o.onLeave || null, pad: o.pad || 0, active: false, dwell: 0, mark: mark, phase: STOPS.length * 1.7 };
     STOPS.push(st); return st;
   }
-  function stopLeave(st) { st.active = false; st.dwell = 0; if (st.card) hideCard(st.card); if (st.onLeave) st.onLeave(st); }
+  function stopLeave(st) { st.active = false; st.dwell = 0; if (KS.open && KS.st === st) closeKiosk('drive'); if (st.card) hideCard(st.card); if (st.onLeave) st.onLeave(st); }
+  /* ------------------------------------------------ the stop kiosk ------------------------------------------------ */
+  // Parking on a stop opens it: the camera frames the place and a panel beside it says what Luis did there, in the profile's own
+  // words (KIOSK_DATA, built from content/pt/profile.ts by build-v3.mjs). The frame is the stop's kiosk.cam, in the stop's own axes
+  // (x to the right of the car, y up, z behind it), or by default from 7 m left and 6 m back looking 6 m ahead. The camera aims so the
+  // place (cam.look) falls in the middle of the free part of the screen, beside the panel. "Próxima parada" goes on to the next
+  // stop, "Dirigir" (Esc, or any driving key pressed after the keys were let go: a brake still held when it opens does not count)
+  // gives the wheel back.
+  const KS = { open: false, st: null, t: 0, armed: false, nx: 0, ny: 0, pos: new THREE.Vector3(), look: new THREE.Vector3(), aim: new THREE.Vector3() };
+  const KS_CAM = { pos: [-7, 3.4, 6], look: [0, 1.2, -6] }, KV = { f: new THREE.Vector3(), r: new THREE.Vector3(), u: new THREE.Vector3(), up: new THREE.Vector3(0, 1, 0) };
+  function stopPoint(st, p, out) { const c = Math.cos(st.h), sn = Math.sin(st.h); return out.set(st.x + p[0] * c + p[2] * sn, (st.y === undefined ? 0 : st.y) + p[1], st.z - p[0] * sn + p[2] * c); }
+  function kioskFrame() { const cam = (KS.st.kiosk && KS.st.kiosk.cam) || KS_CAM; stopPoint(KS.st, cam.pos, KS.pos); stopPoint(KS.st, cam.look, KS.look); }
+  // where the camera looks so the place lands at (KS.nx, KS.ny) on screen (normalised device coordinates)
+  function kioskAim() {
+    const f = KV.f.subVectors(KS.look, KS.pos), dist = f.length(); f.divideScalar(dist || 1);
+    const r = KV.r.crossVectors(f, KV.up).normalize(), u = KV.u.crossVectors(r, f), tv = Math.tan(camera.fov * Math.PI / 360), th = tv * camera.aspect;
+    return KS.aim.copy(f).addScaledVector(r, -KS.nx * th).addScaledVector(u, -KS.ny * tv).normalize().multiplyScalar(dist).add(KS.pos);
+  }
+  // The panel's place, read off where the HUD really is so it covers none of it: a column on the right (40% wide, 45% on a short
+  // landscape phone, at most 520 px) between the tools above and the dash below, or on a phone held upright a sheet from the bottom
+  // above the HUD's bottom row, its top no higher than the middle of the screen. The free part of the screen is beside it.
+  function layoutKiosk() {
+    const el = $('kiosk'), R = stage.getBoundingClientRect(), W = R.width, Hh = R.height, st = el.style, gap = 8;
+    const box = function (sel) { const e = document.querySelector(sel); if (!e || e.hidden || !e.getClientRects().length || getComputedStyle(e).visibility === 'hidden') return null; const r = e.getBoundingClientRect(); return r.width && r.height ? { top: r.top - R.top, bottom: r.bottom - R.top, left: r.left - R.left, right: r.right - R.left } : null; };
+    const above = function (sels) { let y = Hh; sels.forEach(function (q) { const b = box(q); if (b && b.top < y) y = b.top; }); return y; };
+    st.left = st.right = st.top = st.bottom = st.width = st.maxHeight = '';
+    if (W < Hh && W < 700) {
+      const bottom = Hh - above(['.radio', '.dash', '.lift', '.zoom']) + gap;
+      st.left = gap + 'px'; st.right = gap + 'px'; st.bottom = bottom + 'px'; st.maxHeight = Math.max(120, Hh / 2 - bottom) + 'px';
+      const top = Hh - bottom - el.getBoundingClientRect().height; KS.nx = 0; KS.ny = 1 - Math.max(top, Hh / 2) / Hh;
+    } else {
+      const tools = box('.tools'), top = (tools ? tools.bottom : 12) + gap, bottom = Hh - above(['.dash', '.zoom']) + gap, w = Math.min(520, W * (Hh <= 500 ? 0.45 : 0.4));
+      st.right = gap + 'px'; st.top = top + 'px'; st.bottom = bottom + 'px'; st.width = w + 'px'; KS.nx = (W - w - gap) / W - 1; KS.ny = 0;
+    }
+  }
+  function openKiosk(st) {
+    const d = KIOSK_DATA.KIOSK[st.id] || { head: null, period: null, bullets: [], cases: [], video: null, highlight: true }, card = st.card || { title: '', period: '', text: '' }, L = KIOSK_DATA.LABELS;
+    KS.open = true; KS.st = st; KS.t = 0; KS.armed = false; kioskFrame();
+    if (!st.visited) { st.visited = true; st.mark.children[1].material.color.lerp(new THREE.Color(0x555566), 0.6); } // a stop seen: its pointer greys
+    $('kTitle').textContent = d.head || card.title; $('kPer').textContent = d.period || card.period || '';
+    const lead = d.highlight ? (d.head && card.title ? card.title + ': ' + card.text : card.text) : ''; $('kLead').textContent = lead || ''; $('kLead').hidden = !lead;
+    $('kDidH').textContent = L.did; const ul = $('kList'); ul.textContent = ''; d.bullets.forEach(function (b) { const li = document.createElement('li'); li.textContent = b; ul.appendChild(li); }); $('kDid').hidden = !d.bullets.length;
+    const cs = $('kCase'); cs.textContent = ''; d.cases.forEach(function (slug) { const c = KIOSK_DATA.CASES[slug]; if (!c) return; const box = document.createElement('div'), t = document.createElement('b'), sm = document.createElement('p'), tags = document.createElement('div'); box.className = 'case'; tags.className = 'stack'; t.textContent = c.title; sm.textContent = c.summary; c.stack.forEach(function (x) { const sp = document.createElement('span'); sp.textContent = x; tags.appendChild(sp); }); box.append(t, sm, tags); cs.appendChild(box); }); cs.hidden = !d.cases.length;
+    const v = $('kVid'); if (d.video) { v.hidden = false; v.muted = true; v.src = 'video/' + d.video + '.webm'; const pl = v.play(); if (pl) pl.catch(function () {}); } else { v.hidden = true; v.pause(); v.removeAttribute('src'); }
+    $('kNext').textContent = L.next; $('kDrive').textContent = L.drive;
+    const el = $('kiosk'); el.hidden = false; el.classList.toggle('photo-off', !!S.photo); el.scrollTop = 0; stage.classList.add('kiosk-open'); layoutKiosk();
+    $('kNext').focus({ preventScroll: true });
+  }
+  function closeKiosk(how) {
+    if (!KS.open) return; KS.open = false;
+    const el = $('kiosk'), refocus = el.contains(document.activeElement); el.hidden = true; stage.classList.remove('kiosk-open'); $('kVid').pause();
+    if (refocus) canvas.focus({ preventScroll: true });
+    // 'next' goes on to the next stop (the guided tour); until it exists it gives the wheel back like 'drive'
+  }
+  $('kNext').addEventListener('click', function () { closeKiosk('next'); });
+  $('kDrive').addEventListener('click', function () { closeKiosk('drive'); });
+  $('kVid').addEventListener('click', function () { const v = $('kVid'); v.muted = !v.muted; }); // a tap turns the sound on
+  $('kVid').addEventListener('error', function () { $('kVid').hidden = true; }); // a video that fails leaves no hole
   // no allocation per frame (a loop over a handful of stops)
   function updateStops(dt) {
     const c = S.car; let any = false; if (cardTtl > 0) { cardTtl -= dt; if (cardTtl <= 0) hideCard(); }
@@ -5871,7 +5949,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
       const st = STOPS[i], dx = c.x - st.x, dz = c.z - st.z, sn = Math.sin(st.h), cs = Math.cos(st.h), lx = Math.abs(dx * cs - dz * sn), lf = Math.abs(-dx * sn - dz * cs), v = Math.abs(c.speed), low = st.y === undefined ? c.y < 2.5 && !c.air : Math.abs(c.y - st.y) < 1.4 && !c.air;
       if (!st.active) {
         st.dwell = low && v < 1.5 && lx <= 1.9 && lf <= 3.15 ? st.dwell + dt : 0;
-        if (st.dwell >= 0.5) { st.active = true; if (st.card) showCard(st.card); if (st.onArrive) st.onArrive(st); }
+        if (st.dwell >= 0.5) { st.active = true; if (active && !S.demo) openKiosk(st); else if (st.card) showCard(st.card); if (st.onArrive) st.onArrive(st); }
       } else if (v > 3 || lx > 2.5 || lf > 3.75 || !low) stopLeave(st);
       // the pointer is a landmark from afar and a nuisance up close: hidden beyond 80 m (it costs 2 draws a stop), full size from 24 m and shrinking to 40% as the car comes into the bay
       const dm2 = dx * dx + dz * dz; st.mark.visible = !st.active && dm2 < 6400;
@@ -5887,7 +5965,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
   const LAND = { st: null, landed: false, t: 0, hint: false };
   // The attract-mode demo never takes the wheel from a player who stopped on purpose: on a stop (a bay or a pad), landed. It used to
   // after 9 s without a key, and the car drove off in the middle of the card ("fica rodando"); a few scenes held it 5 to 30 s.
-  function demoBlocked() { if (LAND.landed) return true; for (let i = 0; i < STOPS.length; i++) if (STOPS[i].active) return true; return false; }
+  function demoBlocked() { if (LAND.landed || KS.open) return true; for (let i = 0; i < STOPS.length; i++) if (STOPS[i].active) return true; return false; }
   function landAssist(c, inp, dt) {
     const L = LAND;
     if (S.demo || S.transit >= 0) { L.st = null; L.landed = false; return false; }
@@ -6044,6 +6122,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
   function readInput() { let thr = 0, steer = 0, up = 0; const flying = S.mode === 'world' && world && world.flight; if (keys.has('KeyW') || keys.has('ArrowUp')) thr += 1; if (keys.has('KeyS') || keys.has('ArrowDown')) thr -= 1; if (keys.has('KeyA') || keys.has('ArrowLeft')) steer += 1; if (keys.has('KeyD') || keys.has('ArrowRight')) steer -= 1; if (keys.has('KeyE') || touch.up || (flying && keys.has('Space'))) up += 1; if (keys.has('KeyQ') || touch.down || keys.has('ShiftLeft') || keys.has('ShiftRight')) up -= 1; if (dragVec && Math.hypot(dragVec.x, dragVec.y) > 14) { thr = clamp(-dragVec.y / 70, -1, 1); steer = clamp(-dragVec.x / 70, -1, 1); } return { thr: thr, steer: steer, up: up, hand: !flying && keys.has('Space') }; }
   function stepWorld(dt) {
     const c = S.car; let inp = readInput(); const user = inp.thr !== 0 || inp.steer !== 0 || inp.up !== 0 || inp.hand;
+    if (KS.open) { if (!user) KS.armed = true; else if (KS.armed) closeKiosk('drive'); }
     if (active && user) { S.demo = false; S.idle = 0; } else { S.idle += dt; if (!active || (S.idle > 9 && !demoBlocked())) S.demo = true; }
     if (world.finale) { S.parked = 10; return; }
     if (S.demo) inp = autopilot(dt);
@@ -6185,10 +6264,12 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     else { camera.fov = S.transit >= 0 ? 58 + 37 * (1 - Math.pow(1 - clamp((S.transit - 0.15) / 0.8, 0, 1), 2)) : lerp(camera.fov, 58, 0.08); camera.updateProjectionMatrix();
       // parked (on a stop or anywhere): the camera holds still behind the car, lower and closer on a stop. It used to circle the car,
       // and every pass behind a wall or a screen pulled it in, up and down.
-      if (S.parked > 1.2) { orbitA = camYaw + Math.PI / 2; const back = 8.5 * zh, high = 3.6 * zv; target = new THREE.Vector3(c.x + Math.sin(camYaw) * back, c.y + high, c.z + Math.cos(camYaw) * back); look = new THREE.Vector3(c.x - Math.sin(camYaw) * 6, c.y + 1, c.z - Math.cos(camYaw) * 6); }
+      if (KS.open) { kioskFrame(); target = KS.pos.clone(); look = kioskAim().clone(); }
+      else if (S.parked > 1.2) { orbitA = camYaw + Math.PI / 2; const back = 8.5 * zh, high = 3.6 * zv; target = new THREE.Vector3(c.x + Math.sin(camYaw) * back, c.y + high, c.z + Math.cos(camYaw) * back); look = new THREE.Vector3(c.x - Math.sin(camYaw) * 6, c.y + 1, c.z - Math.cos(camYaw) * 6); }
       else { camYaw += wrap(c.h - camYaw) * (1 - Math.pow(0.08, dt)); orbitA = camYaw + Math.PI / 2; const back = 8.5 * zh, high = 3.6 * zv, ahead = 6 + clamp(Math.abs(c.speed), 0, 30) * 0.35; target = new THREE.Vector3(c.x + Math.sin(camYaw) * back, c.y + high, c.z + Math.cos(camYaw) * back); look = new THREE.Vector3(c.x - Math.sin(camYaw) * ahead, c.y + 1.4 + (world.flight ? c.vy * 0.35 : 0), c.z - Math.cos(camYaw) * ahead); } }
     const clearCam = S.mode === 'world' && !S.photo && !world.finale; if (clearCam) pullIn(target, c);
-    camPos.lerp(target, k); if (clearCam) pullIn(camPos, c); camLook.lerp(look, k); camera.position.copy(camPos);
+    const kk = KS.open ? (reduce ? 1 : 1 - Math.pow(0.02, dt)) : k;
+    camPos.lerp(target, kk); if (clearCam) pullIn(camPos, c); camLook.lerp(look, kk); camera.position.copy(camPos);
     if (S.shake > 0) { S.shake -= dt; camera.position.x += (Math.random() - 0.5) * S.shake; camera.position.y += (Math.random() - 0.5) * S.shake; }
     camera.lookAt(camLook);
   }
@@ -6300,7 +6381,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
   function activate() { if (active) return; active = true; stage.classList.add('active'); canvas.tabIndex = 0; canvas.focus({ preventScroll: true }); if (!started) { started = true; if (world) { S.lastDate = '--- ----'; S.plu = 0; S.trip = tripNew(); tripRender(); S.photo = false; enterEra(0); S.car.speed = 6; $('plu').textContent = '☢ 0/25'; } } S.demo = false; S.idle = 0; kick(); }
   function deactivate() { active = false; keys.clear(); stage.classList.remove('active'); S.demo = true; }
   $('start').addEventListener('click', activate);
-  function togglePhoto(on) { S.photo = on === undefined ? !S.photo : on; $('photo').classList.toggle('on', S.photo); if (S.photo) { photoCam.yaw = camYaw + 0.6; photoCam.dist = 12; toast('Modo foto: arraste para girar, scroll para zoom', 1.8); } else { $('vhs').style.display = 'none'; canvas.style.filter = ''; } }
+  function togglePhoto(on) { S.photo = on === undefined ? !S.photo : on; $('photo').classList.toggle('on', S.photo); $('kiosk').classList.toggle('photo-off', S.photo); if (S.photo) { photoCam.yaw = camYaw + 0.6; photoCam.dist = 12; toast('Modo foto: arraste para girar, scroll para zoom', 1.8); } else { $('vhs').style.display = 'none'; canvas.style.filter = ''; } }
   $('photoBtn').addEventListener('click', function () { activate(); togglePhoto(); }); $('photoExit').addEventListener('click', function () { togglePhoto(false); });
   document.querySelectorAll('.photo [data-f]').forEach(function (b) { b.addEventListener('click', function () { const f = b.getAttribute('data-f'); $('vhs').style.display = f === 'vhs' ? 'block' : 'none'; canvas.style.filter = f === 'neon' ? 'saturate(1.8) contrast(1.15) hue-rotate(-10deg)' : f === 'bw' ? 'grayscale(1) contrast(1.2)' : f === 'vhs' ? 'saturate(1.3) blur(0.4px)' : ''; }); });
   $('snap').addEventListener('click', function () { renderer.render(scene, camera); const src = document.createElement('canvas'); src.width = canvas.width; src.height = canvas.height; const g = src.getContext('2d'); g.filter = canvas.style.filter || 'none'; g.drawImage(canvas, 0, 0); g.filter = 'none'; g.fillStyle = 'rgba(0,0,0,0.55)'; g.fillRect(0, src.height - 44, src.width, 44); g.fillStyle = '#ffb347'; g.font = "600 20px 'IBM Plex Mono', monospace"; g.fillText('SALTO 88 · ' + S.era.date + ' · LUIS DIDONATO', 16, src.height - 16); $('shotImg').src = src.toDataURL('image/png'); $('shot').classList.add('on'); });
@@ -6317,7 +6398,8 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     if (e.code === 'KeyI' && !e.repeat) { toggleDrawer(); return; }
     if (e.code === 'KeyC' && !e.repeat) { toggleColliders(); return; }
     if (!active) return;
-    if (e.code === 'Escape') { if (S.photo) { togglePhoto(false); return; } deactivate(); return; }
+    if (KS.open && (e.code === 'Enter' || e.code === 'NumpadEnter')) { const a = document.activeElement; if (a && (a.id === 'kNext' || a.id === 'kDrive')) return; e.preventDefault(); closeKiosk('next'); return; }
+    if (e.code === 'Escape') { if (S.photo) { togglePhoto(false); return; } if (KS.open) { closeKiosk('drive'); return; } deactivate(); return; }
     if (GAME_KEYS.indexOf(e.code) >= 0) e.preventDefault();
     if (e.code === 'KeyL' && !e.repeat) { S.lights = !S.lights; toast(S.lights ? 'Faróis ligados' : 'Faróis desligados', 0.9); return; }
     keys.add(e.code); S.idle = 0;
@@ -6332,7 +6414,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
   canvas.addEventListener('pointerdown', function (e) { if (!active) activate(); drag = { x: e.clientX, y: e.clientY, px: e.clientX, py: e.clientY }; try { canvas.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ } });
   canvas.addEventListener('pointermove', function (e) { if (!drag) return; if (S.photo) { photoCam.yaw -= (e.clientX - drag.px) * 0.008; photoCam.pitch = clamp(photoCam.pitch + (e.clientY - drag.py) * 0.006, -0.1, 1.3); drag.px = e.clientX; drag.py = e.clientY; return; } dragVec = { x: e.clientX - drag.x, y: e.clientY - drag.y }; S.idle = 0; });
   function endDrag() { drag = null; dragVec = null; } canvas.addEventListener('pointerup', endDrag); canvas.addEventListener('pointercancel', endDrag);
-  new ResizeObserver(size).observe(canvas); new ResizeObserver(function () { guideBox.ok = false; }).observe(canvas);
+  new ResizeObserver(size).observe(canvas); new ResizeObserver(function () { if (KS.open) layoutKiosk(); }).observe(canvas); window.addEventListener('resize', function () { if (KS.open) layoutKiosk(); }); // a turned phone: the observer waits for a drawn frame, the resize event does not new ResizeObserver(function () { guideBox.ok = false; }).observe(canvas);
   new ResizeObserver(function (es) { if (es[es.length - 1].contentRect.width > 0) guideBox.ok = false; }).observe($('guide')); // a pill that is hidden reads 0 wide: that is not a new size
   // a hidden tab does not keep the sound going: the audio context sleeps with it and wakes with it, but only for a visitor who has the sound on
   document.addEventListener('visibilitychange', function () { visible = !document.hidden; kick(); if (radio.ctx) { if (document.hidden) radio.ctx.suspend().catch(function () { /* already closed */ }); else if (AUD.on) radio.ctx.resume().catch(function () { /* already closed */ }); } });
@@ -6455,6 +6537,8 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
       jsAnimations: function () { const P = PLC; if (!P || !P.jsa) return null; const q = P.jsa, J = q.JS; return { progress: J.p.slice(), target: J.tgt.slice(), scroll: J.P, mode: J.mode, bayT: J.bayT, maxStep: J.maxStep, draws: J.draws.slice(), entered: J.entered, size: q.size, canvas: q.canvas, facades: J.p.length, start: q.start, end: q.end, bay: q.bay, title: JS_TITLE.join(' '), tagline: JS_TAG, swish: AUD.played.swish || 0, card: JS_CARD.title }; },
       // the crosswalk arms of the loaded blocks (the ones a walker may cross by)
       zebras: function () { const out = []; if (world && world.blocks) world.blocks.forEach(function (B) { if (B.arms) B.arms.forEach(function (al, kc) { al.forEach(function (arm) { const z = cornerZebra(B, CORNERS[kc][0], CORNERS[kc][1], arm); out.push({ block: B.key, ax: z.ax, cx: z.cx, cz: z.cz, zc: z.zc }); }); }); }); return out; },
+      kiosk: function () { if (!KS.st) return { open: false }; const d = KIOSK_DATA.KIOSK[KS.st.id] || {}; return { open: KS.open, stop: KS.st.id, title: $('kTitle').textContent, period: $('kPer').textContent, lead: $('kLead').textContent, bullets: Array.from($('kList').children).map(function (li) { return li.textContent; }), cases: (d.cases || []).slice(), video: d.video || null, focus: document.activeElement ? document.activeElement.id : '', look: [KS.look.x, KS.look.y, KS.look.z], camPos: [KS.pos.x, KS.pos.y, KS.pos.z] }; },
+      queueCard: function (title) { queueLineCard({ title: title, period: '', text: '', values: [] }, 7, 25); },
       stops: function () { return STOPS.map(function (st) { return { id: st.id, x: st.x, z: st.z, h: st.h, y: st.y, pad: st.pad, era: S.era.id, visited: !!st.visited, active: st.active, arrived: st.cbArrive || 0, left: st.cbLeave || 0, mark: st.mark.visible, markK: st.mark.scale.x }; }); },
       addTestStop: function (x, z) { addStop(world.group, { id: 'teste', x: x === undefined ? 0 : x, z: z === undefined ? 30 : z, h: 0, card: TEST_CARD, onArrive: function (st) { st.cbArrive = (st.cbArrive || 0) + 1; }, onLeave: function (st) { st.cbLeave = (st.cbLeave || 0) + 1; } }); },
       testCard: function () { return TEST_CARD; }, showCard: showCard, hideCard: hideCard, toast: toast,
