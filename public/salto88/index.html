@@ -4887,7 +4887,8 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     [[-8.1, -8.1], [8.1, -8.1], [-8.1, 8.1], [8.1, 8.1]].forEach(function (q) { SP.push([plCy(0.16, 0.2, 1.6, 6), q[0], T + 0.8, q[1], 0, 0x3a3156]); L.push([new THREE.SphereGeometry(0.2, 6, 5), q[0], T + 1.7, q[1], 0, 0xb48cff]); });
     grp.add(new THREE.Mesh(kitGeo(SP), K.std)); grp.add(vBasic(L));
     const signTex = evSign('EVIG', 'sede · CTO / Tech Lead', 1024, 256); const sign = plBoard(grp, signTex, 3.6, 0.9, -5.2, T + 3.25, -2.44, 0); sign.name = 'letreiro-da-sede'; sign.userData.text = 'EVIG';
-    evCol(tag, 'sede da EVIG', -5.2, -5.2, 3.2, 2.7, 0, 4.1); evCol(tag, 'caixas da sede', 7.65, -4.2, 0.9, 1.6, 0, 2.3);
+    evCol(tag, 'sede da EVIG', -5.2, -5.2, 3.2, 2.7, 0, 4.1); evCol(tag, 'caixas da sede', 7.65, -4.2, 0.9, 1.6, 0, 2.3); evCol(tag, 'console da sede', 2.9, 8.0, 0.8, 0.35, 0, 1.45);
+    evCol(tag, 'mastro da sede', -7.4, -6.8, 0.25, undefined, 0, 4.4, T + 3.85); [[-8.1, -8.1], [8.1, -8.1], [-8.1, 8.1], [8.1, 8.1]].forEach(function (q) { evCol(tag, 'pilone da sede', q[0], q[1], 0.24, undefined, 0, 1.95); });
     // the board: 1024 x 640 px, five rows of 90 px under a 150 px header
     const BD = plCan(1024, 640), RH = 90, Y0 = 150, SD = { ids: EV_TASKS.map(function (t) { return t[0]; }), titles: EV_TASKS.map(function (t) { return t[1]; }), tags: EV_TASKS.map(function (t) { return t[2]; }), lit: 0, swept: false, animating: false, t: 0, landings: 0, draws: 0, texts: [] };
     function paint() {
@@ -4937,7 +4938,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
       c.fillStyle = EV_DIM; c.font = "500 20px 'IBM Plex Mono', monospace"; c.fillText('Lambda + serviços contínuos', 256, 700); c.fillText('escala independente · containers', 256, 730);
       can.tex.needsUpdate = true; CB.draws++;
     }
-    paint(); const pan = evPanel(g, can, 7, 10.5, 9, 11.5, -38, 0.1, { name: 'ev-migracao', solid: false }); PK.migr = { group: pan.g, CB: CB };
+    paint(); const pan = evPanel(g, can, 7, 10.5, 9, 11.5, -38, 0.1, { name: 'ev-migracao', cname: 'painel da migração' }); PK.migr = { group: pan.g, CB: CB };
     K.upd.push(function (dt) {
       if (S.migr !== CB.migr) {
         CB.migr = S.migr; CB.value = S.migr; CB.changes++; CB.acc = 1;
@@ -4972,7 +4973,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     const L = []; for (let k = 0; k < 4; k++) for (let s = -1; s <= 1; s += 2) L.push([plBx(0.8, 0.07, 0.05), OX + s * 2.9, T + 0.7 + k * 0.5, OZ - 0.97, 0, k % 2 ? 0x46ff8a : 0x59d8ff]);
     L.push([plBx(2.2, 0.08, 0.08), HX, T + 2.56, HZ, 0, 0x59d8ff]);
     grp.add(vBasic(L));
-    const plate = plBoard(grp, evSign('PERGUNTAS', 'sobre dinheiro', 512, 160, EV_CYN), 2.6, 0.8, HX - 0.2, T + 0.45, HZ + 1.6, 0.4); plate.name = 'placa-do-funil';
+    const plate = plBoard(grp, evSign('PERGUNTAS', 'sobre dinheiro', 512, 160, EV_CYN), 2.6, 0.8, HX - 0.2, T + 0.55, HZ + 1.6, 0.4); plate.name = 'placa-do-funil';
     // the core: a crystal that turns, a ring round it and a halo; it works harder (faster, brighter) while a question is in it
     const crys = new THREE.Mesh(new THREE.IcosahedronGeometry(1.05, 1), new THREE.MeshBasicMaterial({ color: 0x46ff8a, fog: false })); crys.position.set(OX, T + 3.0, OZ); crys.name = 'nucleo-ia'; grp.add(crys);
     const ring = new THREE.Mesh(new THREE.TorusGeometry(1.7, 0.07, 6, 30), new THREE.MeshBasicMaterial({ color: 0x59d8ff, fog: false })); ring.rotation.x = 1.2; const rg = new THREE.Group(); rg.position.copy(crys.position); rg.add(ring); grp.add(rg);
@@ -5111,9 +5112,9 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     const L = PEOPLE_LIB; if (!L.ok || !L.list.length) return; const T = EV_TOP, kinds = L.list, F = plFacing;
     // [x, z, heading, clip, deck y (when it is not the island's top)]
     const A = [
-      [5.0, 7.9, F(0, -1), 'interact-right'], [7.6, 7.9, F(0, -1), 'holding-both'], [-3.0, -1.3, F(0, -1), 'emote-yes'], [2.9, 6.9, F(0, 1), 'interact-right'],         // the sede: the board, the door, the console
+      [5.0, 7.9, F(0, -1), 'interact-right'], [7.2, 7.8, F(0, -1), 'holding-both'], [-3.0, -1.3, F(0, -1), 'emote-yes'], [2.9, 6.9, F(0, 1), 'interact-right'],         // the sede: the board, the door, the console
       [-31.5, -30.5, F(-1, 0), 'holding-both'], [-37.0, -32.5, F(-1, 0), 'interact-right'], [38.5, -34.5, F(1, 0), 'interact-right'], [43.5, -22.0, F(-1, 0), 'holding-both'], // GCP's services and AWS's
-      [-44.6, 26.4, F(1.4, -1.9), 'interact-right'], [-35.4, 25.8, F(2.7, -2.3), 'emote-yes'], [-40.0, 23.4, F(2.0, -2.0), 'holding-both'],                                 // the assistant: funnel, board, core
+      [-45.2, 23.0, F(2.0, 1.5), 'interact-right'], [-35.4, 25.8, F(2.7, -2.3), 'emote-yes'], [-40.0, 23.4, F(2.0, -2.0), 'holding-both'],                                 // the assistant: funnel, board, core
       [35.6, 24.6, F(2.4, -1.4), 'emote-yes'], [35.6, 21.4, F(-2.4, -1.3), 'holding-both'], [40.4, 32.0, F(1, 0), 'interact-right']                                           // the triage agent: the agent, the bays, the gate
     ];
     PK.astro = A.map(function (a, i) { return evAstro(kinds[(i * 5 + 3) % kinds.length], a[0], a[1], a[2], a[3], a[4]); });
@@ -5242,7 +5243,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     lit.name = 'ilhas'; glow.name = 'ilhas-luzes'; K.g.add(lit); K.g.add(glow); K.isles = { lit: lit, glow: glow };
   }
   /* the rocks: an icosahedron whose vertices are pushed in and out by a smooth noise of their direction (two octaves) with three round craters (a dent and a darker tint in the vertex colours). The noise is a function of the
-     vertex's place, so the vertices that coincide still do, and the faces meet. Two variants (two seeds) are drawn as two instanced meshes, in a few sizes and greys; they are solid (a circle collider a little inside the rock). */
+     vertex's place, so the vertices that coincide still do, and the faces meet. Two variants (two seeds) are drawn as two instanced meshes, in a few sizes and greys; they are solid (circles stacked over the height of each rock, see rockCols). */
   function evRockGeo(seed) {
     const R = rng(seed), g = new THREE.IcosahedronGeometry(1, 2), P = g.attributes.position, n = P.count, C = new Float32Array(n * 3), v = new THREE.Vector3(), ph = [], cr = [];
     for (let i = 0; i < 6; i++) ph.push(R() * 6.283);
@@ -5255,13 +5256,26 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     }
     g.setAttribute('color', new THREE.BufferAttribute(C, 3)); g.computeVertexNormals(); return g;
   }
+  // a drawn rock (geometry ge under matrix M) as three circles stacked over its height, each round the middle of the rock in its own third.
+  // A rock is turned at random and squashed, so a slice of it is an uneven oval: a circle out to its farthest lump leaves a metre or more
+  // of air on its flat sides, one inside it lets the ship into the lumps. The radius is where three quarters of the slice's points lie
+  // (measured offline on the 40 rocks: the worst air under 1 m, at most an eighth of a rock's edges outside the collider's 0.25 m reach).
+  function rockCols(ge, M) {
+    const P = ge.attributes.position, v = new THREE.Vector3(), W = [], N = 3; let y0 = Infinity, y1 = -Infinity;
+    for (let i = 0; i < P.count; i++) { v.fromBufferAttribute(P, i).applyMatrix4(M); W.push(v.x, v.y, v.z); y0 = Math.min(y0, v.y); y1 = Math.max(y1, v.y); }
+    const st = (y1 - y0) / N, sl = function (y) { return Math.min(N - 1, Math.floor((y - y0) / st)); }, bx = [];
+    for (let k = 0; k < N; k++) bx.push([Infinity, -Infinity, Infinity, -Infinity, []]);
+    for (let i = 0; i < W.length; i += 3) { const b = bx[sl(W[i + 1])]; b[0] = Math.min(b[0], W[i]); b[1] = Math.max(b[1], W[i]); b[2] = Math.min(b[2], W[i + 2]); b[3] = Math.max(b[3], W[i + 2]); }
+    for (let i = 0; i < W.length; i += 3) { const b = bx[sl(W[i + 1])]; b[4].push(Math.hypot(W[i] - (b[0] + b[1]) / 2, W[i + 2] - (b[2] + b[3]) / 2)); }
+    bx.forEach(function (b, k) { if (!b[4].length) return; const d = b[4].sort(function (p, q) { return p - q; }), o = addCircleCol((b[0] + b[1]) / 2, (b[2] + b[3]) / 2, d[Math.floor(0.75 * (d.length - 1))], y0 + k * st, y0 + (k + 1) * st); o.name = 'rocha'; o.tag = 'detrito'; });
+  }
   function evRocks(g) {
     const R = rng(77), mat = new THREE.MeshStandardMaterial({ vertexColors: true, flatShading: true, roughness: 1 }), geos = [evRockGeo(31), evRockGeo(58)], N = 40, M = new THREE.Matrix4(), Q = new THREE.Quaternion(), E = new THREE.Euler(), P = new THREE.Vector3(), Sc = new THREE.Vector3(), col = new THREE.Color();
     const greys = [0x6c6674, 0x7e7882, 0x58535f, 0x8a847f, 0x4c4854, 0x645e5c], meshes = geos.map(function (ge) { const m = new THREE.InstancedMesh(ge, mat, N / 2); m.frustumCulled = false; m.name = 'rochas'; g.add(m); return m; }), cnt = [0, 0];
     for (let i = 0; i < N; i++) {
       const a = R() * Math.PI * 2, r = 70 + R() * 60, x = Math.cos(a) * r, z = Math.sin(a) * r, y = -6 + R() * 22, big = i < 4, mid = !big && i < 16, rad = big ? 5 + R() * 2.2 : mid ? 2.4 + R() * 1.8 : 1.1 + R() * 1.2, k = i % 2, mm = meshes[k];
       E.set(R() * 6.28, R() * 6.28, R() * 6.28); M.compose(P.set(x, y, z), Q.setFromEuler(E), Sc.set(rad, rad * (0.7 + R() * 0.3), rad * (0.85 + R() * 0.3))); mm.setMatrixAt(cnt[k], M); mm.setColorAt(cnt[k], col.setHex(greys[i % greys.length])); cnt[k]++;
-      const o = addCircleCol(x, z, rad * 0.8, y - rad * 0.7, y + rad * 0.7); o.name = 'rocha'; o.tag = 'detrito';
+      rockCols(geos[k], M);
     }
     meshes.forEach(function (m, k) { m.count = cnt[k]; m.instanceMatrix.needsUpdate = true; if (m.instanceColor) m.instanceColor.needsUpdate = true; });
   }
@@ -5300,15 +5314,22 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     // stations: a platform you can land on, an asteroid cone below it, buildings on top that block you
     // (the deck itself, its colour and its silhouette, is made by evIslands: one lit mesh and one self-lit mesh for the five islands; here the solid slab, the models of the place and the label)
     const ISL = [];
+    // what a model holds out past its footprint box (in the box's frame), as one more box over the heights it is at; m sits in a group not yet moved to (ox, oz)
+    function overhangCol(m, ox, oz, foot) {
+      const v = new THREE.Vector3(), b = [Infinity, -Infinity, Infinity, -Infinity, Infinity, -Infinity], c = foot.c, sn = foot.s; let n = 0; m.updateMatrixWorld(true);
+      m.traverse(function (q) { if (!q.isMesh) return; const P = q.geometry.attributes.position; for (let i = 0; i < P.count; i++) { v.fromBufferAttribute(P, i).applyMatrix4(q.matrixWorld); const dx = v.x + ox - foot.x, dz = v.z + oz - foot.z, lx = dx * c - dz * sn, lz = dx * sn + dz * c; if (Math.abs(lx) <= foot.hx + 0.3 && Math.abs(lz) <= foot.hz + 0.3) continue; n++; b[0] = Math.min(b[0], lx); b[1] = Math.max(b[1], lx); b[2] = Math.min(b[2], lz); b[3] = Math.max(b[3], lz); b[4] = Math.min(b[4], v.y); b[5] = Math.max(b[5], v.y); } });
+      if (!n) return null; const mx = (b[0] + b[1]) / 2, mz = (b[2] + b[3]) / 2;
+      const o = addBoxCol(foot.x + mx * c + mz * sn, foot.z - mx * sn + mz * c, Math.max(0.15, (b[1] - b[0]) / 2), Math.max(0.15, (b[3] - b[2]) / 2), foot.a, b[4], b[5]); o.name = foot.name; o.tag = foot.tag; return o;
+    }
     function island(x, z, w, kind, name, look) {
       const grp = new THREE.Group(); ISL.push({ x: x, z: z, w: w, look: look });
       const plat = addBoxCol(x, z, w / 2 - 0.12, w / 2 - 0.12, 0, -9.6, -1.5 + w * 0.05); plat.name = 'plataforma'; plat.tag = 'ilha ' + x + ',' + z;
-      if (kind) kind.forEach(function (k) { const m = model(k[0], { fit: k[1], x: k[2], z: k[3], ry: k[4] || 0, tint: k[5] }); m.position.y = -0.2; grp.add(m); colFrom(tpl(k[0]), m.scale.x, x + k[2], z + k[3], k[4] || 0, 'box', -0.2).tag = plat.tag; });
+      if (kind) kind.forEach(function (k) { const m = model(k[0], { fit: k[1], x: k[2], z: k[3], ry: k[4] || 0, tint: k[5] }); m.position.y = -0.2; grp.add(m); const foot = colFrom(tpl(k[0]), m.scale.x, x + k[2], z + k[3], k[4] || 0, 'box', -0.2); foot.tag = plat.tag; overhangCol(m, x, z, foot); });
       grp.position.set(x, 0, z); g.add(grp); if (name) { const l = label(name[0], name[1], name[2], 1.1); l.position.set(x, 14, z); g.add(l); } return grp;
     }
     island(0, 0, 18, null, ['EVIG', '#b48cff', 'sede · CTO / Tech Lead'], 'sede');
     island(-36, -28, 18, [['hangar_largeA', { len: 9 }, 1, 4, 0, 0xe39a52]], ['GCP', '#ff9a3c', 'origem da migração'], 'gcp');
-    island(36, -28, 18, [['hangar_roundGlass', { len: 9 }, 2, 4.5, 0, 0xf2cf86], ['satelliteDish_large', { h: 6 }, -6.5, 6, 0, 0xf2cf86]], ['AWS', '#ffd060', 'destino da migração'], 'aws');
+    island(36, -28, 18, [['hangar_roundGlass', { len: 9 }, 2, 4.5, 0, 0xf2cf86], ['satelliteDish_large', { h: 5 }, -5.6, 4.6, 0, 0xf2cf86]], ['AWS', '#ffd060', 'destino da migração'], 'aws');
     island(-38, 26, 16, null, ['ASSISTENTE FINANCEIRO', '#46ff8a', 'perguntas → respostas'], 'fin');
     island(38, 26, 16, null, ['AGENTE DE TRIAGEM', '#59d8ff', 'mensagens → filas'], 'tri');
     // services moving from GCP to AWS as rings are passed
@@ -5322,7 +5343,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     upd.push(function (dt) { let moved = false; for (let i = 0; i < services.length; i++) { const s = services[i]; if (s.t >= 0 && s.t < 1) { s.t = Math.min(1, s.t + dt * 0.6); const u = s.t; putCrate(i, s.fx + (s.tx - s.fx) * u, EV_TOP + 0.85 + Math.sin(u * Math.PI) * 16, s.z, u * Math.PI * 2); moved = true; } } if (moved) crates.instanceMatrix.needsUpdate = true; });
     // rings (amber: they are the challenge, the portal is the way out)
     const RINGS = [[0, 36, 0, 6], [0, 18, 0, 12], [10, -10, -0.785, 17], [0, -20, Math.PI / 2, 8], [-10, -31, 0.785, 3], [0, -64, 0, 9]]; const rings = [];
-    RINGS.forEach(function (r) { const m = new THREE.Mesh(new THREE.TorusGeometry(3.6, 0.24, 10, 40), new THREE.MeshBasicMaterial({ color: 0xffb347 })); m.position.set(r[0], r[3], r[1]); m.rotation.y = r[2]; g.add(m); const rg = { m: m, n: new THREE.Vector3(Math.sin(r[2]), 0, Math.cos(r[2])), done: false, fade: 1, side: null }; rings.push(rg); ringRefs.push(rg); });
+    RINGS.forEach(function (r) { const m = new THREE.Mesh(new THREE.TorusGeometry(3.6, 0.24, 10, 40), new THREE.MeshBasicMaterial({ color: 0xffb347 })); m.position.set(r[0], r[3], r[1]); m.rotation.y = r[2]; m.name = 'argola'; g.add(m); const rg = { m: m, n: new THREE.Vector3(Math.sin(r[2]), 0, Math.cos(r[2])), done: false, fade: 1, side: null }; rings.push(rg); ringRefs.push(rg); });
     const rel = new THREE.Vector3();
     upd.push(function (dt) {
       const c = S.car;
@@ -5837,7 +5858,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     const bay = new THREE.Mesh(new THREE.PlaneGeometry(3, 5.5), new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -3, polygonOffsetUnits: -3 }));
     bay.rotation.x = -Math.PI / 2; bay.position.y = 0.07; bay.renderOrder = 2; grp.add(bay);
     const mark = new THREE.Group(), fill = new THREE.Mesh(new THREE.ConeGeometry(0.7, 1.2, 4), new THREE.MeshBasicMaterial({ color: new THREE.Color(S.era.color).lerp(new THREE.Color(0xffffff), 0.3) })), rim = new THREE.Mesh(fill.geometry, new THREE.MeshBasicMaterial({ color: 0x120c1c, side: THREE.BackSide }));
-    rim.scale.setScalar(1.22); mark.add(rim, fill); mark.rotation.x = Math.PI; mark.position.y = 3; grp.add(mark);
+    rim.scale.setScalar(1.22); mark.add(rim, fill); mark.name = 'marcador-de-parada'; mark.rotation.x = Math.PI; mark.position.y = 3; grp.add(mark);
     grp.position.set(o.x, o.y || 0, o.z); grp.rotation.y = o.h || 0; g.add(grp);
     const st = { id: o.id, x: o.x, z: o.z, y: o.y, h: o.h || 0, card: o.card || null, onArrive: o.onArrive || null, onLeave: o.onLeave || null, pad: o.pad || 0, active: false, dwell: 0, mark: mark, phase: STOPS.length * 1.7 };
     STOPS.push(st); return st;
