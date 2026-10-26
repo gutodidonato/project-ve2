@@ -1856,10 +1856,9 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
         const t0 = B.t; B.t += dt; pose(B.t);
         if (t0 < BR_T.run && B.t >= BR_T.run) hydraulic(sndP.set(TKX, 2.5, TR.z), BR_T.lift + BR_T.slide);
         if (B.t >= BR_T.total) seat(false);
-        if (stop.active && S.idle > 5) S.idle = 5; // a parked player is watching: the attract-mode autopilot does not drive off in the middle of the scene
       } else {
         if (B.cheer > 0) { B.cheer -= dt; if (B.cheer <= 0) crew.forEach(function (p) { p.play('idle', 0.2); }); }
-        if (B.state === 'down') { B.after += dt; if (stop.active && B.after < 5.5 && S.idle > 5) S.idle = 5; } // about 10 s after parking (4.5 s of launch + 5.5 s) the attract-mode autopilot does not drive off
+        if (B.state === 'down') B.after += dt;
       }
     });
     BRI = { bridge: bridge, truck: tk, crew: crew, boom: boom, stop: stop };
@@ -2009,7 +2008,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     upd.push(function (dt) {
       const c = S.car;
       if (K.state === 'staged') return;
-      if (stop.active && cmdT < 10) { cmdT += dt; if (S.idle > 5) S.idle = 5; } // about 10 s parked in the bay, the attract-mode autopilot does not drive off
+      if (stop.active && cmdT < 10) cmdT += dt;
       if (K.state === 'following' || K.state === 'crossed') { if (released) recordTrail(c); else { if (Math.hypot(c.x - lastX, c.z - lastZ) > 12) tele = true; lastX = c.x; lastZ = c.z; if (Math.hypot(c.x - bayX, c.z - bayZ) >= CV.PULL) release(c); } }
       let moving = false, home = true;
       for (let i = 0; i < CV.N; i++) {
@@ -3906,7 +3905,6 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
       if (PS.armed) { if (dd < PASS.near && car.y < 12) { PS.armed = false; PS.passes++; if (!CL.active) [TH, TU, TT].forEach(function (T) { waveTo(T, T.seq[T.pi++ % T.seq.length], T === TU); }); } } else if (dd > PASS.far) PS.armed = true;
       stepWave(TH, dt); stepWave(TU, dt); stepWave(TT, dt);
       if (!CL.active) return; CL.t += dt; const t = CL.t;
-      if (stop.active && t < 8 && S.idle > 5) S.idle = 5; // a parked player is watching: the attract-mode autopilot does not drive off in the middle of the show
       if (CL.done) return;
       if (CL.hosp === 'espera' && t >= CLI_T.hosp) { CL.hosp = 'app'; waveTo(TH, 1); CL.swaps++; if (plSnd('recepcao')) chime([79, 83], 0.12, 'sine'); }
       let pending = false, n = 0;
@@ -5887,6 +5885,9 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
   // goes down (6 m/s at most, slower as it nears; it waits 0,4 m up until it is centred) until it stands on the deck top (the stop's y), where it stays, stopped and still, so the stop opens its card. E / Space lets go (take off), and so
   // does the throttle once Q is not held. The deck itself is solid (collideCar); the assist only moves the ship to the top. The attract-mode autopilot and the passage through a portal never land.
   const LAND = { st: null, landed: false, t: 0, hint: false };
+  // The attract-mode demo never takes the wheel from a player who stopped on purpose: on a stop (a bay or a pad), landed. It used to
+  // after 9 s without a key, and the car drove off in the middle of the card ("fica rodando"); a few scenes held it 5 to 30 s.
+  function demoBlocked() { if (LAND.landed) return true; for (let i = 0; i < STOPS.length; i++) if (STOPS[i].active) return true; return false; }
   function landAssist(c, inp, dt) {
     const L = LAND;
     if (S.demo || S.transit >= 0) { L.st = null; L.landed = false; return false; }
@@ -5903,7 +5904,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     const near = dist < 0.7, th = st.y + (near ? 0 : 0.4);
     if (c.y > th) { const vt = -Math.min(6, 0.9 + (c.y - th) * 1.5); c.vy = lerp(c.vy, vt, 1 - Math.pow(0.0005, dt)); c.y = Math.max(th, c.y + c.vy * dt); } else c.vy = 0;
     if (near && c.y <= st.y + 0.002) { c.y = st.y; c.vy = 0; c.speed = 0; c.lat = 0; if (!L.landed) { L.landed = true; L.t = 0; burst(c.x, st.y + 0.2, c.z, 18, 3.5, S.era.color); toast('Pousou · E decola', 1.8); evDocked(st); } }
-    if (L.landed) { L.t += dt; if (L.t < 30 && S.idle > 5) S.idle = 5; /* a parked player is reading: the attract-mode autopilot does not take off in the middle of the card */ }
+    if (L.landed) L.t += dt;
     return true;
   }
   function clearStops() { for (let i = 0; i < STOPS.length; i++) if (STOPS[i].active) stopLeave(STOPS[i]); STOPS.length = 0; LAND.st = null; LAND.landed = false; S.stopK = 0; hideCard(); }
@@ -6043,7 +6044,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
   function readInput() { let thr = 0, steer = 0, up = 0; const flying = S.mode === 'world' && world && world.flight; if (keys.has('KeyW') || keys.has('ArrowUp')) thr += 1; if (keys.has('KeyS') || keys.has('ArrowDown')) thr -= 1; if (keys.has('KeyA') || keys.has('ArrowLeft')) steer += 1; if (keys.has('KeyD') || keys.has('ArrowRight')) steer -= 1; if (keys.has('KeyE') || touch.up || (flying && keys.has('Space'))) up += 1; if (keys.has('KeyQ') || touch.down || keys.has('ShiftLeft') || keys.has('ShiftRight')) up -= 1; if (dragVec && Math.hypot(dragVec.x, dragVec.y) > 14) { thr = clamp(-dragVec.y / 70, -1, 1); steer = clamp(-dragVec.x / 70, -1, 1); } return { thr: thr, steer: steer, up: up, hand: !flying && keys.has('Space') }; }
   function stepWorld(dt) {
     const c = S.car; let inp = readInput(); const user = inp.thr !== 0 || inp.steer !== 0 || inp.up !== 0 || inp.hand;
-    if (active && user) { S.demo = false; S.idle = 0; } else { S.idle += dt; if (!active || S.idle > 9) S.demo = true; }
+    if (active && user) { S.demo = false; S.idle = 0; } else { S.idle += dt; if (!active || (S.idle > 9 && !demoBlocked())) S.demo = true; }
     if (world.finale) { S.parked = 10; return; }
     if (S.demo) inp = autopilot(dt);
     if (S.transit >= 0) inp = { thr: 1, steer: 0, up: 0, hand: false }; // through the ring: straight on, no hands
@@ -6088,7 +6089,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
   }
   function stepHighway(dt) {
     const c = S.car; let inp = readInput(); const user = inp.thr !== 0 || inp.steer !== 0;
-    if (active && user) { S.demo = false; S.idle = 0; } else { S.idle += dt; if (!active || S.idle > 9) S.demo = true; }
+    if (active && user) { S.demo = false; S.idle = 0; } else { S.idle += dt; if (!active || (S.idle > 9 && !demoBlocked())) S.demo = true; }
     const list = hwActive(), jam = S.jam && !S.jam.done;
     if (S.demo) {
       // pick the lane with the most room, only move over when it is clear alongside, brake for the car ahead
@@ -6454,7 +6455,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
       jsAnimations: function () { const P = PLC; if (!P || !P.jsa) return null; const q = P.jsa, J = q.JS; return { progress: J.p.slice(), target: J.tgt.slice(), scroll: J.P, mode: J.mode, bayT: J.bayT, maxStep: J.maxStep, draws: J.draws.slice(), entered: J.entered, size: q.size, canvas: q.canvas, facades: J.p.length, start: q.start, end: q.end, bay: q.bay, title: JS_TITLE.join(' '), tagline: JS_TAG, swish: AUD.played.swish || 0, card: JS_CARD.title }; },
       // the crosswalk arms of the loaded blocks (the ones a walker may cross by)
       zebras: function () { const out = []; if (world && world.blocks) world.blocks.forEach(function (B) { if (B.arms) B.arms.forEach(function (al, kc) { al.forEach(function (arm) { const z = cornerZebra(B, CORNERS[kc][0], CORNERS[kc][1], arm); out.push({ block: B.key, ax: z.ax, cx: z.cx, cz: z.cz, zc: z.zc }); }); }); }); return out; },
-      stops: function () { return STOPS.map(function (st) { return { id: st.id, x: st.x, z: st.z, active: st.active, arrived: st.cbArrive || 0, left: st.cbLeave || 0, mark: st.mark.visible, markK: st.mark.scale.x }; }); },
+      stops: function () { return STOPS.map(function (st) { return { id: st.id, x: st.x, z: st.z, h: st.h, y: st.y, pad: st.pad, era: S.era.id, visited: !!st.visited, active: st.active, arrived: st.cbArrive || 0, left: st.cbLeave || 0, mark: st.mark.visible, markK: st.mark.scale.x }; }); },
       addTestStop: function (x, z) { addStop(world.group, { id: 'teste', x: x === undefined ? 0 : x, z: z === undefined ? 30 : z, h: 0, card: TEST_CARD, onArrive: function (st) { st.cbArrive = (st.cbArrive || 0) + 1; }, onLeave: function (st) { st.cbLeave = (st.cbLeave || 0) + 1; } }); },
       testCard: function () { return TEST_CARD; }, showCard: showCard, hideCard: hideCard, toast: toast,
       // every card of the places that are kept (the qa picks the longest for the HUD scenes of the small screens)
