@@ -76,6 +76,8 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
 .shot.on { display: flex; } .shot img { max-width: 100%; max-height: 80%; border: 1px solid var(--line); } .shot p { margin: 0; font-family: var(--font-mono); font-size: 0.8rem; color: var(--muted); }
 .finale { position: absolute; z-index: 6; left: 50%; bottom: calc(10% + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); width: min(640px, 92vw); padding: 18px 22px; display: none; flex-direction: column; gap: 8px; text-align: center; background: rgba(11, 8, 20, 0.82); border: 1px solid var(--line); border-top: 2px solid var(--sun); }
 .finale.on { display: flex; }
+.finale button.primary { color: #0d0a16; background: var(--ink); border-color: var(--ink); font-weight: 600; }
+.finale .back-in { margin: 0; font-size: 0.72rem; color: var(--muted, #9aa3c8); } .finale .back-in button { padding: 2px 8px; font-size: 0.72rem; }
 .finale h1 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: clamp(1.4rem, 4vw, 2.4rem); background: linear-gradient(180deg, var(--sun), #ff3ea5); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .finale p { margin: 0; color: var(--muted); }
 .finale .links { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; font-family: var(--font-mono); font-size: 0.85rem; }
@@ -243,7 +245,8 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     <p>De cadete a CTO em cinco eras. Vamos construir a próxima?</p>
     <div class="trip" id="trip" hidden><b>Sua viagem</b><div class="chips" id="tripChips"></div></div>
     <div class="links"><span class="mail" data-user="gutodidonato" data-domain="gmail.com"></span><a href="https://www.linkedin.com/in/luis-didonato-66746a250/" target="_blank" rel="noopener">LinkedIn</a><a href="https://github.com/gutodidonato" target="_blank" rel="noopener">GitHub</a><a class="garage-link" href="/pt">Voltar à garagem</a></div>
-    <div><button type="button" id="restart">Recomeçar a viagem</button></div>
+    <div class="end"><button type="button" id="toComputer" class="primary">Voltar ao computador</button> <button type="button" id="restart">Recomeçar a viagem</button></div>
+    <p class="back-in" id="backIn" hidden><span id="backInText"></span> · <button type="button" id="stay">ficar aqui</button></p>
   </div>
   <aside class="drawer" id="drawer" aria-label="Sobre o protótipo">
     <button type="button" class="close" id="drawerClose" aria-label="Fechar">✕</button>
@@ -938,6 +941,19 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
   function colFrom(t, s, x, z, ry, kind, y) { const b = t.base, c = Math.cos(ry || 0), sn = Math.sin(ry || 0); const wx = x + (b.cx * c + b.cz * sn) * s, wz = z + (-b.cx * sn + b.cz * c) * s, y0 = y || 0, y1 = y0 + t.size.y * s; const o = kind === 'circle' ? addCircleCol(wx, wz, Math.max(0.18, Math.max(b.hx, b.hz) * s), y0, y1) : addBoxCol(wx, wz, Math.max(0.15, b.hx * s), Math.max(0.15, b.hz * s), ry || 0, y0, y1); o.name = t.name; return o; }
   // The legs of a gantry as drawn: on each side of its middle, the box of what the model has under 1.2 m (two 0.55 m circles
   // used to stand inside legs far wider, so the car hit air on one side and drove into the leg on the other).
+  // The legs of a pooled model as drawn, for an instance at (x, z) unturned at its fitted size: per quadrant around its middle,
+  // the box of what its template has under 1.2 m (cached on the pool).
+  function poolLegs(pool) {
+    if (pool.legs) return pool.legs;
+    const v = new THREE.Vector3(), bins = {}; pool.t.holder.updateMatrixWorld(true);
+    pool.t.holder.traverse(function (m) { if (!m.isMesh) return; const p = m.geometry.attributes.position; for (let i = 0; i < p.count; i++) { v.fromBufferAttribute(p, i).applyMatrix4(m.matrixWorld).multiplyScalar(pool.base); if (v.y > 1.2) continue; const k = (v.x < 0 ? 'w' : 'e') + (v.z < 0 ? 'n' : 's'), b = bins[k] || (bins[k] = [Infinity, -Infinity, Infinity, -Infinity]); b[0] = Math.min(b[0], v.x); b[1] = Math.max(b[1], v.x); b[2] = Math.min(b[2], v.z); b[3] = Math.max(b[3], v.z); } });
+    pool.legs = Object.keys(bins).map(function (k) { const b = bins[k]; return [(b[0] + b[1]) / 2, (b[2] + b[3]) / 2, Math.max(0.2, (b[1] - b[0]) / 2), Math.max(0.2, (b[3] - b[2]) / 2)]; });
+    return pool.legs;
+  }
+  // The monorail's support in the middle of block B collides where its legs are drawn (a 0.7 m circle used to stand between them).
+  function monorailLegs(B, pool) {
+    poolLegs(pool).forEach(function (L) { const o = addBoxCol(B.cx + L[0], B.cz + L[1], L[2], L[3], 0, 0, 11); o.name = 'pilar do monotrilho'; o.tag = 'monorail'; o.block = B.key; B.statics.push(o); });
+  }
   function gantryLegs(m) {
     m.updateMatrixWorld(true);
     const v = new THREE.Vector3(), mid = new THREE.Box3().setFromObject(m).getCenter(new THREE.Vector3()), sides = [[Infinity, -Infinity, Infinity, -Infinity], [Infinity, -Infinity, Infinity, -Infinity]];
@@ -2724,8 +2740,9 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
       bicicletario: { name: 'bicicletário', hx: 0.75, hz: 0.3, h: 0.9, cap: 120, parts: [{ geo: kitGeo([-0.6, -0.2, 0.2, 0.6].reduce(function (a, x) { return a.concat([[Bx(0.04, 0.04, 0.5), x, 0.8, 0], [Bx(0.04, 0.8, 0.04), x, 0.4, 0.25], [Bx(0.04, 0.8, 0.04), x, 0.4, -0.25]]); }, [])), mat: steel }] },
       placa: { name: 'placa de rua', r: 0.12, h: 2.7, cap: 480, parts: [
         { geo: kitGeo([[Cy(0.035, 0.04, 2.7, 6), 0, 1.35, 0]]), mat: metal },
-        { geo: kitGeo([[Pl(0.9, 0.22), 0.016, 2.5, 0, Math.PI / 2], [Pl(0.9, 0.22), -0.016, 2.5, 0, -Math.PI / 2]], uvPlate), mat: plate(), off: 'A' },
-        { geo: kitGeo([[Pl(0.9, 0.22), 0, 2.2, 0.016, 0], [Pl(0.9, 0.22), 0, 2.2, -0.016, Math.PI]], uvPlate), mat: plate(), off: 'B' }] },
+        // the two faces of each plate 5 cm off the pole's axis (the pole is 4 cm thick): at 1.6 cm the pole came through the middle of the name
+        { geo: kitGeo([[Pl(0.9, 0.22), 0.05, 2.5, 0, Math.PI / 2], [Pl(0.9, 0.22), -0.05, 2.5, 0, -Math.PI / 2]], uvPlate), mat: plate(), off: 'A' },
+        { geo: kitGeo([[Pl(0.9, 0.22), 0, 2.2, 0.05, 0], [Pl(0.9, 0.22), 0, 2.2, -0.05, Math.PI]], uvPlate), mat: plate(), off: 'B' }] },
       lens: { cap: 140, parts: [5.23, 4.78, 4.33].map(function (y, k) { return { geo: kitGeo([[new THREE.SphereGeometry(0.2, 8, 6), -0.68, y, 0], [new THREE.SphereGeometry(0.2, 8, 6), -0.23, y, 0]]), mat: lensMat[k] }; }) },
       semped: { name: 'semáforo de pedestre', r: 0.1, h: 2.6, cap: 900, parts: [{ geo: kitGeo([[Cy(0.045, 0.05, 2.5, 6), 0, 1.25, 0], [Bx(0.34, 0.5, 0.16), 0, 2.2, 0]]), mat: metal }, { geo: kitGeo([[Pl(0.26, 0.4), 0, 2.2, 0.085]]), mat: semMat }] },
       canteiro: { name: 'canteiro', cap: 800, parts: [{ geo: kitGeo([[Bx(1.2, 0.26, 1.2), 0, 0.13, 0, 0, 0x6a6272], [Bx(1.04, 0.03, 1.04), 0, 0.27, 0, 0, 0x2d2820]]), mat: std(0xffffff, { roughness: 0.9, vertexColors: true }) }] }
@@ -2924,7 +2941,8 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
       [-1, 1].forEach(function (sx) { [-1, 1].forEach(function (sz) {
         const x = B.cx + sx * LOT, z = B.cz + sz * LOT;
         if (skip && skip(sx, sz)) { B.R(); B.R(); return; }
-        if (era.style === 'hive') { const h = low ? 5 + B.R() * 3.5 : 8 + Math.pow(B.R(), 1.4) * 26, id = pools.hex.add(x, z, h, 5.0); if (id >= 0) { B.ids.push([pools.hex, id]); const o = addCircleCol(x, z, 4.85, 0, h); o.name = 'torre hexagonal'; o.block = B.key; B.statics.push(o); } return; }
+        // the monorail row has slimmer towers: at 5 m they came into the legs of the support in the middle of the block
+        if (era.style === 'hive') { const h = low ? 5 + B.R() * 3.5 : 8 + Math.pow(B.R(), 1.4) * 26, hr = B.j === -1 ? 3.6 : 5.0, id = pools.hex.add(x, z, h, hr); if (id >= 0) { B.ids.push([pools.hex, id]); const o = addCircleCol(x, z, hr - 0.15, 0, h); o.name = 'torre hexagonal'; o.block = B.key; B.statics.push(o); } return; }
         put(B, pools.bld[kinds[Math.floor(B.R() * kinds.length)]], x, z, [0, Math.PI / 2, Math.PI, -Math.PI / 2][Math.floor(B.R() * 4)], 1, 0, 'box');
       }); });
     }
@@ -3068,9 +3086,10 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     };
     if (era.style === 'hive') hiveBuild(BUILD, { era: era, deco: deco, decoModel: decoModel, pools: pools, rot: rot, faceRy: faceRy, SIDES: SIDES });
     function typed(B, forced) {
-      B.type = forced || blockTypeOf(era, B.i, B.j); B.signs = []; B.venues = []; B.vitrines = 0; B.lotsN = 0; B.spots = []; B.fronts = []; B.pacers = []; BUILD[B.type](B);
-      // the monorail row: every block of it holds the pillar of the track in its middle
-      if (era.style === 'hive' && B.j === -1) { put(B, pools.support, B.cx, B.cz, 0, 1, 0, null); const o = addCircleCol(B.cx, B.cz, 0.7, 0, 11); o.name = 'pilar do monotrilho'; o.tag = 'monorail'; o.block = B.key; B.statics.push(o); }
+      B.type = forced || blockTypeOf(era, B.i, B.j); B.signs = []; B.venues = []; B.vitrines = 0; B.lotsN = 0; B.spots = []; B.fronts = []; B.pacers = [];
+      // the monorail row: every block of it holds the pillar of the track in its middle, placed first so the towers keep off its legs
+      if (era.style === 'hive' && B.j === -1) { put(B, pools.support, B.cx, B.cz, 0, 1, 0, null); monorailLegs(B, pools.support); }
+      BUILD[B.type](B);
     }
     const HOOKS = { put: put, parked: parked, lots: lots, park: park, front: front, deco: deco, kit: kit, typed: typed, SN: SN, LOW: LOW, TALL: TALL, SHALLOW: SHALLOW };
     function build(i, j) {
@@ -4074,7 +4093,8 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
       const low = B.j === -1, e = hiveBridgeOf(era, B.i, B.j), w = hiveBridgeOf(era, B.i - 1, B.j);
       [-1, 1].forEach(function (sx) { [-1, 1].forEach(function (sz) {
         let h = low ? 5 + B.R() * 3.5 : 8 + Math.pow(B.R(), 1.4) * 26; if (!low && ((sx > 0 && e === sz) || (sx < 0 && w === sz))) h = Math.max(h, 16);
-        const x = B.cx + sx * LOT, z = B.cz + sz * LOT, id = pools.hex.add(x, z, h, 5.0); if (id >= 0) { B.ids.push([pools.hex, id]); solid(B, x, z, 4.85, 0, 0, h, 'torre hexagonal', true); B.lotsN++; }
+        // on the monorail row the towers are slimmer (3.6 m): at 5 m they came into the legs of the support in the middle of the block
+        const x = B.cx + sx * LOT, z = B.cz + sz * LOT, hr = low ? 3.6 : 5.0, id = pools.hex.add(x, z, h, hr); if (id >= 0) { B.ids.push([pools.hex, id]); solid(B, x, z, hr - 0.15, 0, 0, h, 'torre hexagonal', true); B.lotsN++; }
       }); });
       if (e) { const z = B.cz + e * LOT; if (deco(B, 'ponte', B.cx + 21, z, 0, 10.4)) { B.pacers.push({ pts: [[B.cx + 12.6, z + 0.55], [B.cx + 29.4, z + 0.55]], y: 11.0 }, { pts: [[B.cx + 29.4, z - 0.55], [B.cx + 12.6, z - 0.55]], y: 11.0 }); [16.4, 25.6].forEach(function (u, k) { B.spots.push({ x: B.cx + u, z: z + (k ? 0.9 : -0.9), h: plFacing(0, k ? 1 : -1), anim: k ? 'idle' : 'holding-both', y: 11.0, solid: true }); }); B.bridges = (B.bridges || 0) + 1; } }
     };
@@ -4277,7 +4297,8 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     const BC = plCan(JIRA_W, JIRA_H); function paint() { colJiraPaint(BC.c, JR); BC.tex.needsUpdate = true; JR.draws++; } paint();
     const board = plBoard(grp, BC.tex, 18.6, 5.4, X0 - 0.06, 5.9, cz, -Math.PI / 2); board.name = 'quadro-kanban'; board.userData.text = JIRA_COLS.join(' · ');
     grp.add(vBasic([[plBx(0.06, 3.0, 3.4), X0 - 0.04, 1.5, CZ, 0, 0xffc880], [plBx(0.14, 3.3, 0.18), X0 - 0.07, 1.65, CZ - 1.75, 0, 0x14100c], [plBx(0.14, 3.3, 0.18), X0 - 0.07, 1.65, CZ + 1.75, 0, 0x14100c], [plBx(0.14, 0.2, 3.7), X0 - 0.07, 3.2, CZ, 0, 0xffb347]]));
-    const sg = colSign('DOCA 1', 'entregas · Jira', 512, 128, COL_GREEN); const sgm = plBoard(grp, sg, 3.4, 0.85, X0 - 0.08, 3.55, CZ, -Math.PI / 2); sgm.name = 'letreiro-da-doca'; sgm.userData.text = 'DOCA 1';
+    // over the door frame's top bar (3.1-3.3 m, 6 cm proud of the wall): at 3.55 the bar hid "entregas · Jira"
+    const sg = colSign('DOCA 1', 'entregas · Jira', 512, 128, COL_GREEN); const sgm = plBoard(grp, sg, 3.4, 0.85, X0 - 0.08, 3.8, CZ, -Math.PI / 2); sgm.name = 'letreiro-da-doca'; sgm.userData.text = 'DOCA 1';
     // the dock: the slab with its yellow edge, the conveyor over it into the door (its belt with lit rollers), the mark of the drop
     const roll = canvasTex(64, 64, function (c, w, h) { c.fillStyle = '#1a1612'; c.fillRect(0, 0, w, h); for (let x = 4; x < w; x += 12) { c.fillStyle = '#6a5a48'; c.fillRect(x, 0, 6, h); c.fillStyle = '#ffb347'; c.fillRect(x + 2, 0, 2, h); } }); roll.wrapS = roll.wrapT = THREE.RepeatWrapping; roll.repeat.set(7, 1);
     grp.add(new THREE.Mesh(kitGeo([[plBx(DX1 - DX0, DY, DZ1 - DZ0), (DX0 + DX1) / 2, DY / 2, (DZ0 + DZ1) / 2, 0, 0x7a6e60], [plBx(0.3, 0.5, DZ1 - DZ0 - 0.4), DX0 + 0.15, DY + 0.25, (DZ0 + DZ1) / 2, 0, 0x2b2420], [plBx(0.18, 1.0, 0.18), DX0 + 0.3, 0.5, DZ0 + 0.2, 0, 0x14100c], [plBx(0.18, 1.0, 0.18), DX0 + 0.3, 0.5, DZ1 - 0.2, 0, 0x14100c]]), K.propMat));
@@ -4391,7 +4412,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     const follow = buildRoadGrid(g, era);
     const special = {};
     const avenueSide = function (sd) { return sd.dx !== 0; };   // district blocks keep the avenue curbs free for screens and the radar
-    for (let j = -3; j <= 2; j++) { special['0,' + j] = special['0,' + j] || function (B, h) { h.lots ? (era.style === 'hive' ? h.lots(B, null, j === -1) : h.lots(B, era.life ? SITE_KINDS : TOWER_KINDS)) : 0; if (era.style === 'hive' && j === -1) { const o = addCircleCol(B.cx, B.cz, 0.7, 0, 11); o.name = 'pilar do monotrilho'; o.tag = 'monorail'; B.statics.push(o); const id = pools.support.add(B.cx, B.cz, 0, 1, 0); B.ids.push([pools.support, id]); } return { skipSide: avenueSide, curbGaps: j === -3 ? [{ x0: -7.2, x1: 7.2, z0: CITY_GATE_Z - 0.62, z1: CITY_GATE_Z + 0.62 }] : undefined }; }; special['-1,' + j] = special['-1,' + j] || special['0,' + j]; }
+    for (let j = -3; j <= 2; j++) { special['0,' + j] = special['0,' + j] || function (B, h) { if (era.style === 'hive' && j === -1) { monorailLegs(B, pools.support); const id = pools.support.add(B.cx, B.cz, 0, 1, 0); B.ids.push([pools.support, id]); } h.lots ? (era.style === 'hive' ? h.lots(B, null, j === -1) : h.lots(B, era.life ? SITE_KINDS : TOWER_KINDS)) : 0; return { skipSide: avenueSide, curbGaps: j === -3 ? [{ x0: -7.2, x1: 7.2, z0: CITY_GATE_Z - 0.62, z1: CITY_GATE_Z + 0.62 }] : undefined }; }; special['-1,' + j] = special['-1,' + j] || special['0,' + j]; }
     function reserveLot(key, sx, sz) {
       const ij = key.split(',').map(Number), prev = special[key];
       special[key] = function (B, h) { h.lots(B, era.style === 'hive' ? null : (era.life ? SITE_KINDS : TOWER_KINDS), era.style === 'hive' && ij[1] === -1, function (lx, lz) { return lx === sx && lz === sz; }); return prev ? prev(B, { lots: function () {} }) : { skipSide: avenueSide }; };
@@ -5330,7 +5351,8 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     if (showroom) { const s = showroom.clone(true); g.add(s); }
     else { getShowroom().then(function (sc) { if (S.era.id === 'final') { const s = sc.clone(true); world.group.add(s); fitShowroom(s); } }); }
     g.children.forEach(fitShowroom);
-    upd.push(function (dt, t) { S.finaleT += dt; if (!active && S.finaleT > 16) restart(); });
+    // the end goes back to the computer of the garage (the site's home) after BACK_S, unless the visitor chooses to stay
+    upd.push(function (dt) { S.finaleT += dt; finaleCountdown(); });
     return { group: g, screens: [], updates: upd, ramps: [], finale: true, spawn: { x: 0, z: 0 }, mission: '', waypoints: [] };
   }
   // The original presentation scene at native scale, shifted so its DeLorean (centered near x 3, z -0.7, wheels at y -0.7) sits on the origin.
@@ -5963,8 +5985,18 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     if (S.era.id === 'redbit') startJam();
     else toast(next.id === 'final' ? 'Último salto: de volta a hoje' : 'Destino ' + next.date + ' · acelere até 88', 2.4);
   }
-  function restart() { S.lastDate = S.era.date; $('finale').classList.remove('on'); S.trip = tripNew(); tripRender(); S.plu = 0; $('plu').textContent = '☢ 0/25'; enterEra(0); }
+  function restart() { S.lastDate = S.era.date; $('finale').classList.remove('on'); S.trip = tripNew(); tripRender(); S.plu = 0; $('plu').textContent = '☢ 0/25'; S.stayFinale = false; $('backIn').hidden = true; enterEra(0); }
   $('restart').addEventListener('click', function () { restart(); });
+  // the way back to the garage's computer: the button, and the count at the end of the trip (20 s, "ficar aqui" stops it)
+  const BACK_S = 20;
+  function toComputer() { if (S.leaving) return; S.leaving = true; location.assign('/' + GAME_LANG); }
+  function finaleCountdown() {
+    const box = $('backIn'); if (S.stayFinale || S.leaving) { box.hidden = true; return; }
+    const left = Math.max(0, Math.ceil(BACK_S - S.finaleT)); box.hidden = false; $('backInText').textContent = left ? 'Voltando ao computador em ' + left + ' s' : 'Voltando ao computador…';
+    if (S.finaleT >= BACK_S) toComputer();
+  }
+  $('toComputer').addEventListener('click', toComputer);
+  $('stay').addEventListener('click', function () { S.stayFinale = true; $('backIn').hidden = true; });
 
   /* ------------------------------------------------ driving ------------------------------------------------ */
   function autopilot(dt) {
@@ -6127,7 +6159,9 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     if (S.mode === 'highway') { const mph = S.hwSpeed * 2.2; camera.fov = lerp(camera.fov, 56 + clamp((mph - 30) / 58, 0, 1) * 24, 0.08); camera.updateProjectionMatrix(); target = new THREE.Vector3(c.x * 0.7, 2.4 + z * 0.6, 7.5 + z * 2 - clamp(mph / 88, 0, 1) * 1.5); look = new THREE.Vector3(c.x * 0.5, 1.2, -14); }
     else if (world && world.finale) { camera.fov = lerp(camera.fov, 45, 0.05); camera.updateProjectionMatrix(); orbitA += dt * 0.16; const r = 14.5 * z; target = new THREE.Vector3(Math.cos(orbitA) * r, 1.4 + 2.6 * z, Math.sin(orbitA) * r); look = new THREE.Vector3(0, -1.3, 0); }
     else { camera.fov = S.transit >= 0 ? 58 + 37 * (1 - Math.pow(1 - clamp((S.transit - 0.15) / 0.8, 0, 1), 2)) : lerp(camera.fov, 58, 0.08); camera.updateProjectionMatrix();
-      if (S.parked > 1.2) { orbitA += dt * 0.35; const r = 8.5 * zh; target = new THREE.Vector3(c.x + Math.cos(orbitA) * r, c.y + 2.6 * zv, c.z + Math.sin(orbitA) * r); look = new THREE.Vector3(c.x, c.y + 1, c.z); }
+      // parked (on a stop or anywhere): the camera holds still behind the car, lower and closer on a stop. It used to circle the car,
+      // and every pass behind a wall or a screen pulled it in, up and down.
+      if (S.parked > 1.2) { orbitA = camYaw + Math.PI / 2; const back = 8.5 * zh, high = 3.6 * zv; target = new THREE.Vector3(c.x + Math.sin(camYaw) * back, c.y + high, c.z + Math.cos(camYaw) * back); look = new THREE.Vector3(c.x - Math.sin(camYaw) * 6, c.y + 1, c.z - Math.cos(camYaw) * 6); }
       else { camYaw += wrap(c.h - camYaw) * (1 - Math.pow(0.08, dt)); orbitA = camYaw + Math.PI / 2; const back = 8.5 * zh, high = 3.6 * zv, ahead = 6 + clamp(Math.abs(c.speed), 0, 30) * 0.35; target = new THREE.Vector3(c.x + Math.sin(camYaw) * back, c.y + high, c.z + Math.cos(camYaw) * back); look = new THREE.Vector3(c.x - Math.sin(camYaw) * ahead, c.y + 1.4 + (world.flight ? c.vy * 0.35 : 0), c.z - Math.cos(camYaw) * ahead); } }
     const clearCam = S.mode === 'world' && !S.photo && !world.finale; if (clearCam) pullIn(target, c);
     camPos.lerp(target, k); if (clearCam) pullIn(camPos, c); camLook.lerp(look, k); camera.position.copy(camPos);
