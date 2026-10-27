@@ -5921,6 +5921,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
   }
   function openKiosk(st) {
     const d = KIOSK_DATA.KIOSK[st.id] || { head: null, period: null, bullets: [], cases: [], video: null, highlight: true }, card = st.card || { title: '', period: '', text: '' }, L = KIOSK_DATA.LABELS;
+    if (S.tour && S.tour.target === st) tourStop('arrived');
     KS.open = true; KS.st = st; KS.t = 0; KS.armed = false; kioskFrame();
     if (!st.visited) { st.visited = true; st.mark.children[1].material.color.lerp(new THREE.Color(0x555566), 0.6); } // a stop seen: its pointer greys
     $('kTitle').textContent = d.head || card.title; $('kPer').textContent = d.period || card.period || '';
@@ -5936,12 +5937,72 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     if (!KS.open) return; KS.open = false;
     const el = $('kiosk'), refocus = el.contains(document.activeElement); el.hidden = true; stage.classList.remove('kiosk-open'); $('kVid').pause();
     if (refocus) canvas.focus({ preventScroll: true });
-    // 'next' goes on to the next stop (the guided tour); until it exists it gives the wheel back like 'drive'
+    if (how === 'next') tourStart();
   }
   $('kNext').addEventListener('click', function () { closeKiosk('next'); });
   $('kDrive').addEventListener('click', function () { closeKiosk('drive'); });
   $('kVid').addEventListener('click', function () { const v = $('kVid'); v.muted = !v.muted; }); // a tap turns the sound on
   $('kVid').addEventListener('error', function () { $('kVid').hidden = true; }); // a video that fails leaves no hole
+  /* ------------------------------------------------ the guided tour ------------------------------------------------ */
+  // "Próxima parada": the car drives itself to the next stop of the era (in the order the era's route passes them), parks in the bay
+  // and the kiosk opens there; after the last stop it drives through the portal and goes on to the first stop of the next era, until the
+  // showroom. The route's own points lead it (those between the car and the stop), then the bay's entrance on the road and the bay. On a deck in a flight era (the Colmeia's helipad, the EVIG's pads) it comes to 6 m over the deck and goes down
+  // as the player does with Q (the pads' landing assist does the rest). A driving key takes the wheel back; a leg longer than
+  // TOUR.limit (90 s) stops it with a word, the car stuck somewhere.
+  const TOUR = { limit: 90 };
+  function tourEntry(st) { return { x: st.x + Math.sin(st.h) * 8, z: st.z + Math.cos(st.h) * 8 }; }
+  function tourDeck(st) { return world.flight && st.y !== undefined; }
+  // the route as the demo drives it, from where the car comes into the era (its spawn) through the era's points
+  function tourLine() { return [{ x: world.spawn.x, z: world.spawn.z }].concat(world.waypoints || []); }
+  // where (x, z) meets that route: the segment i (L[i] to L[i + 1]), the point on it, how far along the route (s) and how far off (d);
+  // of two stretches equally near (a loop that comes back down the same avenue) the first one, the one the car meets first
+  function tourProj(x, z) {
+    const L = tourLine(); let best = { i: 0, s: 0, x: L[0].x, z: L[0].z, d: Math.hypot(x - L[0].x, z - L[0].z) }, acc = 0;
+    for (let i = 0; i + 1 < L.length; i++) {
+      const a = L[i], b = L[i + 1], ux = b.x - a.x, uz = b.z - a.z, len = Math.hypot(ux, uz) || 1e-6, t = clamp(((x - a.x) * ux + (z - a.z) * uz) / (len * len), 0, 1);
+      const px = a.x + ux * t, pz = a.z + uz * t, d = Math.hypot(x - px, z - pz);
+      if (d < best.d - 0.01) best = { i: i, s: acc + t * len, x: px, z: pz, d: d };
+      acc += len;
+    }
+    return best;
+  }
+  // a bay's way in: its entrance 8 m behind it, brought onto the road (the lane next to the route, 2.6 m off it towards the bay) so the
+  // car turns in from the street instead of driving down the sidewalk
+  function tourRoad(st) { const e = tourEntry(st), q = tourProj(e.x, e.z), k = q.d > 2.6 ? 2.6 / q.d : 1; return { x: q.x + (e.x - q.x) * k, z: q.z + (e.z - q.z) * k }; }
+  function tourAt(st) { if (st.ts === undefined) { const e = tourDeck(st) ? st : tourRoad(st), q = tourProj(e.x, e.z); st.ts = q.s; st.ti = q.i; } return st; }
+  // the era's stops in the order the car meets them along the route
+  function tourOrder() { return STOPS.filter(function (st) { return st.id !== 'teste'; }).map(tourAt).sort(function (a, b) { return a.ts - b.ts; }); }
+  function wpCopy(w) { return { x: w.x, z: w.z, y: w.y, r: w.r, v: w.v }; } // the route's dwells (the demo's pauses) are not the tour's
+  function tourGo(target) {
+    const L = tourLine(), c = S.car, from = tourProj(c.x, c.z), wps = [];
+    // out of a bay off the road (on a sidewalk): first onto the lane on that side, 10 m on along the route, not down the sidewalk
+    if (!world.flight && from.d > 3) {
+      const b = L[Math.min(from.i + 1, L.length - 1)], rem = Math.hypot(b.x - from.x, b.z - from.z), k = rem > 0.01 ? Math.min(10, rem) / rem : 0, n = 2.6 / from.d;
+      wps.push({ x: from.x + (b.x - from.x) * k + (c.x - from.x) * n, z: from.z + (b.z - from.z) * k + (c.z - from.z) * n, r: 3, v: 6 });
+    }
+    // the route's points between the car and the target (none when the target is behind the car: straight to it)
+    const upto = target === 'portal' ? L.length - 1 : tourAt(target).ti;
+    for (let i = from.i + 1; i <= upto; i++) wps.push(wpCopy(L[i]));
+    if (target === 'portal') {
+      const pt = world.portal3; if (!pt) { tourStop('arrived'); return; }
+      const yy = world.flight ? pt.y - 0.6 : undefined; // through the ring's centre, nose first towards -z
+      wps.push({ x: pt.x, z: pt.z + 14, y: yy, r: 3, v: 14 }, { x: pt.x, z: pt.z - 30, y: yy, r: 3, v: 14 });
+    } else if (tourDeck(target)) wps.push({ x: target.x, z: target.z, y: target.y + 6, r: 2, v: 6, land: true });
+    else { const e = tourRoad(target); wps.push({ x: e.x, z: e.z, r: 2.5, v: 6 }, { x: target.x, z: target.z, r: 1.2, v: 3, dwell: 999 }); }
+    S.tour = { target: target, wps: wps, wp: 0, dwell: 0, leg: 0, phase: 'drive' }; S.unstick = 0; S.stuck = 0;
+  }
+  function tourStart() { const order = tourOrder(), i = KS.st ? order.indexOf(KS.st) : -1; tourGo(order[i + 1] || 'portal'); }
+  function tourStop(reason) { if (!S.tour) return; S.tour = null; if (reason === 'stuck') toast('Tour pausado: siga dirigindo até a próxima parada', 3); }
+  // a new era with the tour on: its first stop (the showroom ends it)
+  function tourEra() { if (!S.tour) return; if (world.finale) { tourStop('arrived'); return; } const o = tourOrder(); tourGo(o[0] || 'portal'); }
+  function tourInput(dt) {
+    const T = S.tour, c = S.car; T.leg += dt;
+    if (T.leg > TOUR.limit) { tourStop('stuck'); return { thr: 0, steer: 0, up: 0, hand: false }; }
+    const last = T.wps[T.wps.length - 1];
+    if (T.phase === 'drive' && last && last.land && T.wp >= T.wps.length - 1 && Math.hypot(c.x - last.x, c.z - last.z) < 3) T.phase = 'land';
+    if (T.phase === 'land') return { thr: 0, steer: 0, up: -1, hand: false };
+    return autopilot(dt);
+  }
   // no allocation per frame (a loop over a handful of stops)
   function updateStops(dt) {
     const c = S.car; let any = false; if (cardTtl > 0) { cardTtl -= dt; if (cardTtl <= 0) hideCard(); }
@@ -5965,7 +6026,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
   const LAND = { st: null, landed: false, t: 0, hint: false };
   // The attract-mode demo never takes the wheel from a player who stopped on purpose: on a stop (a bay or a pad), landed. It used to
   // after 9 s without a key, and the car drove off in the middle of the card ("fica rodando"); a few scenes held it 5 to 30 s.
-  function demoBlocked() { if (LAND.landed || KS.open) return true; for (let i = 0; i < STOPS.length; i++) if (STOPS[i].active) return true; return false; }
+  function demoBlocked() { if (LAND.landed || KS.open || S.tour) return true; for (let i = 0; i < STOPS.length; i++) if (STOPS[i].active) return true; return false; }
   function landAssist(c, inp, dt) {
     const L = LAND;
     if (S.demo || S.transit >= 0) { L.st = null; L.landed = false; return false; }
@@ -6033,6 +6094,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     toast(S.era.id === 'final' ? 'Hoje · ' + S.era.role : S.era.date + ' · ' + S.era.name, 3);
     // the flight hint follows the arrival title once it has faded (game time, so a paused game does not pile one on the other)
     S.toastQ = world.flight ? { at: S.t + 3.4, msg: S.era.flight === 'wings' ? 'Asas abertas: integrações por cima do trânsito' : 'Modo nave: pra onde vamos, não precisamos de estradas', secs: 2.8 } : null;
+    tourEra();
   }
   /* ------------------------------------------------ the passage through the time portal ------------------------------------------------ */
   // P7: a white flash (0.15 s), then a 0.8 s tunnel. The field of view opens from 58 to 95 degrees (updateCamera), light streaks run past in the destination's colours (lines, additive,
@@ -6102,16 +6164,17 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
 
   /* ------------------------------------------------ driving ------------------------------------------------ */
   function autopilot(dt) {
-    const c = S.car, wps = world.waypoints; if (!wps.length) return { thr: 0, steer: 0, up: 0 }; const w = wps[Math.min(S.wp, wps.length - 1)];
+    // the guided tour drives its own list (Q.wp, Q.dwell)
+    const c = S.car, Q = S.tour || S, wps = S.tour ? S.tour.wps : world.waypoints; if (!wps.length) return { thr: 0, steer: 0, up: 0 }; const w = wps[Math.min(Q.wp, wps.length - 1)];
     const up = w.y !== undefined ? clamp((w.y - c.y) * 0.45, -1, 1) : 0;
-    if (S.dwell > 0) { S.dwell -= dt; if (S.dwell <= 0) S.wp++; return { thr: c.speed > 0.5 ? -1 : 0, steer: 0, up: up }; }
+    if (Q.dwell > 0) { Q.dwell -= dt; if (Q.dwell <= 0) Q.wp++; return { thr: c.speed > 0.5 ? -1 : 0, steer: 0, up: up }; }
     const dx = w.x - c.x, dz = w.z - c.z, dist = Math.hypot(dx, dz), diff = wrap(Math.atan2(-dx, -dz) - c.h);
     // Wedged against a wall: back off while turning toward the target, then carry on.
     if (S.unstick > 0) { S.unstick -= dt; return { thr: -1, steer: -clamp(diff * 2.4, -1, 1), up: up }; }
     if (Math.abs(c.speed) < 1 && !S.pedHold) { S.stuck += dt; if (S.stuck > 1.2) { S.stuck = 0; S.unstick = 0.9; } } else S.stuck = 0;
-    const nw = wps[S.wp + 1]; const passed = !w.dwell && nw && dist < 8 && (c.x - w.x) * (nw.x - w.x) + (c.z - w.z) * (nw.z - w.z) > 0;
-    if (dist < (w.r || 4) || passed) { if (w.dwell) { S.dwell = w.dwell; return { thr: -1, steer: 0, up: up }; } S.wp++; }
-    let vt = Math.min(24, Math.sqrt(2 * 16 * Math.max(0, dist - 1)) + (w.dwell ? 0 : 8), dist < 14 && S.wp < wps.length - 1 ? 13 : 99, w.v || 99); if (w.y !== undefined && Math.abs(w.y - c.y) > 3) vt = Math.min(vt, 10);
+    const nw = wps[Q.wp + 1]; const passed = !w.dwell && nw && dist < 8 && (c.x - w.x) * (nw.x - w.x) + (c.z - w.z) * (nw.z - w.z) > 0;
+    if (dist < (w.r || 4) || passed) { if (w.dwell) { Q.dwell = w.dwell; return { thr: -1, steer: 0, up: up }; } Q.wp++; }
+    let vt = Math.min(24, Math.sqrt(2 * 16 * Math.max(0, dist - 1)) + (w.dwell ? 0 : 8), dist < 14 && Q.wp < wps.length - 1 ? 13 : 99, w.v || 99); if (w.y !== undefined && Math.abs(w.y - c.y) > 3) vt = Math.min(vt, 10);
     // brake for whatever is right ahead (traffic waiting, a parked car)
     const fx = -Math.sin(c.h), fz = -Math.cos(c.h); for (let i = 0; i < DYN.length; i++) { const o = DYN[i]; if (o.prop || (world.flight ? Math.abs(o.y - c.y) > 2 : o.flying)) continue; if ((o.lane || o.path) && !o.awake && -Math.sin(o.h) * fx - Math.cos(o.h) * fz < -0.3) continue; /* oncoming traffic yields to us */ const ax = o.x - c.x, az = o.z - c.z, ah = ax * fx + az * fz; if (ah > 0 && ah < 12 && Math.abs(ax * fz - az * fx) < 2.1) vt = Math.min(vt, Math.max(0, (ah - 5) * 1.6)); }
     let thr = clamp((vt - c.speed) / 4, -1, 1); if (Math.abs(diff) > 1.3) thr = Math.min(thr, 0.35);
@@ -6125,7 +6188,8 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     if (KS.open) { if (!user) KS.armed = true; else if (KS.armed) closeKiosk('drive'); }
     if (active && user) { S.demo = false; S.idle = 0; } else { S.idle += dt; if (!active || (S.idle > 9 && !demoBlocked())) S.demo = true; }
     if (world.finale) { S.parked = 10; return; }
-    if (S.demo) inp = autopilot(dt);
+    if (S.tour) { if (active && user) tourStop('user'); else inp = tourInput(dt); }
+    else if (S.demo) inp = autopilot(dt);
     if (S.transit >= 0) inp = { thr: 1, steer: 0, up: 0, hand: false }; // through the ring: straight on, no hands
     // someone on a zebra in the way the car travels: it cuts the throttle and brakes by itself, stopping 3.7 m short (8 m trigger at 12 m/s, growing with the speed: at the 46 m/s^2 the brake can give, 27 m/s needs 12.8 m and 32 m/s 16.5 m)
     S.pedHold = false; if (CROWD.on && c.y < 1.5) { const dir = c.speed < -0.3 || (c.speed < 0.3 && inp.thr < 0) ? -1 : 1, pg = pedAhead(c, dir), trig = 8 + Math.max(0, c.speed * c.speed / 80 - 4.3);
@@ -6169,8 +6233,9 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
   function stepHighway(dt) {
     const c = S.car; let inp = readInput(); const user = inp.thr !== 0 || inp.steer !== 0;
     if (active && user) { S.demo = false; S.idle = 0; } else { S.idle += dt; if (!active || (S.idle > 9 && !demoBlocked())) S.demo = true; }
+    if (S.tour && active && user) tourStop('user');
     const list = hwActive(), jam = S.jam && !S.jam.done;
-    if (S.demo) {
+    if (S.demo || S.tour) {
       // pick the lane with the most room, only move over when it is clear alongside, brake for the car ahead
       let best = S.hwX, bestGap = -1;
       LANES.forEach(function (ln) { let gap = 999; list.forEach(function (k) { if (k.kind !== 'moto' && Math.abs(k.x - ln) < 2 && k.z < 3 && k.z > -90) gap = Math.min(gap, -k.z); }); if (gap > bestGap + 4 || (Math.abs(gap - bestGap) <= 4 && Math.abs(ln - S.hwX) < Math.abs(best - S.hwX))) { bestGap = gap; best = ln; } });
@@ -6538,6 +6603,8 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
       // the crosswalk arms of the loaded blocks (the ones a walker may cross by)
       zebras: function () { const out = []; if (world && world.blocks) world.blocks.forEach(function (B) { if (B.arms) B.arms.forEach(function (al, kc) { al.forEach(function (arm) { const z = cornerZebra(B, CORNERS[kc][0], CORNERS[kc][1], arm); out.push({ block: B.key, ax: z.ax, cx: z.cx, cz: z.cz, zc: z.zc }); }); }); }); return out; },
       kiosk: function () { if (!KS.st) return { open: false }; const d = KIOSK_DATA.KIOSK[KS.st.id] || {}; return { open: KS.open, stop: KS.st.id, title: $('kTitle').textContent, period: $('kPer').textContent, lead: $('kLead').textContent, bullets: Array.from($('kList').children).map(function (li) { return li.textContent; }), cases: (d.cases || []).slice(), video: d.video || null, focus: document.activeElement ? document.activeElement.id : '', look: [KS.look.x, KS.look.y, KS.look.z], camPos: [KS.pos.x, KS.pos.y, KS.pos.z] }; },
+      tour: function () { const T = S.tour; return { on: !!T, target: T ? (T.target === 'portal' ? 'portal' : T.target.id) : null, phase: T ? T.phase : null, leg: T ? T.leg : 0, order: tourOrder().map(function (st) { return st.id; }) }; },
+      tourLimit: function (s) { TOUR.limit = s; },
       queueCard: function (title) { queueLineCard({ title: title, period: '', text: '', values: [] }, 7, 25); },
       stops: function () { return STOPS.map(function (st) { return { id: st.id, x: st.x, z: st.z, h: st.h, y: st.y, pad: st.pad, era: S.era.id, visited: !!st.visited, active: st.active, arrived: st.cbArrive || 0, left: st.cbLeave || 0, mark: st.mark.visible, markK: st.mark.scale.x }; }); },
       addTestStop: function (x, z) { addStop(world.group, { id: 'teste', x: x === undefined ? 0 : x, z: z === undefined ? 30 : z, h: 0, card: TEST_CARD, onArrive: function (st) { st.cbArrive = (st.cbArrive || 0) + 1; }, onLeave: function (st) { st.cbLeave = (st.cbLeave || 0) + 1; } }); },
