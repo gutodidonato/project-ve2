@@ -1413,7 +1413,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
       D.stepT += dt; while (D.stepT >= stepP) { D.stepT -= stepP; stepClick(sndP.set(D.cx, 1, D.cz), 0.75, 'passo'); if (d.phase === 'desfile') snare(sndP.set(D.cx, 1, D.cz), 0.5); }
     }
     upd.push(drillTick);
-    addStop(g, { id: 'patio', x: -2.5, z: 40, h: 0, card: PATIO_CARD, onArrive: drillStart, onLeave: drillCancel });
+    addStop(g, { id: 'patio', x: -2.5, z: 40, h: 0, kiosk: { cam: KS_CAM_ROAD }, card: PATIO_CARD, onArrive: drillStart, onLeave: drillCancel });
   }
 
   /* ------------------------------------------------ the pavilion of classes and the dormitory (C3) ------------------------------------------------ */
@@ -1634,7 +1634,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     const A = AMANI = { phase: 'idle', t: 0, company: company, guards: guards, cmd: cmd, blades: blades };
     function command(text) { say(cmd, text, { style: 'command' }); }
     function salute(on) { company.forEach(function (p) { if (on) { p.attention(false); p.play('holding-both', 0.15, 0); } else { p.play('idle', 0.15); p.attention(true); } }); setBlades(on); }
-    addStop(g, { id: 'aman', x: 2.5, z: CZ, h: 0, card: ESPADIM_CARD,
+    addStop(g, { id: 'aman', x: 2.5, z: CZ, h: 0, kiosk: { cam: KS_CAM_ROAD_BACK }, card: ESPADIM_CARD,
       onArrive: function () { A.phase = 'ordem'; A.t = 0; command('Companhia! Apresentar... espadim!'); },
       onLeave: function () { if (A.phase !== 'idle') { salute(false); A.phase = 'idle'; A.t = 0; } } });
     upd.push(function (dt) {
@@ -1871,7 +1871,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
       if (st === 'launching') { reset(); startLaunch(); B.t = BR_T.run + BR_T.lift; pose(B.t); return true; }
       return false;
     };
-    const stop = addStop(g, { id: 'pontoneiro', x: CX + 0.3, z: TR.z + 6.1, h: 0, card: BRECHA_CARD, onArrive: function () { if (B.state === 'folded') startLaunch(); } });
+    const stop = addStop(g, { id: 'pontoneiro', x: CX + 0.3, z: TR.z + 6.1, h: 0, kiosk: { cam: KS_CAM_ROAD }, card: BRECHA_CARD, onArrive: function () { if (B.state === 'folded') startLaunch(); } });
     upd.push(function (dt) {
       if (B.state === 'launching') {
         const t0 = B.t; B.t += dt; pose(B.t);
@@ -1955,7 +1955,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
       K.state = 'following'; K.crossed = 0; K.idle = 0; cmdT = 0; list.forEach(function (v) { v.crossed = false; v.side = 0; v.stuck = 0; });
       seedTrail(); setMission(missionText()); toast('Você assumiu o comando do comboio', 2);
     }
-    const stop = addStop(g, { id: 'comando', x: 41, z: 25, h: Math.PI / 2, card: CONVOY_CARD, onArrive: start });
+    const stop = addStop(g, { id: 'comando', x: 41, z: 25, h: Math.PI / 2, kiosk: { cam: KS_CAM_ROAD_BACK }, card: CONVOY_CARD, onArrive: start });
     // the trail begins as the column's own line, tail to lead (the tail's slot is its first crumb, so a vehicle's distance along the trail is its distance from the tail): every vehicle is already on it, at its slot. The column
     // holds until the car is PULL metres from the bay; then the way out is laid, a smooth curve (cubic) from the lead's nose (heading +z) to where the car is, in the direction the car is going, and from there on the trail is the
     // car's own. Whichever way the car drives, nobody has to be fetched and nobody follows the first metres of the car's trail (a U-turn at the bay is cut off).
@@ -3286,7 +3286,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
       const P = [[Bx(1.4, 0.1, 0.1), bx0 - 0.7, 4.3, cz + 8.8, 0, 0x2a2734], [Bx(1.4, 0.1, 0.1), bx0 - 0.7, 13.1, cz + 8.8, 0, 0x2a2734], [Bx(0.1, 0.12, bw), bx0 - 0.05, 7.05, cz, 0, 0x1a1c26], [Bx(2.8, 0.12, 2.2), bx0 - 1.4, 3.9, bz, 0, 0x1a1c26]];
       grp.add(new THREE.Mesh(kitGeo(P), propMat));
       PL.redbit = { group: grp, block: '0,1', cx: cx, cz: cz, floors: 4, glass: glass, glassFloors: 2, interior: true, neon: neon, bay: { x: cx - 12.25, z: bz } };
-      addStop(g, { id: 'redbit', x: cx - 12.25, z: bz, h: 0, card: REDBIT_CARD, onArrive: function () { const rd = PL.radar && PL.radar.rd; if (!rd || rd.best === null) setMission(MISSION_RADAR); /* a radar already optimised keeps its own mission line */ } });
+      addStop(g, { id: 'redbit', x: cx - 12.25, z: bz, h: 0, kiosk: { cam: KS_CAM_ROAD }, card: REDBIT_CARD, onArrive: function () { const rd = PL.radar && PL.radar.rd; if (!rd || rd.best === null) setMission(MISSION_RADAR); /* a radar already optimised keeps its own mission line */ } });
       special['0,1'] = function (B, h) {
         B.type = 'redbit'; B.signs = []; B.venues = []; B.vitrines = 0; B.lotsN = 2; B.spots = []; B.fronts = [];
         plCol(B, (bx0 + bx1) / 2, cz, (bx1 - bx0) / 2, bw / 2, 0, 0, FH, 'escritório da RedBit');
@@ -3576,7 +3576,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     });
     grp.add(new THREE.Mesh(kitGeo(parts), K.propMat));
     // the bay on the avenue's sidewalk, at the middle of the block
-    JS.stop = addStop(g, { id: 'animacoes', x: CX - 12.25, z: BZ, h: 0, card: JS_CARD });
+    JS.stop = addStop(g, { id: 'animacoes', x: CX - 12.25, z: BZ, h: 0, kiosk: { cam: KS_CAM_ROAD }, card: JS_CARD });
     let swishAt = -9; const swish = function () { if (!plSnd('swish')) return; plNoise('bandpass', 700, 2400, 1.2, 0.16, 0.26); };
     K.upd.push(function (dt) {
       const c = S.car;
@@ -3743,7 +3743,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     // the studio's own light spills out onto the sidewalk
     const spill = new THREE.Sprite(new THREE.SpriteMaterial({ map: softDot, color: 0x6fd8ff, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0.12, fog: false })); spill.position.set(X1 + 2.4, 1.6, cz); spill.scale.set(7, 5, 1); grp.add(spill);
     const bay = { x: cx + 12.25, z: cz - 5.5 }, V1 = { clicks: 0 };
-    const stop = addStop(g, { id: 'valiantgroup', x: bay.x, z: bay.z, h: 0, card: VAL_CARD, onArrive: function () { V1.clicks++; if (plSnd('clique')) { [0, 0.11, 0.2].forEach(function (d, k) { tone('square', 1400 + k * 260, radio.ctx.currentTime + d, 0.035, 0.05, AUD.sfx); }); } } });
+    const stop = addStop(g, { id: 'valiantgroup', x: bay.x, z: bay.z, h: 0, kiosk: { cam: KS_CAM_LEFT }, card: VAL_CARD, onArrive: function () { V1.clicks++; if (plSnd('clique')) { [0, 0.11, 0.2].forEach(function (d, k) { tone('square', 1400 + k * 260, radio.ctx.currentTime + d, 0.035, 0.05, AUD.sfx); }); } } });
     K.special['-1,1'] = function (B, h) {
       B.type = 'valiantgroup'; B.signs = []; B.venues = []; B.vitrines = 0; B.lotsN = 1; B.spots = []; B.fronts = []; B.spotsFirst = true;
       plCol(B, (X0 + X1) / 2, cz, (X1 - X0) / 2, (Z1 - Z0) / 2, 0, 0, FH, 'escritório da ValiantGroup');
@@ -3815,7 +3815,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     }
     // the bay: the audience turns to the car and the remote to face it, and a ray of light goes to it
     const bay = { x: 8.75, z: -21 }; let turned = [];
-    const stop = addStop(g, { id: 'praca-dos-teloes', x: bay.x, z: bay.z, h: 0, card: VAL_PLAZA_CARD, onArrive: function (st) {
+    const stop = addStop(g, { id: 'praca-dos-teloes', x: bay.x, z: bay.z, h: 0, kiosk: { cam: KS_CAM_ROAD }, card: VAL_PLAZA_CARD, onArrive: function (st) {
       PZ.ray = 2.8; PZ.rayT = 0; PZ.spin = 1.5; PZ.rays++; if (plSnd('raio')) { const a = radio.ctx, t = a.currentTime, o = a.createOscillator(), gn = a.createGain(); o.type = 'sawtooth'; o.frequency.setValueAtTime(220, t); o.frequency.exponentialRampToValueAtTime(1500, t + 0.5); gn.gain.setValueAtTime(0, t); gn.gain.linearRampToValueAtTime(0.06, t + 0.05); gn.gain.exponentialRampToValueAtTime(0.001, t + 0.7); o.connect(gn); gn.connect(AUD.sfx); o.start(t); o.stop(t + 0.75); }
       turned = []; PEOPLE.forEach(function (p) { if (p.cb && (p.cb.key === '-1,-1' || p.cb.key === '0,-1') && !p.walking && p.st !== 'cross' && p.st !== 'wait' && p.st !== 'toWait' && Math.hypot(p.root.position.x - st.x, p.root.position.z - st.z) < 26) { turned.push({ p: p, h: p.h }); p.setHeading(plFacing(st.x - p.root.position.x, st.z - p.root.position.z)); } }); PZ.turned = turned.length;
     }, onLeave: function () { PZ.ray = 0; ray.visible = false; turned.forEach(function (q) { if (q.p.cb) q.p.setHeading(q.h); }); turned = []; PZ.turned = 0; } });
@@ -3919,7 +3919,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     }
     function start() { reset(true); setAll(TU, 0); CL.active = true; CL.runs++; }
     const bay = { x: cx + 12.25, z: cz - 5.5 };
-    const stop = addStop(g, { id: 'clientes', x: bay.x, z: bay.z, h: 0, card: VAL_CLIENTS_CARD, onArrive: function () { start(); }, onLeave: function () { reset(false); } });
+    const stop = addStop(g, { id: 'clientes', x: bay.x, z: bay.z, h: 0, kiosk: { cam: KS_CAM_LEFT }, card: VAL_CLIENTS_CARD, onArrive: function () { start(); }, onLeave: function () { reset(false); } });
     K.upd.push(function (dt) {
       // the pass: within 30 m of the facade the next content comes up it in a wave, once until the car is 50 m away again (a car that is at the bay has the show instead)
       const car = S.car, dzf = Math.max(0, ZS[0] - car.z, car.z - (ZS[2] + W)), dd = Math.hypot(car.x - X1, dzf);
@@ -4933,7 +4933,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
       if (n !== SD.lit) { SD.lit = n; paint(); if (plSnd('frentes')) chime([76 + n * 2], 0.09, 'triangle'); }
       if (SD.t >= 0.3 * SD.ids.length + 0.5) { SD.animating = false; paint(); }
     });
-    const stop = addStop(g, { id: 'sede-evig', x: 0, y: T, z: 2.6, h: 0, card: EV_CARD_SEDE, pad: EV_PAD_R, onArrive: function () { SD.landings++; evDedupe(EV_CARD_SEDE); if (!SD.swept) startSweep(); } });
+    const stop = addStop(g, { id: 'sede-evig', x: 0, y: T, z: 2.6, h: 0, kiosk: { cam: { pos: [4, 6, 10], look: [-4, 1, -3] } }, card: EV_CARD_SEDE, pad: EV_PAD_R, onArrive: function () { SD.landings++; evDedupe(EV_CARD_SEDE); if (!SD.swept) startSweep(); } });
     evPad(K, 0, 2.6, 0xb48cff); PK.sede = { group: grp, SD: SD, stop: stop, state: function () { return { group: grp.name, ids: SD.ids.slice(), titles: SD.titles.slice(), tags: SD.tags.slice(), texts: SD.texts.slice(), lit: SD.lit, swept: SD.swept, animating: SD.animating, landings: SD.landings, draws: SD.draws, sign: sign.userData.text, stop: { id: stop.id, x: stop.x, y: stop.y, z: stop.z, active: stop.active } }; } };
   }
   /* ---------------- the migration GCP -> AWS: the progress panel between the two islands and the landing pad on the AWS one ---------------- */
@@ -5881,7 +5881,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     const mark = new THREE.Group(), fill = new THREE.Mesh(new THREE.ConeGeometry(0.7, 1.2, 4), new THREE.MeshBasicMaterial({ color: new THREE.Color(S.era.color).lerp(new THREE.Color(0xffffff), 0.3) })), rim = new THREE.Mesh(fill.geometry, new THREE.MeshBasicMaterial({ color: 0x120c1c, side: THREE.BackSide }));
     rim.scale.setScalar(1.22); mark.add(rim, fill); mark.name = 'marcador-de-parada'; mark.rotation.x = Math.PI; mark.position.y = 3; grp.add(mark);
     grp.position.set(o.x, o.y || 0, o.z); grp.rotation.y = o.h || 0; g.add(grp);
-    const st = { id: o.id, x: o.x, z: o.z, y: o.y, h: o.h || 0, card: o.card || null, onArrive: o.onArrive || null, onLeave: o.onLeave || null, pad: o.pad || 0, active: false, dwell: 0, mark: mark, phase: STOPS.length * 1.7 };
+    const st = { id: o.id, x: o.x, z: o.z, y: o.y, h: o.h || 0, card: o.card || null, onArrive: o.onArrive || null, onLeave: o.onLeave || null, pad: o.pad || 0, kiosk: o.kiosk || null, active: false, dwell: 0, mark: mark, phase: STOPS.length * 1.7 };
     STOPS.push(st); return st;
   }
   function stopLeave(st) { st.active = false; st.dwell = 0; if (KS.open && KS.st === st) closeKiosk('drive'); if (st.card) hideCard(st.card); if (st.onLeave) st.onLeave(st); }
@@ -5892,10 +5892,14 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
   // place (cam.look) falls in the middle of the free part of the screen, beside the panel. "Próxima parada" goes on to the next
   // stop, "Dirigir" (Esc, or any driving key pressed after the keys were let go: a brake still held when it opens does not count)
   // gives the wheel back.
-  const KS = { open: false, st: null, t: 0, armed: false, nx: 0, ny: 0, pos: new THREE.Vector3(), look: new THREE.Vector3(), aim: new THREE.Vector3() };
+  const KS = { open: false, st: null, t: 0, armed: false, nx: 0, ny: 0, sheet: false, pos: new THREE.Vector3(), look: new THREE.Vector3(), aim: new THREE.Vector3() };
+  // a stop by the road with its place on the car's right: the camera out on the road, behind and left, turned towards the place
+  const KS_CAM_ROAD = { pos: [-5.5, 4.5, 4.5], look: [3.5, 1.6, -2.5] };
+  // further back on the road (the AMAN's arcades, the convoy's yard: wide places), and its mirror for a place on the car's left
+  const KS_CAM_ROAD_BACK = { pos: [-6, 4, 8], look: [3, 1.2, -1] }, KS_CAM_LEFT = { pos: [6, 4, 8], look: [-3, 1.2, -1] };
   const KS_CAM = { pos: [-7, 3.4, 6], look: [0, 1.2, -6] }, KV = { f: new THREE.Vector3(), r: new THREE.Vector3(), u: new THREE.Vector3(), up: new THREE.Vector3(0, 1, 0) };
   function stopPoint(st, p, out) { const c = Math.cos(st.h), sn = Math.sin(st.h); return out.set(st.x + p[0] * c + p[2] * sn, (st.y === undefined ? 0 : st.y) + p[1], st.z - p[0] * sn + p[2] * c); }
-  function kioskFrame() { const cam = (KS.st.kiosk && KS.st.kiosk.cam) || KS_CAM; stopPoint(KS.st, cam.pos, KS.pos); stopPoint(KS.st, cam.look, KS.look); }
+  function kioskFrame() { const cam = (KS.st.kiosk && KS.st.kiosk.cam) || KS_CAM; stopPoint(KS.st, cam.pos, KS.pos); stopPoint(KS.st, cam.look, KS.look); if (KS.sheet) KS.pos.sub(KS.look).multiplyScalar(1.6).add(KS.look); } // a phone held upright sees a narrow strip: the camera 1.6x further back along the same line
   // where the camera looks so the place lands at (KS.nx, KS.ny) on screen (normalised device coordinates)
   function kioskAim() {
     const f = KV.f.subVectors(KS.look, KS.pos), dist = f.length(); f.divideScalar(dist || 1);
@@ -5913,10 +5917,10 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     if (W < Hh && W < 700) {
       const bottom = Hh - above(['.radio', '.dash', '.lift', '.zoom']) + gap;
       st.left = gap + 'px'; st.right = gap + 'px'; st.bottom = bottom + 'px'; st.maxHeight = Math.max(120, Hh / 2 - bottom) + 'px';
-      const top = Hh - bottom - el.getBoundingClientRect().height; KS.nx = 0; KS.ny = 1 - Math.max(top, Hh / 2) / Hh;
+      const top = Hh - bottom - el.getBoundingClientRect().height; KS.nx = 0; KS.sheet = true; KS.ny = 1 - Math.max(top, Hh / 2) / Hh;
     } else {
       const tools = box('.tools'), top = (tools ? tools.bottom : 12) + gap, bottom = Hh - above(['.dash', '.zoom']) + gap, w = Math.min(520, W * (Hh <= 500 ? 0.45 : 0.4));
-      st.right = gap + 'px'; st.top = top + 'px'; st.bottom = bottom + 'px'; st.width = w + 'px'; KS.nx = (W - w - gap) / W - 1; KS.ny = 0;
+      st.right = gap + 'px'; st.top = top + 'px'; st.bottom = bottom + 'px'; st.width = w + 'px'; KS.nx = (W - w - gap) / W - 1; KS.ny = 0; KS.sheet = false;
     }
   }
   function openKiosk(st) {
@@ -6602,6 +6606,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
       jsAnimations: function () { const P = PLC; if (!P || !P.jsa) return null; const q = P.jsa, J = q.JS; return { progress: J.p.slice(), target: J.tgt.slice(), scroll: J.P, mode: J.mode, bayT: J.bayT, maxStep: J.maxStep, draws: J.draws.slice(), entered: J.entered, size: q.size, canvas: q.canvas, facades: J.p.length, start: q.start, end: q.end, bay: q.bay, title: JS_TITLE.join(' '), tagline: JS_TAG, swish: AUD.played.swish || 0, card: JS_CARD.title }; },
       // the crosswalk arms of the loaded blocks (the ones a walker may cross by)
       zebras: function () { const out = []; if (world && world.blocks) world.blocks.forEach(function (B) { if (B.arms) B.arms.forEach(function (al, kc) { al.forEach(function (arm) { const z = cornerZebra(B, CORNERS[kc][0], CORNERS[kc][1], arm); out.push({ block: B.key, ax: z.ax, cx: z.cx, cz: z.cz, zc: z.zc }); }); }); }); return out; },
+      kioskCam: function (cam) { if (!KS.st) return false; KS.st.kiosk = Object.assign({}, KS.st.kiosk, { cam: cam }); kioskFrame(); return true; }, // a framing tried live (the camera lab); it holds until the era is built again
       kiosk: function () { if (!KS.st) return { open: false }; const d = KIOSK_DATA.KIOSK[KS.st.id] || {}; return { open: KS.open, stop: KS.st.id, title: $('kTitle').textContent, period: $('kPer').textContent, lead: $('kLead').textContent, bullets: Array.from($('kList').children).map(function (li) { return li.textContent; }), cases: (d.cases || []).slice(), video: d.video || null, focus: document.activeElement ? document.activeElement.id : '', look: [KS.look.x, KS.look.y, KS.look.z], camPos: [KS.pos.x, KS.pos.y, KS.pos.z] }; },
       tour: function () { const T = S.tour; return { on: !!T, target: T ? (T.target === 'portal' ? 'portal' : T.target.id) : null, phase: T ? T.phase : null, leg: T ? T.leg : 0, order: tourOrder().map(function (st) { return st.id; }) }; },
       tourLimit: function (s) { TOUR.limit = s; },
