@@ -3161,7 +3161,6 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
   const REDBIT_BULLETS = ['Criei e otimizei sites com foco em responsividade e SEO, reduzindo o carregamento médio de aproximadamente 2 s para 0,5 s em projetos selecionados.', 'Configurei tags, eventos e conversões com Google Tag Manager e Google Ads.'];
   const REDBIT_CARD = { title: 'RedBit · Desenvolvedor Front-end', period: 'mar 2023 – nov 2024', text: REDBIT_BULLETS.join('\n'), values: [] };
   const MISSION_OFFICE = 'Front-end na RedBit: pare na vaga do <b>escritório da RedBit</b>, à direita.';
-  const MISSION_RADAR = 'Passe pelo <b>radar de carregamento</b> a mais de 60 mph.';
   let PLC = null; // what the test hooks places(), radar(), conversions() and jsAnimations() read
   const plFacing = function (dx, dz) { return Math.atan2(-dx, -dz); };    // heading of a person (or the car) that looks along (dx, dz)
   const plStd = function (o) { return new THREE.MeshStandardMaterial(Object.assign({ roughness: 0.8, metalness: 0.05 }, o)); };
@@ -3292,7 +3291,8 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
       const P = [[Bx(1.4, 0.1, 0.1), bx0 - 0.7, 4.3, cz + 8.8, 0, 0x2a2734], [Bx(1.4, 0.1, 0.1), bx0 - 0.7, 13.1, cz + 8.8, 0, 0x2a2734], [Bx(0.1, 0.12, bw), bx0 - 0.05, 7.05, cz, 0, 0x1a1c26], [Bx(2.8, 0.12, 2.2), bx0 - 1.4, 3.9, bz, 0, 0x1a1c26]];
       grp.add(new THREE.Mesh(kitGeo(P), propMat));
       PL.redbit = { group: grp, block: '0,1', cx: cx, cz: cz, floors: 4, glass: glass, glassFloors: 2, interior: true, neon: neon, bay: { x: cx - 12.25, z: bz } };
-      addStop(g, { id: 'redbit', x: cx - 12.25, z: bz, h: 0, kiosk: { cam: KS_CAM_ROAD }, card: REDBIT_CARD, onArrive: function () { const rd = PL.radar && PL.radar.rd; if (!rd || rd.best === null) setMission(MISSION_RADAR); /* a radar already optimised keeps its own mission line */ } });
+      // the place calls: the neon starts with a flicker and its glow rises, the open space brightens, the people by the door look at the street
+      addStop(g, { id: 'redbit', x: cx - 12.25, z: bz, h: 0, kiosk: { cam: KS_CAM_ROAD }, card: REDBIT_CARD, call: { lights: [{ mat: neon.material, rest: 0.7, peak: 1, flicker: true }, { mat: glow.material, prop: 'opacity', rest: 0.5, peak: 0.9 }, { mat: glass.material, rest: 0.85, peak: 1 }], people: 9, path: true } });
       special['0,1'] = function (B, h) {
         B.type = 'redbit'; B.signs = []; B.venues = []; B.vitrines = 0; B.lotsN = 2; B.spots = []; B.fronts = [];
         plCol(B, (bx0 + bx1) / 2, cz, (bx1 - bx0) / 2, bw / 2, 0, 0, FH, 'escritório da RedBit');
@@ -5887,8 +5887,45 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     const mark = new THREE.Group(), fill = new THREE.Mesh(new THREE.ConeGeometry(0.7, 1.2, 4), new THREE.MeshBasicMaterial({ color: new THREE.Color(S.era.color).lerp(new THREE.Color(0xffffff), 0.3) })), rim = new THREE.Mesh(fill.geometry, new THREE.MeshBasicMaterial({ color: 0x120c1c, side: THREE.BackSide }));
     rim.scale.setScalar(1.22); mark.add(rim, fill); mark.name = 'marcador-de-parada'; mark.rotation.x = Math.PI; mark.position.y = 3; grp.add(mark);
     grp.position.set(o.x, o.y || 0, o.z); grp.rotation.y = o.h || 0; g.add(grp);
-    const st = { id: o.id, x: o.x, z: o.z, y: o.y, h: o.h || 0, card: o.card || null, onArrive: o.onArrive || null, onLeave: o.onLeave || null, pad: o.pad || 0, kiosk: o.kiosk || null, active: false, dwell: 0, mark: mark, phase: STOPS.length * 1.7 };
+    const st = { id: o.id, x: o.x, z: o.z, y: o.y, h: o.h || 0, card: o.card || null, onArrive: o.onArrive || null, onLeave: o.onLeave || null, pad: o.pad || 0, kiosk: o.kiosk || null, active: false, dwell: 0, mark: mark, phase: STOPS.length * 1.7, call: o.call ? callMake(grp, o.call) : null };
     STOPS.push(st); return st;
+  }
+  // The place calls (spec 2026-10-28 §3.3): within 40 m with the car on its way in, its lights rise (a flicker first where asked), the
+  // people standing near the bay turn to the street and a dashed path lights on the ground, 3 to 15 m behind the bay on its axis; past
+  // 60 m it all goes back. In between it keeps what it was, so the edge never blinks. No text. o.call: { lights: [{ mat, rest, peak,
+  // prop: 'color' (the default, a scale of the colour) or 'opacity', flicker }], people: radius in m, path: true }
+  function callLight(L, v) { if (L.prop === 'opacity') L.mat.opacity = v; else L.mat.color.setScalar(v); L.v = v; }
+  function callMake(grp, cfg) {
+    const C = { on: false, k: 0, t: 0, lights: cfg.lights || [], people: cfg.people || 0, ppl: [], path: null };
+    if (cfg.path) {
+      const parts = []; for (let z = 3.3; z < 15; z += 1.2) parts.push([new THREE.PlaneGeometry(0.35, 0.6).rotateX(-Math.PI / 2), 0, 0.06, z, 0]);
+      C.path = new THREE.Mesh(kitGeo(parts), new THREE.MeshBasicMaterial({ color: S.era.color, transparent: true, opacity: 0, depthWrite: false, toneMapped: false, polygonOffset: true, polygonOffsetFactor: -3, polygonOffsetUnits: -3 }));
+      C.path.name = 'caminho-de-luz'; C.path.visible = false; C.path.renderOrder = 2; grp.add(C.path);
+    }
+    C.lights.forEach(function (L) { callLight(L, L.rest); }); // at rest the lights wait a little dimmer
+    return C;
+  }
+  function callPeople(st, C) {
+    const r2 = C.people * C.people; if (!r2) return;
+    for (let i = 0; i < PEOPLE.length; i++) { const p = PEOPLE[i], ex = p.root.position.x - st.x, ez = p.root.position.z - st.z; if (p.walking || ex * ex + ez * ez > r2 || C.ppl.indexOf(p) >= 0) continue; p.callH0 = p.h; C.ppl.push(p); }
+  }
+  // no allocation per frame: a few lights, a path, the people near the bay
+  function callStep(st, c, dx, dz, dt) {
+    const C = st.call, d = Math.sqrt(dx * dx + dz * dz), vin = d > 0.01 ? (Math.sin(c.h) * dx + Math.cos(c.h) * dz) / d * c.speed : 0; // the car's speed towards the bay
+    if (!C.on && d <= 40 && (vin > 0.5 || d < 12)) { C.on = true; C.t = 0; callPeople(st, C); }
+    else if (C.on && d > 60) C.on = false;
+    C.t += dt; const k0 = C.k; C.k = Math.max(0, Math.min(1, C.k + (C.on ? dt / 0.6 : -dt)));
+    if (C.k !== k0 || (C.on && C.t < 0.4)) {
+      for (let i = 0; i < C.lights.length; i++) { const L = C.lights[i]; callLight(L, L.flicker && C.on && C.t < 0.35 ? (Math.floor(C.t / 0.07) % 2 ? L.rest : L.peak) : L.rest + (L.peak - L.rest) * C.k); }
+      if (C.path) { C.path.material.opacity = 0.85 * C.k; C.path.visible = C.k > 0; }
+    }
+    // the people: towards the car while it calls, back to their own heading after (then they are let go)
+    for (let i = C.ppl.length - 1; i >= 0; i--) {
+      const p = C.ppl[i]; if (p.walking) { C.ppl.splice(i, 1); continue; }
+      const goal = C.on ? Math.atan2(-(c.x - p.root.position.x), -(c.z - p.root.position.z)) : p.callH0, turn = wrap(goal - p.h), lim = PEOPLE_TURN * dt;
+      p.setHeading(p.h + (turn > lim ? lim : turn < -lim ? -lim : turn));
+      if (!C.on && Math.abs(turn) <= lim) C.ppl.splice(i, 1);
+    }
   }
   function stopLeave(st) { st.active = false; st.dwell = 0; if (KS.open && KS.st === st) closeKiosk('drive'); if (st.card) hideCard(st.card); if (st.onLeave) st.onLeave(st); }
   /* ------------------------------------------------ the stop kiosk ------------------------------------------------ */
@@ -6060,7 +6097,8 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
   function updateStops(dt) {
     const c = S.car; let any = false; if (cardTtl > 0) { cardTtl -= dt; if (cardTtl <= 0) hideCard(); }
     for (let i = 0; i < STOPS.length; i++) {
-      const st = STOPS[i], dx = c.x - st.x, dz = c.z - st.z, sn = Math.sin(st.h), cs = Math.cos(st.h), lx = Math.abs(dx * cs - dz * sn), lf = Math.abs(-dx * sn - dz * cs), v = Math.abs(c.speed), low = st.y === undefined ? c.y < 2.5 && !c.air : Math.abs(c.y - st.y) < 1.4 && !c.air;
+      const st = STOPS[i], dx = c.x - st.x, dz = c.z - st.z; if (st.call) callStep(st, c, dx, dz, dt);
+      const sn = Math.sin(st.h), cs = Math.cos(st.h), lx = Math.abs(dx * cs - dz * sn), lf = Math.abs(-dx * sn - dz * cs), v = Math.abs(c.speed), low = st.y === undefined ? c.y < 2.5 && !c.air : Math.abs(c.y - st.y) < 1.4 && !c.air;
       if (!st.active) {
         st.dwell = low && v < 1.5 && lx <= 1.9 && lf <= 3.15 ? st.dwell + dt : 0;
         if (st.dwell >= 0.5) { st.active = true; if (active && !S.demo) openKiosk(st); else if (st.card) showCard(st.card); if (st.onArrive) st.onArrive(st); }
@@ -6660,6 +6698,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
       // the crosswalk arms of the loaded blocks (the ones a walker may cross by)
       zebras: function () { const out = []; if (world && world.blocks) world.blocks.forEach(function (B) { if (B.arms) B.arms.forEach(function (al, kc) { al.forEach(function (arm) { const z = cornerZebra(B, CORNERS[kc][0], CORNERS[kc][1], arm); out.push({ block: B.key, ax: z.ax, cx: z.cx, cz: z.cz, zc: z.zc }); }); }); }); return out; },
       kioskCam: function (cam) { if (!KS.st) return false; KS.st.kiosk = Object.assign({}, KS.st.kiosk, { cam: cam }); kioskFrame(); return true; }, // a framing tried live (the camera lab); it holds until the era is built again
+      call: function () { const o = {}, c = S.car; STOPS.forEach(function (st) { const C = st.call; if (!C) return; o[st.id] = { on: C.on, k: C.k, lights: C.lights.map(function (L) { return { v: L.v, rest: L.rest, peak: L.peak }; }), path: C.path && C.path.visible ? C.path.material.opacity : 0, people: C.ppl.map(function (p) { const g = Math.atan2(-(c.x - p.root.position.x), -(c.z - p.root.position.z)); return { uid: p.uid, h: p.h, h0: p.callH0, toRoad: Math.abs(wrap(p.h - g)) < 0.5 }; }) }; }); return o; },
       beats: function () { const b = KB.list[KB.i], el = $('kiosk'); return { on: KB.on, auto: KB.auto, i: KB.i, n: KB.n, place: b ? b.place : null, ok: !!(b && BEATS[b.place]), label: $('kNext').textContent, lit: KB.els.findIndex(function (e) { return !!e && e.classList.contains('beat-on'); }), dim: el.querySelectorAll('.beat-dim').length, cam: [camera.position.x, camera.position.y, camera.position.z], look: [KS.look.x, KS.look.y, KS.look.z], stub: JSON.parse(JSON.stringify(BEATT)) }; },
       beatScene: function (id) { const p = BEATS[id]; return p && p.state ? p.state() : null; },
       // a test place: counts its play and stop calls; null takes the place out of the era (plan B)
