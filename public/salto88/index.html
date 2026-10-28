@@ -3584,13 +3584,14 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     grp.add(new THREE.Mesh(kitGeo(P), K.propMat));
     // ---- the funnel ----
     const cash = function () { if (!plSnd('caixa')) return; const t = radio.ctx.currentTime; tone('triangle', 2093, t, 0.3, 0.1, AUD.sfx); tone('triangle', 3136, t + 0.09, 0.45, 0.1, AUD.sfx); plNoise('highpass', 5000, 5000, 0.7, 0.12, 0.08); };
-    // quiet: the beat's shopper (below) fires the same tags without a toast, a mission or a line on the trip's record
+    // quiet: the beat's shopper (below) fires the same tags without a toast, a mission or a line on the trip's record; her steps are
+    // always in order and leave the car's own funnel (CV.step) where it was
     function fire(k, quiet) {
-      const ok = k === 0 || k === CV.step, name = CV_NAMES[k]; CV.events.push({ name: name, ok: ok, t: S.t, clock: clockStr() }); if (CV.events.length > 24) CV.events.shift();
+      const ok = quiet || k === 0 || k === CV.step, name = CV_NAMES[k]; CV.events.push({ name: name, ok: ok, t: S.t, clock: clockStr() }); if (CV.events.length > 24) CV.events.shift();
       CV.lit[k] = ok ? 3.2 : 2.2; CV.mode[k] = ok ? 'on' : 'bad'; paintGate(k); glow[k].material.color.setHex(ok ? 0x46ff8a : 0xff6a3d); glow[k].visible = true; road[k].material.color.setHex(ok ? 0x46ff8a : 0xff6a3d); road[k].visible = true; CV.strips++;
       if (!ok) { CV.step = 0; CV.last = 'Evento fora do funil'; if (!quiet) toast('Evento fora do funil', 2.4); if (plSnd('erro')) tone('sawtooth', 150, radio.ctx.currentTime, 0.35, 0.1, AUD.sfx); }
-      else if (k < 2) { CV.step = k + 1; CV.last = name; if (!quiet) toast('Tag disparada: ' + name, 1.4); if (plSnd('tag')) chime([72 + 4 * k], 0, 'square'); }
-      else { CV.step = 0; CV.count++; CV.last = 'Conversão registrada'; if (!quiet) { tripRec(function (T) { T.conv++; }); toast('Conversão registrada', 2.6); setMission('Conversão registrada! <b>page_view → add_to_cart → purchase</b>'); } cash(); burst(GX[2] - 1, BEAM, 0, 26, 6, 0x46ff8a); paintPanel(); }
+      else if (k < 2) { if (!quiet) CV.step = k + 1; CV.last = name; if (!quiet) toast('Tag disparada: ' + name, 1.4); if (plSnd('tag')) chime([72 + 4 * k], 0, 'square'); }
+      else { if (!quiet) CV.step = 0; CV.count++; CV.last = 'Conversão registrada'; if (!quiet) { tripRec(function (T) { T.conv++; }); toast('Conversão registrada', 2.6); setMission('Conversão registrada! <b>page_view → add_to_cart → purchase</b>'); } cash(); burst(GX[2] - 1, BEAM, 0, 26, 6, 0x46ff8a); paintPanel(); }
       syncNext(); paintEvents();
     }
     // The beat of "Configurei tags, eventos e conversões com Google Tag Manager e Google Ads." (spec 2026-10-28 §4.2): a shopper does the
@@ -6154,7 +6155,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     beatsOff(); const bt = d.beats || [];
     if (bt.length) { KB.on = true; KB.list = bt; KB.n = bt.length; KB.els = bt.map(function (b) { return b.kind === 'bullet' ? ul.children[b.index] : b.kind === 'case' ? cs.children[b.index] : v; }); KB.els.forEach(function (e, j) { if (e) e.dataset.beat = j; }); }
     const el = $('kiosk'); el.hidden = false; el.classList.toggle('photo-off', !!S.photo); el.scrollTop = 0; stage.classList.add('kiosk-open'); layoutKiosk();
-    if (KB.on) { KB.auto = !!auto; beatGo(0); }
+    if (KB.on) { KB.auto = !!auto; if (KB.auto) S.dwell = Math.max(S.dwell, 999); beatGo(0); } // the demo's kiosk holds it at the bay while it is open (the bay's own wait is 3 s, so a hold no kiosk takes up never strands it)
     $('kNext').focus({ preventScroll: true });
   }
   function closeKiosk(how) {
@@ -6186,7 +6187,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     // the way out, as the way in: 5 m ahead of the bay brought onto the road, so the car turns back into the street instead of driving
     // down the sidewalk into the corner's kit
     const e = tourRoad(st), fx = st.x - Math.sin(st.h) * 5, fz = st.z - Math.cos(st.h) * 5, q = tourProj(fx, fz), k = q.d > 2.6 ? 2.6 / q.d : 1;
-    return [{ x: e.x, z: e.z, r: 2.5, v: 6 }, { x: st.x, z: st.z, r: 1.2, v: 3, dwell: 999 }, { x: q.x + (fx - q.x) * k, z: q.z + (fz - q.z) * k, r: 3, v: 8 }].concat(world.waypoints.slice(1));
+    return [{ x: e.x, z: e.z, r: 2.5, v: 6 }, { x: st.x, z: st.z, r: 1.2, v: 3, dwell: 3 }, { x: q.x + (fx - q.x) * k, z: q.z + (fz - q.z) * k, r: 3, v: 8 }].concat(world.waypoints.slice(1));
   }
   function tourDeck(st) { return world.flight && st.y !== undefined; }
   // the route as the demo drives it, from where the car comes into the era (its spawn) through the era's points
