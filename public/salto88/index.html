@@ -3341,7 +3341,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
         paint();
         const m = new THREE.Mesh(new THREE.PlaneGeometry(BW, BH), plLit(Q.tex, { fog: true })); m.position.set(bx0 - 0.09, BY, BZ); m.rotation.y = -Math.PI / 2; m.name = 'bancada'; grp.add(m); BN.mat = m.material;
         upd.push(function (dt) { if (!BN.playing) return; BN.t += dt; if (BN.t >= 1.5) { BN.t -= 1.5; BN.step = (BN.step + 1) % 4; paint(); } });
-        beatPlace('bancada', { cam: { pos: [6.2, 2.4, 62.4], look: [11.4, 1.3, 59.7] }, play: function () { BN.playing = true; BN.t = 0; BN.step = 0; paint(); }, stop: function () { BN.playing = false; if (BN.step !== 3) { BN.step = 3; paint(); } }, state: function () { return { step: BN.step, cols: BN.cols.slice(), draws: BN.draws, playing: BN.playing }; } });
+        beatPlace('bancada', { cam: { pos: [7.5, 3.4, 61.2], look: [11.41, 1.45, 59.7] }, play: function () { BN.playing = true; BN.t = 0; BN.step = 0; paint(); }, stop: function () { BN.playing = false; if (BN.step !== 3) { BN.step = 3; paint(); } }, state: function () { return { step: BN.step, cols: BN.cols.slice(), draws: BN.draws, playing: BN.playing }; } });
       }
       // The beats of the two cases (spec 2026-10-28 §4.2): small scenes by the bay, made once for the era, running only as their beat.
       // Oceans-20 (the recycling point by the office's south corner, in the strip between the walkers and the building, off the way a
@@ -3376,7 +3376,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
           if (ph !== ECO.phase) { if (ECO.phase === 'coleta') bag.visible = false; ECO.phase = ph; shoot(who, ph === 'foto'); cb.visible = ph !== 'foto'; }
           if (ph === 'chega') ecoAt(Z0 + (Z1 - Z0) * (t - 1.6) / 3, Math.PI); else if (ph === 'coleta') ecoAt(Z1, Math.PI); else if (ph === 'sai') { ecoAt(Z1 - (Z1 - Z0) * Math.min(1, (t - 5.6) / 3), 0); if (t > 8.6) cb.visible = false; }
         });
-        beatPlace('ecoponto', { cam: { pos: [6.4, 2.8, 46.5], look: [10.3, 0.8, 52.4] }, play: function () { ECO.playing = true; ecoRest(); ECO.phase = 'foto'; shoot(who, true); }, stop: function () { ECO.playing = false; ecoRest(); }, state: function () { return { phase: ECO.phase, bag: bag.visible, bike: { x: cb.position.x, z: cb.position.z, visible: cb.visible }, bins: ECO.bins.slice() }; } });
+        beatPlace('ecoponto', { cam: { pos: [6.6, 4.4, 50.2], look: [10.5, 0.6, 53.2] }, play: function () { ECO.playing = true; ecoRest(); ECO.phase = 'foto'; shoot(who, true); }, stop: function () { ECO.playing = false; ecoRest(); }, state: function () { return { phase: ECO.phase, bag: bag.visible, bike: { x: cb.position.x, z: cb.position.z, visible: cb.visible }, bins: ECO.bins.slice() }; } });
       }
       const VIS = { phase: 'rest', t: 0, playing: false };
       {
@@ -3399,10 +3399,10 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
           if (ph !== VIS.phase) { VIS.phase = ph; shoot(who, ph === 'foto'); if (ph === 'foto') frame(0); else if (ph === 'mostra') frame(12); }
           if (ph === 'caixa') frame(Math.min(12, 1 + Math.floor((t - 1.2) / 0.6 * 12)));
         });
-        beatPlace('vistoria', { cam: { pos: [5, 2.4, 70], look: [8.6, 0.8, 66.4] }, play: function () { VIS.playing = true; visRest(); VIS.phase = 'foto'; shoot(who, true); }, stop: function () { VIS.playing = false; visRest(); }, state: function () { return { phase: VIS.phase, box: { visible: edges[11].visible, min: VIS.box.min.slice(), max: VIS.box.max.slice() }, bike: { min: VIS.bike.min.slice(), max: VIS.bike.max.slice() } }; } });
+        beatPlace('vistoria', { cam: { pos: [5.6, 2.2, 63.0], look: [8.6, 0.8, 66.4] }, play: function () { VIS.playing = true; visRest(); VIS.phase = 'foto'; shoot(who, true); }, stop: function () { VIS.playing = false; visRest(); }, state: function () { return { phase: VIS.phase, box: { visible: edges[11].visible, min: VIS.box.min.slice(), max: VIS.box.max.slice() }, bike: { min: VIS.bike.min.slice(), max: VIS.bike.max.slice() } }; } });
       }
       // the place calls: the neon starts with a flicker and its glow rises, the open space brightens, the people by the door look at the street
-      addStop(g, { id: 'redbit', x: cx - 12.25, z: bz, h: 0, kiosk: { cam: KS_CAM_ROAD }, card: REDBIT_CARD, call: { lights: [{ mat: neon.material, rest: 0.7, peak: 1, flicker: true }, { mat: glow.material, prop: 'opacity', rest: 0.5, peak: 0.9 }, { mat: glass.material, rest: 0.85, peak: 1 }, { mat: BN.mat, rest: 0.85, peak: 1 }], people: 9, path: true } });
+      addStop(g, { id: 'redbit', x: cx - 12.25, z: bz, h: 0, kiosk: { cam: KS_CAM_ROAD }, card: REDBIT_CARD, call: { lights: [{ mat: neon.material, rest: 0.7, peak: 1, flicker: true }, { mat: glow.material, prop: 'opacity', rest: 0.5, peak: 0.9 }, { mat: glass.material, rest: 0.85, peak: 1 }, { mat: BN.mat, rest: 0.85, peak: 1 }], people: 9, path: true }, onArrive: function () { if (MISSION.long === MISSION_OFFICE) setMission(''); } }); // parked, the office's instruction is done (the radar no longer follows it)
       special['0,1'] = function (B, h) {
         B.type = 'redbit'; B.signs = []; B.venues = []; B.vitrines = 0; B.lotsN = 2; B.spots = []; B.fronts = [];
         plCol(B, (bx0 + bx1) / 2, cz, (bx1 - bx0) / 2, bw / 2, 0, 0, FH, 'escritório da RedBit');
@@ -3604,7 +3604,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     function shopCart() { const P = SHOP.p; SHOP.phase = 'carrinho'; P.walkTo(25.7, 9.7, function () { P.setHeading(plFacing(0, -1)); P.play('interact-right'); shopFire(1); SHOP.wait = 1.2; SHOP.next = shopDoor; }); }
     function shopDoor() { const P = SHOP.p; SHOP.phase = 'porta'; P.walkTo(23.5, 10.8, function () { shopFire(2); SHOP.phase = 'dentro'; P.boarded = true; SHOP.wait = 2; SHOP.next = function () { shopRest(); shopGo(); }; }); }
     K.upd.push(function (dt) { if (SHOP.wait > 0) { SHOP.wait -= dt; if (SHOP.wait <= 0 && SHOP.next) { const f = SHOP.next; SHOP.next = null; f(); } } });
-    beatPlace('conversoes', { cam: { pos: [28, 5.5, -3], look: [26.5, 1.6, 10.5] }, play: function () { SHOP.fired = []; shopRest(); shopGo(); }, stop: function () { shopRest(); SHOP.phase = 'rest'; }, state: function () { const r = SHOP.p.root.position; return { phase: SHOP.phase, fired: SHOP.fired.slice(), person: { x: r.x, z: r.z, visible: SHOP.p.root.visible } }; } });
+    beatPlace('conversoes', { cam: { pos: [19.5, 3.8, 3.0], look: [25.8, 1.4, 10.5] }, play: function () { SHOP.fired = []; shopRest(); shopGo(); }, stop: function () { shopRest(); SHOP.phase = 'rest'; }, state: function () { const r = SHOP.p.root.position; return { phase: SHOP.phase, fired: SHOP.fired.slice(), person: { x: r.x, z: r.z, visible: SHOP.p.root.visible } }; } });
     K.upd.push(function (dt, t) {
       const c = S.car;
       // a pass is a drive from the west of a gate to its east inside the street (a jump of 4 m or more in one frame is a teleport, not a drive; from the east nothing counts)
@@ -6021,8 +6021,8 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
   function callMake(grp, cfg) {
     const C = { on: false, k: 0, t: 0, lights: cfg.lights || [], people: cfg.people || 0, ppl: [], path: null };
     if (cfg.path) {
-      const parts = []; for (let z = 3.3; z < 15; z += 1.2) parts.push([new THREE.PlaneGeometry(0.35, 0.6).rotateX(-Math.PI / 2), 0, 0.06, z, 0]);
-      C.path = new THREE.Mesh(kitGeo(parts), new THREE.MeshBasicMaterial({ color: S.era.color, transparent: true, opacity: 0, depthWrite: false, toneMapped: false, polygonOffset: true, polygonOffsetFactor: -3, polygonOffsetUnits: -3 }));
+      const parts = []; for (let z = 3.8; z < 15; z += 2.0) parts.push([new THREE.PlaneGeometry(0.75, 1.4).rotateX(-Math.PI / 2), 0, CURB_H + 0.03, z, 0]); // on the sidewalk, which stands CURB_H above the road
+      C.path = new THREE.Mesh(kitGeo(parts), new THREE.MeshBasicMaterial({ color: new THREE.Color(S.era.color).lerp(new THREE.Color(0xffffff), 0.5), transparent: true, opacity: 0, depthWrite: false, toneMapped: false, polygonOffset: true, polygonOffsetFactor: -3, polygonOffsetUnits: -3 }));
       C.path.name = 'caminho-de-luz'; C.path.visible = false; C.path.renderOrder = 2; grp.add(C.path);
     }
     C.lights.forEach(function (L) { callLight(L, L.rest); }); // at rest the lights wait a little dimmer
