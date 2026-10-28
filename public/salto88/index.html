@@ -3526,14 +3526,27 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     grp.add(new THREE.Mesh(kitGeo(P), K.propMat));
     // ---- the funnel ----
     const cash = function () { if (!plSnd('caixa')) return; const t = radio.ctx.currentTime; tone('triangle', 2093, t, 0.3, 0.1, AUD.sfx); tone('triangle', 3136, t + 0.09, 0.45, 0.1, AUD.sfx); plNoise('highpass', 5000, 5000, 0.7, 0.12, 0.08); };
-    function fire(k) {
+    // quiet: the beat's shopper (below) fires the same tags without a toast, a mission or a line on the trip's record
+    function fire(k, quiet) {
       const ok = k === 0 || k === CV.step, name = CV_NAMES[k]; CV.events.push({ name: name, ok: ok, t: S.t, clock: clockStr() }); if (CV.events.length > 24) CV.events.shift();
       CV.lit[k] = ok ? 3.2 : 2.2; CV.mode[k] = ok ? 'on' : 'bad'; paintGate(k); glow[k].material.color.setHex(ok ? 0x46ff8a : 0xff6a3d); glow[k].visible = true; road[k].material.color.setHex(ok ? 0x46ff8a : 0xff6a3d); road[k].visible = true; CV.strips++;
-      if (!ok) { CV.step = 0; CV.last = 'Evento fora do funil'; toast('Evento fora do funil', 2.4); if (plSnd('erro')) tone('sawtooth', 150, radio.ctx.currentTime, 0.35, 0.1, AUD.sfx); }
-      else if (k < 2) { CV.step = k + 1; CV.last = name; toast('Tag disparada: ' + name, 1.4); if (plSnd('tag')) chime([72 + 4 * k], 0, 'square'); }
-      else { CV.step = 0; CV.count++; tripRec(function (T) { T.conv++; }); CV.last = 'Conversão registrada'; toast('Conversão registrada', 2.6); setMission('Conversão registrada! <b>page_view → add_to_cart → purchase</b>'); cash(); burst(GX[2] - 1, BEAM, 0, 26, 6, 0x46ff8a); paintPanel(); }
+      if (!ok) { CV.step = 0; CV.last = 'Evento fora do funil'; if (!quiet) toast('Evento fora do funil', 2.4); if (plSnd('erro')) tone('sawtooth', 150, radio.ctx.currentTime, 0.35, 0.1, AUD.sfx); }
+      else if (k < 2) { CV.step = k + 1; CV.last = name; if (!quiet) toast('Tag disparada: ' + name, 1.4); if (plSnd('tag')) chime([72 + 4 * k], 0, 'square'); }
+      else { CV.step = 0; CV.count++; CV.last = 'Conversão registrada'; if (!quiet) { tripRec(function (T) { T.conv++; }); toast('Conversão registrada', 2.6); setMission('Conversão registrada! <b>page_view → add_to_cart → purchase</b>'); } cash(); burst(GX[2] - 1, BEAM, 0, 26, 6, 0x46ff8a); paintPanel(); }
       syncNext(); paintEvents();
     }
+    // The beat of "Configurei tags, eventos e conversões com Google Tag Manager e Google Ads." (spec 2026-10-28 §4.2): a shopper does the
+    // funnel on foot. She looks at the window (page_view), takes the cart on the pavement (add_to_cart) and goes in at the door
+    // (purchase, then 2 s inside, hidden as the people in a bus are); each step lights its gate, its line on the events screen and the
+    // counter as the car does, but quietly. About 12 s a round; at rest she waits at the east end of the pavement.
+    const HOME = [33, 9.6], SHOP = { phase: 'rest', wait: 0, next: null, fired: [], p: spawnPerson({ kind: 'female-b', x: HOME[0], z: HOME[1], h: plFacing(-1, 0), anim: 'idle' }) };
+    function shopFire(k) { fire(k, true); SHOP.fired.push(CV_NAMES[k]); }
+    function shopRest() { const P = SHOP.p; P.walking = false; P.onArrive = null; P.boarded = false; P.root.position.set(HOME[0], 0, HOME[1]); P.setHeading(plFacing(-1, 0)); P.play('idle'); SHOP.wait = 0; SHOP.next = null; }
+    function shopGo() { const P = SHOP.p; SHOP.phase = 'vitrine'; P.walkTo(27.8, 9.6, function () { P.setHeading(plFacing(0, 1)); P.play('idle'); shopFire(0); SHOP.wait = 1.5; SHOP.next = shopCart; }); }
+    function shopCart() { const P = SHOP.p; SHOP.phase = 'carrinho'; P.walkTo(25.7, 9.7, function () { P.setHeading(plFacing(0, -1)); P.play('interact-right'); shopFire(1); SHOP.wait = 1.2; SHOP.next = shopDoor; }); }
+    function shopDoor() { const P = SHOP.p; SHOP.phase = 'porta'; P.walkTo(23.5, 10.8, function () { shopFire(2); SHOP.phase = 'dentro'; P.boarded = true; SHOP.wait = 2; SHOP.next = function () { shopRest(); shopGo(); }; }); }
+    K.upd.push(function (dt) { if (SHOP.wait > 0) { SHOP.wait -= dt; if (SHOP.wait <= 0 && SHOP.next) { const f = SHOP.next; SHOP.next = null; f(); } } });
+    beatPlace('conversoes', { cam: { pos: [28, 5.5, -3], look: [26.5, 1.6, 10.5] }, play: function () { SHOP.fired = []; shopRest(); shopGo(); }, stop: function () { shopRest(); SHOP.phase = 'rest'; }, state: function () { const r = SHOP.p.root.position; return { phase: SHOP.phase, fired: SHOP.fired.slice(), person: { x: r.x, z: r.z, visible: SHOP.p.root.visible } }; } });
     K.upd.push(function (dt, t) {
       const c = S.car;
       // a pass is a drive from the west of a gate to its east inside the street (a jump of 4 m or more in one frame is a teleport, not a drive; from the east nothing counts)
