@@ -3235,6 +3235,8 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
       [[wallX - 0.9, cz - 1.0 - 5.6], [wallX - 0.9, cz - 1.0 + 5.6]].forEach(function (q) { P.push([Bx(0.3, 1.2, 0.3), q[0] - 0.0, FH + 0.6, q[1], 0, 0x3a3648]); });
       const props = new THREE.Mesh(kitGeo(P), propMat); grp.add(props);
       PL.fiap = { group: grp, block: '-1,1', cx: cx, cz: cz, sign: sign, signText: 'FIAP', screen: scr, wings: 2, floors: FL, ez: ez, wallX: wallX, kiosk: [kx, kz], students: [] };
+      // the beat of the stop's video (spec 2026-10-28 §4.2): the screen already plays it as scenery; the beat starts it from the beginning
+      beatPlace('fiap-telao', { cam: { pos: [-3, 9, 72], look: [-16.25, 9.9, 66] }, play: function () { const v = scr.userData.video; if (!v) return; v.el.currentTime = 0; const pl = v.el.play(); if (pl) pl.catch(function () {}); }, stop: function () {}, state: function () { const v = scr.userData.video; return { playing: !!v && !v.el.paused, video: 'fiap', t: v ? v.el.currentTime : 0 }; } });
       special['-1,1'] = function (B, h) {
         B.type = 'fiap'; B.signs = []; B.venues = []; B.vitrines = 0; B.lotsN = 2; B.spots = []; B.fronts = [];
         plCol(B, cx + 0.5, cz, 4.0, 9.6, 0, 0, FH, 'prédio da FIAP'); plCol(B, cx - 6.55, cz - 5.8, 3.05, 3.8, 0, 0, FH, 'ala da FIAP');
@@ -3291,8 +3293,58 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
       const P = [[Bx(1.4, 0.1, 0.1), bx0 - 0.7, 4.3, cz + 8.8, 0, 0x2a2734], [Bx(1.4, 0.1, 0.1), bx0 - 0.7, 13.1, cz + 8.8, 0, 0x2a2734], [Bx(0.1, 0.12, bw), bx0 - 0.05, 7.05, cz, 0, 0x1a1c26], [Bx(2.8, 0.12, 2.2), bx0 - 1.4, 3.9, bz, 0, 0x1a1c26]];
       grp.add(new THREE.Mesh(kitGeo(P), propMat));
       PL.redbit = { group: grp, block: '0,1', cx: cx, cz: cz, floors: 4, glass: glass, glassFloors: 2, interior: true, neon: neon, bay: { x: cx - 12.25, z: bz } };
+      // The beat of "Criei e otimizei sites com foco em responsividade e SEO" (spec 2026-10-28 §4.2): a desk just behind the glass by the
+      // bay, a monitor, a tablet and a phone showing one site. In turn each builds it at its own width (3 columns, 2, 1 with the menu in
+      // three bars), 1,5 s a step, then all three hold it. A canvas over the glass (5 cm in front of it), painted as the view through it,
+      // centred at the height of a desk; redrawn only when the step changes. No text and no figure: bars and blocks, as a mock site is.
+      const BN = { step: 3, t: 0, playing: false, draws: 0, cols: [3, 2, 1] };
+      {
+        const BW = 3.2, BH = 1.6, BY = 1.45, BZ = 59.7, Q = plCan(1024, 512), PX = 1024 / BW, TOP = BY + BH / 2;
+        // the lit part of each screen [x, y, w, h] and the columns of the site at that width; clear of the glass's mullions (z 58,2 and 60,6: x 32 and 800)
+        const DEV = [[96, 150, 380, 214, 3], [524, 196, 146, 196, 2], [706, 262, 66, 122, 1]];
+        const rr = function (c, x, y, w, h, r) { c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); };
+        function site(c, d, built) {
+          const x = d[0], y = d[1], w = d[2], h = d[3], n = d[4], hb = Math.max(10, h * 0.11), pad = Math.max(4, w * 0.04);
+          if (!built) { // the screen on, the page not there yet: grey outlines where its parts will go
+            c.fillStyle = '#161a28'; c.fillRect(x, y, w, h); c.strokeStyle = '#353b54'; c.lineWidth = 2; c.strokeRect(x + pad, y + pad, w - 2 * pad, hb);
+            for (let r = 0; r < 3; r++) c.strokeRect(x + pad, y + hb + 2 * pad + r * (h - hb - 3 * pad) / 3, w - 2 * pad, (h - hb - 3 * pad) / 3 - pad); return;
+          }
+          c.fillStyle = '#f4f1ec'; c.fillRect(x, y, w, h);
+          c.fillStyle = '#1b1f2e'; c.fillRect(x, y, w, hb); c.fillStyle = '#ff2f56'; c.fillRect(x + pad, y + hb * 0.25, hb * 0.5, hb * 0.5);
+          c.fillStyle = '#e6e9ff';
+          if (n === 1) for (let k = 0; k < 3; k++) c.fillRect(x + w - pad - hb * 0.6, y + hb * (0.28 + k * 0.18), hb * 0.6, Math.max(1.5, hb * 0.08)); // the menu as three bars
+          else for (let k = 0; k < 3; k++) c.fillRect(x + w - pad - (k + 1) * hb * 1.3, y + hb * 0.42, hb, Math.max(2, hb * 0.16));
+          const hy = y + hb + pad, hh = h * 0.26; c.fillStyle = '#ffd0e2'; c.fillRect(x + pad, hy, w - 2 * pad, hh); c.fillStyle = '#3a2a40'; c.fillRect(x + pad * 2, hy + hh * 0.3, (w - 4 * pad) * (n === 1 ? 0.8 : 0.5), hh * 0.14); c.fillStyle = '#ff3ea5'; c.fillRect(x + pad * 2, hy + hh * 0.62, (w - 4 * pad) * (n === 1 ? 0.45 : 0.22), hh * 0.18);
+          const gy = hy + hh + pad, cw = (w - pad * (n + 1)) / n, ch = Math.min(cw * 0.75, (y + h - gy - pad * 2) / (n === 1 ? 2 : 1));
+          for (let r = 0; gy + r * (ch + pad) + ch <= y + h - pad / 2; r++) for (let k = 0; k < n; k++) {
+            const bx = x + pad + k * (cw + pad), by = gy + r * (ch + pad); c.fillStyle = '#dfe3ec'; c.fillRect(bx, by, cw, ch); c.fillStyle = '#9fb4d8'; c.fillRect(bx, by, cw, ch * 0.55); c.fillStyle = '#8a8fa6'; c.fillRect(bx + cw * 0.08, by + ch * 0.68, cw * 0.7, Math.max(1.5, ch * 0.08));
+          }
+        }
+        function paint() {
+          const c = Q.c, W = 1024, H = 512;
+          // the open space behind the glass at these heights (the glass's own gradient: 3,5 m of floor, light in the middle)
+          const gw = c.createLinearGradient(0, -(3.5 - TOP) * PX, 0, TOP * PX); gw.addColorStop(0, '#2c2432'); gw.addColorStop(0.5, '#4d3d40'); gw.addColorStop(1, '#2e2530'); c.fillStyle = gw; c.fillRect(0, 0, W, H);
+          c.fillStyle = 'rgba(255,244,208,0.10)'; c.fillRect(60, 0, 820, 120);
+          // the desk: its top at 0,75 m
+          const dy = (TOP - 0.75) * PX; c.fillStyle = '#5a463c'; c.fillRect(40, dy - 6, 940, 8); c.fillStyle = '#3a2f2a'; c.fillRect(56, dy + 2, 908, H - dy);
+          DEV.forEach(function (d, i) {
+            const b = i === 0 ? 10 : i === 1 ? 12 : 7; c.fillStyle = '#0d0f18'; rr(c, d[0] - b, d[1] - b, d[2] + 2 * b, d[3] + 2 * b, i ? 8 : 4); c.fill();
+            if (i === 0) { c.fillRect(d[0] + d[2] / 2 - 10, d[1] + d[3] + b, 20, dy - d[1] - d[3] - b); c.fillRect(d[0] + d[2] / 2 - 60, dy - 10, 120, 10); }
+            else { c.fillStyle = '#1c1f2c'; c.beginPath(); c.moveTo(d[0] + d[2] * 0.3, d[1] + d[3] + b); c.lineTo(d[0] + d[2] * 0.7, d[1] + d[3] + b); c.lineTo(d[0] + d[2] * 0.85, dy); c.lineTo(d[0] + d[2] * 0.15, dy); c.closePath(); c.fill(); }
+            site(c, d, i <= BN.step);
+          });
+          // the glass in front: its mullions, the slab's shadow and the same soft reflection across it
+          c.fillStyle = 'rgba(8,10,18,0.7)'; [32, 800].forEach(function (x) { c.fillRect(x - 2, 0, 4, H); });
+          const rf = c.createLinearGradient(0, 0, W, H); rf.addColorStop(0, 'rgba(255,255,255,0.0)'); rf.addColorStop(0.45, 'rgba(255,255,255,0.08)'); rf.addColorStop(0.55, 'rgba(255,255,255,0.0)'); c.fillStyle = rf; c.fillRect(0, 0, W, H);
+          Q.tex.needsUpdate = true; BN.draws++;
+        }
+        paint();
+        const m = new THREE.Mesh(new THREE.PlaneGeometry(BW, BH), plLit(Q.tex, { fog: true })); m.position.set(bx0 - 0.09, BY, BZ); m.rotation.y = -Math.PI / 2; m.name = 'bancada'; grp.add(m); BN.mat = m.material;
+        upd.push(function (dt) { if (!BN.playing) return; BN.t += dt; if (BN.t >= 1.5) { BN.t -= 1.5; BN.step = (BN.step + 1) % 4; paint(); } });
+        beatPlace('bancada', { cam: { pos: [6.2, 2.4, 62.4], look: [11.4, 1.3, 59.7] }, play: function () { BN.playing = true; BN.t = 0; BN.step = 0; paint(); }, stop: function () { BN.playing = false; if (BN.step !== 3) { BN.step = 3; paint(); } }, state: function () { return { step: BN.step, cols: BN.cols.slice(), draws: BN.draws, playing: BN.playing }; } });
+      }
       // the place calls: the neon starts with a flicker and its glow rises, the open space brightens, the people by the door look at the street
-      addStop(g, { id: 'redbit', x: cx - 12.25, z: bz, h: 0, kiosk: { cam: KS_CAM_ROAD }, card: REDBIT_CARD, call: { lights: [{ mat: neon.material, rest: 0.7, peak: 1, flicker: true }, { mat: glow.material, prop: 'opacity', rest: 0.5, peak: 0.9 }, { mat: glass.material, rest: 0.85, peak: 1 }], people: 9, path: true } });
+      addStop(g, { id: 'redbit', x: cx - 12.25, z: bz, h: 0, kiosk: { cam: KS_CAM_ROAD }, card: REDBIT_CARD, call: { lights: [{ mat: neon.material, rest: 0.7, peak: 1, flicker: true }, { mat: glow.material, prop: 'opacity', rest: 0.5, peak: 0.9 }, { mat: glass.material, rest: 0.85, peak: 1 }, { mat: BN.mat, rest: 0.85, peak: 1 }], people: 9, path: true } });
       special['0,1'] = function (B, h) {
         B.type = 'redbit'; B.signs = []; B.venues = []; B.vitrines = 0; B.lotsN = 2; B.spots = []; B.fronts = [];
         plCol(B, (bx0 + bx1) / 2, cz, (bx1 - bx0) / 2, bw / 2, 0, 0, FH, 'escritório da RedBit');
