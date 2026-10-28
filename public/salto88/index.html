@@ -6114,9 +6114,10 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
   }
   // the button, Enter and →: the next item, or on the last one the next stop
   function beatStep(d) { if (d > 0 && KB.i >= KB.n - 1) closeKiosk('next'); else beatGo(KB.i + d); }
-  function kioskNext() { if (KB.on) beatStep(1); else closeKiosk('next'); }
+  function kioskNext() { beatTake(); if (KB.on) beatStep(1); else closeKiosk('next'); }
   function beatsOff() {
     if (KB.cur) { const c = KB.cur; KB.cur = null; c.stop(); }
+    if (KB.auto) S.dwell = Math.min(S.dwell, 0.01); // the demo's hold at the bay ends with its kiosk
     KB.els.forEach(function (el) { if (el) { el.classList.remove('beat-on', 'beat-dim'); delete el.dataset.beat; } });
     KB.on = false; KB.auto = false; KB.els = []; KB.list = []; KB.n = 0; KB.i = 0; KB.k = 1;
   }
@@ -6127,7 +6128,13 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     KBV.pos.lerpVectors(KB.fromPos, KB.toPos, e); if (KB.arc) KBV.pos.y += Math.max(0, 18 - KBV.pos.y) * Math.sin(Math.PI * e);
     KBV.look.lerpVectors(KB.fromLook, aim, e);
   }
-  function openKiosk(st) {
+  function beatsOf(st) { const d = KIOSK_DATA.KIOSK[st.id]; return !!(d && d.beats && d.beats.length); }
+  // The demo plays the beats (spec 2026-10-28 §3.7): parked by the demo, the kiosk goes on by itself, an item every 6 s, and 6 s after
+  // the last it closes and lets the demo's hold go (S.dwell). A click or a touch on the panel or the screen, or a kiosk key, takes it
+  // over: the demo stops and the kiosk stays on its item, the visitor's now. A driving key gives the wheel back as it always does.
+  function beatAuto(dt) { KB.t += dt; if (KB.t < 6) return; if (KB.i < KB.n - 1) beatGo(KB.i + 1); else closeKiosk('auto'); }
+  function beatTake() { if (!KB.auto) return; KB.auto = false; S.demo = false; S.idle = 0; S.dwell = Math.min(S.dwell, 0.01); activate(); }
+  function openKiosk(st, auto) {
     const d = KIOSK_DATA.KIOSK[st.id] || { head: null, period: null, bullets: [], cases: [], video: null, highlight: true }, card = st.card || { title: '', period: '', text: '' }, L = KIOSK_DATA.LABELS;
     if (S.tour && S.tour.target === st) tourStop('arrived');
     KS.open = true; KS.st = st; KS.t = 0; KS.armed = false; kioskFrame();
@@ -6141,7 +6148,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     beatsOff(); const bt = d.beats || [];
     if (bt.length) { KB.on = true; KB.list = bt; KB.n = bt.length; KB.els = bt.map(function (b) { return b.kind === 'bullet' ? ul.children[b.index] : b.kind === 'case' ? cs.children[b.index] : v; }); KB.els.forEach(function (e, j) { if (e) e.dataset.beat = j; }); }
     const el = $('kiosk'); el.hidden = false; el.classList.toggle('photo-off', !!S.photo); el.scrollTop = 0; stage.classList.add('kiosk-open'); layoutKiosk();
-    if (KB.on) beatGo(0);
+    if (KB.on) { KB.auto = !!auto; beatGo(0); }
     $('kNext').focus({ preventScroll: true });
   }
   function closeKiosk(how) {
@@ -6151,8 +6158,9 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     if (how === 'next') tourStart();
   }
   $('kNext').addEventListener('click', function () { kioskNext(); });
-  $('kiosk').addEventListener('click', function (e) { if (!KB.on) return; const el = e.target.closest('[data-beat]'); if (el && +el.dataset.beat !== KB.i) beatGo(+el.dataset.beat); }); // a click on an item goes to it
-  $('kDrive').addEventListener('click', function () { closeKiosk('drive'); });
+  $('kiosk').addEventListener('click', function (e) { if (!KB.on) return; beatTake(); const el = e.target.closest('[data-beat]'); if (el && +el.dataset.beat !== KB.i) beatGo(+el.dataset.beat); }); // a click on an item goes to it
+  canvas.addEventListener('pointerdown', function () { if (KS.open) beatTake(); }); // a touch on the screen takes the demo's kiosk over
+  $('kDrive').addEventListener('click', function () { beatTake(); closeKiosk('drive'); });
   $('kVid').addEventListener('click', function () { if (KB.on && KB.list[KB.i].kind !== 'video') return; const v = $('kVid'); v.muted = !v.muted; }); // a tap turns the sound on (with beats, once the video is the item shown)
   $('kVid').addEventListener('error', function () { $('kVid').hidden = true; }); // a video that fails leaves no hole
   /* ------------------------------------------------ the guided tour ------------------------------------------------ */
@@ -6163,6 +6171,17 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
   // TOUR.limit (90 s) stops it with a word, the car stuck somewhere.
   const TOUR = { limit: 90 };
   function tourEntry(st) { return { x: st.x + Math.sin(st.h) * 8, z: st.z + Math.cos(st.h) * 8 }; }
+  // The demo shows the beats (spec 2026-10-28 §3.7): the era's first road stop with beats takes the place of the route's first point
+  // (the era's waiting point) — the tour's own way in from the street, then the bay, held until the kiosk lets it go. A route of the
+  // demo's own: the tour keeps measuring its ways in against the era's route (tourLine), so they do not move.
+  function demoRoute() {
+    if (!world.waypoints || !world.waypoints.length || world.flight) return null;
+    const st = tourOrder().filter(beatsOf)[0]; if (!st) return null;
+    // the way out, as the way in: 5 m ahead of the bay brought onto the road, so the car turns back into the street instead of driving
+    // down the sidewalk into the corner's kit
+    const e = tourRoad(st), fx = st.x - Math.sin(st.h) * 5, fz = st.z - Math.cos(st.h) * 5, q = tourProj(fx, fz), k = q.d > 2.6 ? 2.6 / q.d : 1;
+    return [{ x: e.x, z: e.z, r: 2.5, v: 6 }, { x: st.x, z: st.z, r: 1.2, v: 3, dwell: 999 }, { x: q.x + (fx - q.x) * k, z: q.z + (fz - q.z) * k, r: 3, v: 8 }].concat(world.waypoints.slice(1));
+  }
   function tourDeck(st) { return world.flight && st.y !== undefined; }
   // the route as the demo drives it, from where the car comes into the era (its spawn) through the era's points
   function tourLine() { return [{ x: world.spawn.x, z: world.spawn.z }].concat(world.waypoints || []); }
@@ -6224,7 +6243,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
       const sn = Math.sin(st.h), cs = Math.cos(st.h), lx = Math.abs(dx * cs - dz * sn), lf = Math.abs(-dx * sn - dz * cs), v = Math.abs(c.speed), low = st.y === undefined ? c.y < 2.5 && !c.air : Math.abs(c.y - st.y) < 1.4 && !c.air;
       if (!st.active) {
         st.dwell = low && v < 1.5 && lx <= 1.9 && lf <= 3.15 ? st.dwell + dt : 0;
-        if (st.dwell >= 0.5) { st.active = true; if (active && !S.demo) openKiosk(st); else if (st.card) showCard(st.card); if (st.onArrive) st.onArrive(st); }
+        if (st.dwell >= 0.5) { st.active = true; if (active && !S.demo) openKiosk(st); else if (beatsOf(st)) openKiosk(st, true); else if (st.card) showCard(st.card); if (st.onArrive) st.onArrive(st); }
       } else if (v > 3 || lx > 2.5 || lf > 3.75 || !low) stopLeave(st);
       // the pointer is a landmark from afar and a nuisance up close: hidden beyond 80 m (it costs 2 draws a stop), full size from 24 m and shrinking to 40% as the car comes into the bay
       const dm2 = dx * dx + dz * dz; st.mark.visible = !st.active && dm2 < 6400;
@@ -6297,7 +6316,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     world.group.children.forEach(function (o) { const ss = o.userData.screenSize; if (!ss) return; const sc = addBoxCol(o.position.x, o.position.z, (ss[0] + 0.5) / 2, 0.3, o.rotation.y, o.position.y - ss[1] / 2 - 0.25, o.position.y + ss[1] / 2 + 0.25); sc.name = 'telão'; sc.tag = 'telão'; });
     scene.add(world.group); hwGroup.visible = false; applyAtmosphere(S.era); warmVehicles();
     world.screens.forEach(function (s) { const v = s.userData.video; if (v) { v.el.play().catch(function () { /* poster fallback */ }); } });
-    S.mode = 'world'; S.wp = 0; S.dwell = 0;
+    S.mode = 'world'; S.wp = 0; S.dwell = 0; world.demoWps = demoRoute();
     const c = S.car; c.x = world.spawn.x; c.z = world.spawn.z; c.h = 0; c.w = 0; c.speed = world.finale ? 0 : 16; c.lat = 0; c.y = world.flight ? (world.alt || 6) : 0; kitEdge.color.setHex(S.era.color); edgeGlow.color.setHex(S.era.color); c.vy = 0; c.air = false;
     car.visible = !world.finale; camYaw = 0; setCircuits(); setMission(world.mission);
     // arrival: the car materialises in a burst of cold smoke and crackling light while the camera swoops in
@@ -6379,7 +6398,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
   /* ------------------------------------------------ driving ------------------------------------------------ */
   function autopilot(dt) {
     // the guided tour drives its own list (Q.wp, Q.dwell)
-    const c = S.car, Q = S.tour || S, wps = S.tour ? S.tour.wps : world.waypoints; if (!wps.length) return { thr: 0, steer: 0, up: 0 }; const w = wps[Math.min(Q.wp, wps.length - 1)];
+    const c = S.car, Q = S.tour || S, wps = S.tour ? S.tour.wps : world.demoWps || world.waypoints; if (!wps.length) return { thr: 0, steer: 0, up: 0 }; const w = wps[Math.min(Q.wp, wps.length - 1)];
     const up = w.y !== undefined ? clamp((w.y - c.y) * 0.45, -1, 1) : 0;
     if (Q.dwell > 0) { Q.dwell -= dt; if (Q.dwell <= 0) Q.wp++; return { thr: c.speed > 0.5 ? -1 : 0, steer: 0, up: up }; }
     const dx = w.x - c.x, dz = w.z - c.z, dist = Math.hypot(dx, dz), diff = wrap(Math.atan2(-dx, -dz) - c.h);
@@ -6400,6 +6419,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
   function stepWorld(dt) {
     const c = S.car; let inp = readInput(); const user = inp.thr !== 0 || inp.steer !== 0 || inp.up !== 0 || inp.hand;
     if (KS.open) { if (!user) KS.armed = true; else if (KS.armed) closeKiosk('drive'); }
+    if (KS.open && KB.auto) beatAuto(dt);
     if (active && user) { S.demo = false; S.idle = 0; } else { S.idle += dt; if (!active || (S.idle > 9 && !demoBlocked())) S.demo = true; }
     if (world.finale) { S.parked = 10; return; }
     if (S.tour) { if (active && user) tourStop('user'); else inp = tourInput(dt); }
@@ -6679,8 +6699,8 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     if (e.code === 'KeyC' && !e.repeat) { toggleColliders(); return; }
     if (!active) return;
     if (KS.open && (e.code === 'Enter' || e.code === 'NumpadEnter')) { const a = document.activeElement; if (a && (a.id === 'kNext' || a.id === 'kDrive')) return; e.preventDefault(); kioskNext(); return; }
-    if (KS.open && KB.on && (e.code === 'ArrowRight' || e.code === 'ArrowLeft')) { e.preventDefault(); S.idle = 0; if (!e.repeat) beatStep(e.code === 'ArrowRight' ? 1 : -1); return; } // with beats ← → step the items, they do not steer
-    if (e.code === 'Escape') { if (S.photo) { togglePhoto(false); return; } if (KS.open) { closeKiosk('drive'); return; } deactivate(); return; }
+    if (KS.open && KB.on && (e.code === 'ArrowRight' || e.code === 'ArrowLeft')) { e.preventDefault(); S.idle = 0; beatTake(); if (!e.repeat) beatStep(e.code === 'ArrowRight' ? 1 : -1); return; } // with beats ← → step the items, they do not steer
+    if (e.code === 'Escape') { if (S.photo) { togglePhoto(false); return; } if (KS.open) { beatTake(); closeKiosk('drive'); return; } deactivate(); return; }
     if (GAME_KEYS.indexOf(e.code) >= 0) e.preventDefault();
     if (e.code === 'KeyL' && !e.repeat) { S.lights = !S.lights; toast(S.lights ? 'Faróis ligados' : 'Faróis desligados', 0.9); return; }
     keys.add(e.code); S.idle = 0;
@@ -6747,7 +6767,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
       esqMute: function (m) { if (ESQI) { ESQI.mute = !!m; } },
       estrada: function () { const O = ABI; if (!O) return null; return { state: O.state, cleared: O.cleared, v: O.v, items: O.items.map(function (b) { return { x: b.x, z: b.z, r: b.r, mass: b.mass, prop: b.prop, awake: b.awake }; }), tractor: { x: O.tb.x, z: O.tb.z }, engineers: O.eng.map(function (p) { return { x: p.root.position.x, z: p.root.position.z, anim: p.anim, outfit: p.outfit }; }) }; },
       convoy: function () { return CVI ? CVI.snapshot() : null; },
-      pilot: function (pts) { world.waypoints = pts.map(function (p) { return { x: p[0], z: p[1], r: p[2] || 4, v: p[3], dwell: p[4] }; }); S.wp = 0; S.dwell = 0; S.unstick = 0; S.stuck = 0; S.demo = true; S.idle = 99; }, // test: the attract-mode autopilot drives these points [x, z]
+      pilot: function (pts) { world.demoWps = null; world.waypoints = pts.map(function (p) { return { x: p[0], z: p[1], r: p[2] || 4, v: p[3], dwell: p[4] }; }); S.wp = 0; S.dwell = 0; S.unstick = 0; S.stuck = 0; S.demo = true; S.idle = 99; }, // test: the attract-mode autopilot drives these points [x, z]
       bridgeDown: bridgeDown, bridgeTest: function (st) { return BRIDGE_TEST ? BRIDGE_TEST(st) : false; },
       telao: function () { const T = TELI; if (!T) return null; return { x: T.x, z: T.z, ry: T.ry, cadets: T.cadets.map(function (p) { return { x: p.root.position.x, y: p.root.position.y, z: p.root.position.z, h: p.h, anim: p.anim, outfit: p.outfit }; }) }; },
       tfm: function () { const I = TFMI; if (!I) return null; const pe = function (p) { return { x: p.root.position.x, z: p.root.position.z, h: p.h, anim: p.anim, outfit: p.outfit }; }; return { text: JSON.parse(JSON.stringify(I.text)), said: I.said, x: I.x, z: I.z, inst: pe(I.inst), platoon: I.platoon.map(pe), stands: I.stands.map(pe) }; },
