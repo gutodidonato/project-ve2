@@ -6088,6 +6088,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
       const tools = box('.tools'), top = (tools ? tools.bottom : 12) + gap, bottom = Hh - above(['.dash', '.zoom']) + gap, w = Math.min(520, W * (Hh <= 500 ? 0.45 : 0.4));
       st.right = gap + 'px'; st.top = top + 'px'; st.bottom = bottom + 'px'; st.width = w + 'px'; KS.nx = (W - w - gap) / W - 1; KS.ny = 0; KS.sheet = false;
     }
+    if (KB.on) beatScroll();
   }
   // The beats (spec 2026-10-28): on a stop whose items each happen somewhere in the place (KIOSK_DATA's beats), the item lit is the
   // one the camera shows. Each place registers its anchor for the era (beatPlace, emptied when an era is built): a camera in world
@@ -6099,14 +6100,19 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
   const KBV = { pos: new THREE.Vector3(), look: new THREE.Vector3() };
   // the destination of the current beat's camera: the place's own, 1.6x further back on a phone held upright (as kioskFrame)
   function beatTo() { const p = KB.cur; KB.toPos.fromArray(p.cam.pos); KB.toLook.fromArray(p.cam.look); if (KS.sheet) KB.toPos.sub(KB.toLook).multiplyScalar(1.6).add(KB.toLook); }
+  // the current item in view: the panel scrolls itself (never the page), clear of the buttons stuck at its bottom; again after the
+  // panel changes its layout (a phone turned), which leaves its scroll where it was
+  function beatScroll() {
+    const el = KB.els[KB.i], box = $('kiosk'); if (!el || box.scrollHeight <= box.clientHeight) return;
+    const r = el.getBoundingClientRect(), R = box.getBoundingClientRect(), acts = box.querySelector('.acts').offsetHeight;
+    if (r.top < R.top + 8 || r.bottom > R.bottom - acts - 8) box.scrollTop += r.top - R.top - 12;
+  }
   function beatGo(i) {
     if (!KB.on || i < 0 || i >= KB.n) return;
     if (KB.cur) { const c = KB.cur; KB.cur = null; c.stop(); }
     KB.i = i; KB.t = 0;
     KB.els.forEach(function (el, j) { if (el) { el.classList.toggle('beat-on', j === i); el.classList.toggle('beat-dim', j !== i); } });
-    // the item in view: the panel scrolls itself (never the page), clear of the buttons stuck at its bottom
-    const el = KB.els[i], box = $('kiosk');
-    if (el && box.scrollHeight > box.clientHeight) { const r = el.getBoundingClientRect(), R = box.getBoundingClientRect(), acts = box.querySelector('.acts').offsetHeight; if (r.top < R.top + 8 || r.bottom > R.bottom - acts - 8) box.scrollTop += r.top - R.top - 12; }
+    beatScroll();
     const L = KIOSK_DATA.LABELS; $('kNext').textContent = i < KB.n - 1 ? L.item + ' · ' + (i + 2) + '/' + KB.n : L.next;
     // the camera goes from where it is, looking where it looked, to the place's frame; over 30 m it climbs in an arc
     const p = BEATS[KB.list[i].place] || null; KB.fromPos.copy(camPos); KB.fromLook.copy(camLook); KB.k = 0; KB.cur = p;
