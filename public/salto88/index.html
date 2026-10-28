@@ -6124,7 +6124,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
   function kioskNext() { beatTake(); if (KB.on) beatStep(1); else closeKiosk('next'); }
   function beatsOff() {
     if (KB.cur) { const c = KB.cur; KB.cur = null; c.stop(); }
-    if (KB.auto) S.dwell = Math.min(S.dwell, 0.01); // the demo's hold at the bay ends with its kiosk
+    if (KB.auto) demoRelease(); // the demo's hold at the bay ends with its kiosk
     KB.els.forEach(function (el) { if (el) { el.classList.remove('beat-on', 'beat-dim'); delete el.dataset.beat; } });
     KB.on = false; KB.auto = false; KB.els = []; KB.list = []; KB.n = 0; KB.i = 0; KB.k = 1;
   }
@@ -6140,7 +6140,10 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
   // the last it closes and lets the demo's hold go (S.dwell). A click or a touch on the panel or the screen, or a kiosk key, takes it
   // over: the demo stops and the kiosk stays on its item, the visitor's now. A driving key gives the wheel back as it always does.
   function beatAuto(dt) { KB.t += dt; if (KB.t < 6) return; if (KB.i < KB.n - 1) beatGo(KB.i + 1); else closeKiosk('auto'); }
-  function beatTake() { if (!KB.auto) return; KB.auto = false; S.demo = false; S.idle = 0; S.dwell = Math.min(S.dwell, 0.01); activate(); }
+  function beatTake() { if (!KB.auto) return; KB.auto = false; S.demo = false; S.idle = 0; demoRelease(); activate(); }
+  // the demo's hold at the bay ends: it goes on from the way out (the route's demoExit), whether the kiosk opened before or after the
+  // bay's own 3 s wait ran out (after, the route had already moved on to the way out; a release there must not skip it)
+  function demoRelease() { S.dwell = 0; if (world && world.demoWps && world.demoExit !== undefined) S.wp = Math.max(S.wp, world.demoExit); }
   function openKiosk(st, auto) {
     const d = KIOSK_DATA.KIOSK[st.id] || { head: null, period: null, bullets: [], cases: [], video: null, highlight: true }, card = st.card || { title: '', period: '', text: '' }, L = KIOSK_DATA.LABELS;
     if (S.tour && S.tour.target === st) tourStop('arrived');
@@ -6187,6 +6190,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     // the way out, as the way in: 5 m ahead of the bay brought onto the road, so the car turns back into the street instead of driving
     // down the sidewalk into the corner's kit
     const e = tourRoad(st), fx = st.x - Math.sin(st.h) * 5, fz = st.z - Math.cos(st.h) * 5, q = tourProj(fx, fz), k = q.d > 2.6 ? 2.6 / q.d : 1;
+    world.demoExit = 2;
     return [{ x: e.x, z: e.z, r: 2.5, v: 6 }, { x: st.x, z: st.z, r: 1.2, v: 3, dwell: 3 }, { x: q.x + (fx - q.x) * k, z: q.z + (fz - q.z) * k, r: 3, v: 8 }].concat(world.waypoints.slice(1));
   }
   function tourDeck(st) { return world.flight && st.y !== undefined; }
