@@ -3343,6 +3343,64 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
         upd.push(function (dt) { if (!BN.playing) return; BN.t += dt; if (BN.t >= 1.5) { BN.t -= 1.5; BN.step = (BN.step + 1) % 4; paint(); } });
         beatPlace('bancada', { cam: { pos: [6.2, 2.4, 62.4], look: [11.4, 1.3, 59.7] }, play: function () { BN.playing = true; BN.t = 0; BN.step = 0; paint(); }, stop: function () { BN.playing = false; if (BN.step !== 3) { BN.step = 3; paint(); } }, state: function () { return { step: BN.step, cols: BN.cols.slice(), draws: BN.draws, playing: BN.playing }; } });
       }
+      // The beats of the two cases (spec 2026-10-28 §4.2): small scenes by the bay, made once for the era, running only as their beat.
+      // Oceans-20 (the recycling point by the office's south corner, in the strip between the walkers and the building, off the way a
+      // car leaves the bay): someone photographs a bag with a phone, a cargo bicycle comes up the pavement, takes it and rides off.
+      // The bike check (the rack by the bay, now with a bicycle in it): someone photographs it and a detection frame draws itself round it.
+      const BK = bikeKit(), phoneGeo = Bx(0.08, 0.15, 0.012), phoneMat = new THREE.MeshBasicMaterial({ color: 0x1b1f2e });
+      // a bicycle with no rider: bikeKit's frame without the rider's parts, and its two wheels
+      function parkedBike(col) {
+        const g = new THREE.Group(), R = [0, 0.34, 0.62], F = [0, 0.34, -0.62], BB = [0, 0.3, 0.08], St = [0, 0.92, 0.24], H = [0, 0.88, -0.5], Hb = [0, 0.64, -0.55];
+        [-0.62, 0.62].forEach(function (z) { const w = new THREE.Mesh(BK.wheel, BK.mat); w.position.set(0, 0.34, z); g.add(w); });
+        g.add(new THREE.Mesh(mergeParts([TUBE(R, BB, 0.018, col), TUBE(BB, St, 0.02, col), TUBE(St, R, 0.014, col), TUBE(BB, Hb, 0.024, col), TUBE(St, H, 0.02, col), TUBE(Hb, H, 0.024, col), TUBE(Hb, F, 0.016, 0xb8bcc8), PT(Bx(0.58, 0.025, 0.025), 0, 0.92, -0.5, 0, 0, 0, 0x15151a), PT(Bx(0.1, 0.04, 0.22), 0, 0.95, 0.26, 0, 0, 0, 0x15151a)]), BK.mat));
+        return g;
+      }
+      // someone holding a phone up to take a picture (the phone shows only while they do)
+      function photographer(kind, x, z, tx, tz) { const p = spawnPerson({ kind: kind, x: x, z: z, h: plFacing(tx - x, tz - z), anim: 'idle' }), ph = new THREE.Mesh(phoneGeo, phoneMat); ph.position.set(0, 1.3, -0.34); ph.visible = false; p.root.add(ph); p.phone = ph; p.noCall = true; return p; } // a scene's person: the stop's call does not turn them
+      function shoot(p, on) { p.phone.visible = on; p.play(on ? 'holding-both' : 'idle'); }
+      const ECO = { phase: 'rest', t: 0, playing: false, bins: [10.9, 53.1] };
+      {
+        const P = []; [53.1, 53.8, 54.5].forEach(function (z, k) { P.push([Bx(0.6, 0.95, 0.6), 10.9, 0.475, z, 0, [0x2e9e4f, 0x2f6fd0, 0xf2c230][k]], [Bx(0.64, 0.06, 0.64), 10.9, 0.98, z, 0, 0x222630]); });
+        const bins = new THREE.Mesh(kitGeo(P), propMat); bins.name = 'ecoponto'; grp.add(bins); const bc = addBoxCol(10.9, 53.8, 0.32, 1.02, 0, 0, 1.0); bc.name = 'ecoponto';
+        const bag = new THREE.Mesh(new THREE.SphereGeometry(0.28, 10, 8), new THREE.MeshStandardMaterial({ color: 0x23262e, roughness: 0.9 })); bag.scale.set(1, 0.75, 1); bag.position.set(10.45, 0.21, 52.6); grp.add(bag);
+        const who = photographer('male-c', 10.6, 51.4, 10.45, 52.6);
+        // the cargo bicycle: the city's bicycle (its rider is the collector) with a crate over the front wheel; it comes up the pavement at x 9,8
+        const cb = cityBike(BK, 5), crate = new THREE.Mesh(Bx(0.7, 0.45, 0.6), new THREE.MeshStandardMaterial({ color: 0x8a6a44, roughness: 0.8 })); crate.position.set(0, 0.8, -0.8); cb.add(crate); cb.position.set(9.8, 0, 40); cb.visible = false; grp.add(cb);
+        const Z0 = 40, Z1 = 52.3, wheels = cb.userData.wheels;
+        function ecoAt(z, h) { const dz = z - cb.position.z; cb.position.z = z; cb.rotation.y = h; for (let k = 0; k < wheels.length; k++) wheels[k].rotation.x -= Math.abs(dz) / 0.34; }
+        function ecoRest() { ECO.phase = 'rest'; ECO.t = 0; bag.visible = true; cb.visible = false; cb.position.z = Z0; shoot(who, false); }
+        // 9,4 s a round: the photo (1,6 s), the bicycle comes (3 s), the collection (1 s: the bag goes at its end), it rides off (3 s) and is gone
+        upd.push(function (dt) {
+          if (!ECO.playing) return; ECO.t += dt; if (ECO.t >= 9.4) { ECO.t = 0; bag.visible = true; }
+          const t = ECO.t, ph = t < 1.6 ? 'foto' : t < 4.6 ? 'chega' : t < 5.6 ? 'coleta' : 'sai';
+          if (ph !== ECO.phase) { if (ECO.phase === 'coleta') bag.visible = false; ECO.phase = ph; shoot(who, ph === 'foto'); cb.visible = ph !== 'foto'; }
+          if (ph === 'chega') ecoAt(Z0 + (Z1 - Z0) * (t - 1.6) / 3, Math.PI); else if (ph === 'coleta') ecoAt(Z1, Math.PI); else if (ph === 'sai') { ecoAt(Z1 - (Z1 - Z0) * Math.min(1, (t - 5.6) / 3), 0); if (t > 8.6) cb.visible = false; }
+        });
+        beatPlace('ecoponto', { cam: { pos: [6.4, 2.8, 46.5], look: [10.3, 0.8, 52.4] }, play: function () { ECO.playing = true; ecoRest(); ECO.phase = 'foto'; shoot(who, true); }, stop: function () { ECO.playing = false; ecoRest(); }, state: function () { return { phase: ECO.phase, bag: bag.visible, bike: { x: cb.position.x, z: cb.position.z, visible: cb.visible }, bins: ECO.bins.slice() }; } });
+      }
+      const VIS = { phase: 'rest', t: 0, playing: false };
+      {
+        const vb = parkedBike(0x2156c8); vb.position.set(8.6, 0, 66.4); vb.rotation.y = Math.PI / 2; vb.name = 'bicicleta-da-vistoria'; grp.add(vb); vb.updateMatrixWorld(true);
+        const bb = new THREE.Box3().setFromObject(vb), mn = bb.min.clone().subScalar(0.1), mx = bb.max.clone().addScalar(0.1), c = mn.clone().add(mx).multiplyScalar(0.5), sz = mx.clone().sub(mn), T = 0.03;
+        VIS.bike = { min: bb.min.toArray(), max: bb.max.toArray() }; VIS.box = { min: mn.toArray(), max: mx.toArray() };
+        // the frame: 12 thin edges drawn over everything (an overlay, as a detection is), shown one after another from corner to corner
+        const fm = new THREE.MeshBasicMaterial({ color: S.era.color, toneMapped: false, depthTest: false, transparent: true, opacity: 0.95 }), edges = [];
+        const E = [];
+        [mn.y, mx.y].forEach(function (y) { [mn.z, mx.z].forEach(function (z) { E.push([sz.x + T, T, T, c.x, y, z]); }); });
+        [mn.x, mx.x].forEach(function (x) { [mn.z, mx.z].forEach(function (z) { E.push([T, sz.y + T, T, x, c.y, z]); }); });
+        [mn.x, mx.x].forEach(function (x) { [mn.y, mx.y].forEach(function (y) { E.push([T, T, sz.z + T, x, y, c.z]); }); });
+        E.forEach(function (e) { const m = new THREE.Mesh(Bx(e[0], e[1], e[2]), fm); m.position.set(e[3], e[4], e[5]); m.renderOrder = 6; m.visible = false; grp.add(m); edges.push(m); });
+        const who = photographer('female-d', 10.2, 65.2, 8.6, 66.4);
+        function frame(n) { for (let k = 0; k < edges.length; k++) edges[k].visible = k < n; }
+        function visRest() { VIS.phase = 'rest'; VIS.t = 0; frame(0); shoot(who, false); }
+        // 5 s a round: the photo (1,2 s), the frame draws itself (0,6 s), it stays (2,5 s), then the phone again
+        upd.push(function (dt) {
+          if (!VIS.playing) return; VIS.t = (VIS.t + dt) % 5; const t = VIS.t, ph = t < 1.2 || t >= 4.3 ? 'foto' : t < 1.8 ? 'caixa' : 'mostra';
+          if (ph !== VIS.phase) { VIS.phase = ph; shoot(who, ph === 'foto'); if (ph === 'foto') frame(0); else if (ph === 'mostra') frame(12); }
+          if (ph === 'caixa') frame(Math.min(12, 1 + Math.floor((t - 1.2) / 0.6 * 12)));
+        });
+        beatPlace('vistoria', { cam: { pos: [5, 2.4, 70], look: [8.6, 0.8, 66.4] }, play: function () { VIS.playing = true; visRest(); VIS.phase = 'foto'; shoot(who, true); }, stop: function () { VIS.playing = false; visRest(); }, state: function () { return { phase: VIS.phase, box: { visible: edges[11].visible, min: VIS.box.min.slice(), max: VIS.box.max.slice() }, bike: { min: VIS.bike.min.slice(), max: VIS.bike.max.slice() } }; } });
+      }
       // the place calls: the neon starts with a flicker and its glow rises, the open space brightens, the people by the door look at the street
       addStop(g, { id: 'redbit', x: cx - 12.25, z: bz, h: 0, kiosk: { cam: KS_CAM_ROAD }, card: REDBIT_CARD, call: { lights: [{ mat: neon.material, rest: 0.7, peak: 1, flicker: true }, { mat: glow.material, prop: 'opacity', rest: 0.5, peak: 0.9 }, { mat: glass.material, rest: 0.85, peak: 1 }, { mat: BN.mat, rest: 0.85, peak: 1 }], people: 9, path: true } });
       special['0,1'] = function (B, h) {
@@ -5972,7 +6030,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
   }
   function callPeople(st, C) {
     const r2 = C.people * C.people; if (!r2) return;
-    for (let i = 0; i < PEOPLE.length; i++) { const p = PEOPLE[i], ex = p.root.position.x - st.x, ez = p.root.position.z - st.z; if (p.walking || ex * ex + ez * ez > r2 || C.ppl.indexOf(p) >= 0) continue; p.callH0 = p.h; C.ppl.push(p); }
+    for (let i = 0; i < PEOPLE.length; i++) { const p = PEOPLE[i], ex = p.root.position.x - st.x, ez = p.root.position.z - st.z; if (p.walking || p.noCall || ex * ex + ez * ez > r2 || C.ppl.indexOf(p) >= 0) continue; p.callH0 = p.h; C.ppl.push(p); }
   }
   // no allocation per frame: a few lights, a path, the people near the bay
   function callStep(st, c, dx, dz, dt) {
