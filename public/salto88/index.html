@@ -355,12 +355,40 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
   const softDot = canvasTex(64, 64, function (g) { const gr = g.createRadialGradient(32, 32, 0, 32, 32, 32); gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(0.5, 'rgba(255,255,255,0.4)'); gr.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = gr; g.fillRect(0, 0, 64, 64); }); softDot.keepAlive = true;
   const measureCtx = document.createElement('canvas').getContext('2d'), LABELS = [];
   const MSHORT = {}; // the short variants of the mission lines, by the long text (a phone in portrait only; see setMission)
+  /* ------------------------------------------------ scene rules (spec 2026-10-29 §4.5) ------------------------------------------------ */
+  // What the rules check, read by the hooks sceneRules() and textFit(): SIGNS (a sign, screen or label with text: R1 reads it whole from the camera), SUBJECTS (what a stop shows:
+  // R3 keeps it clear), OVERLAYS (a 3D notice and the board it goes with: R4 keeps it off the board) and TEXTFIT (each text drawn through fitText and each badge, by canvas: R2).
+  // enterEra empties the era's lists; the highway's signs, built once, are kept apart (HW_SIGNS). A subject is an object or a world rectangle { c, ax, ay } (centre, half axes).
+  const SIGNS = [], SUBJECTS = [], OVERLAYS = [], HW_SIGNS = [], TEXTFIT = new Map();
+  function signMark(obj, name, uv) { obj.userData.sign = { name: name || null, uv: uv || [0, 0, 1, 1] }; SIGNS.push(obj); return obj; }
+  function subjectMark(id, obj, uv) { SUBJECTS.push({ id: id, obj: obj, uv: uv || [0, 0, 1, 1] }); return obj; }
+  function overlayMark(obj, board) { OVERLAYS.push({ obj: obj, board: board }); return obj; }
+  // the texts of a canvas: one slot per text, reused when the canvas is redrawn (textReset at the start of the drawing), so a redraw allocates nothing new
+  function textSlot(c) { let r = TEXTFIT.get(c.canvas); if (!r) { r = { n: 0, items: [] }; TEXTFIT.set(c.canvas, r); } return r; }
+  function textReset(c) { textSlot(c).n = 0; }
+  function textNote(c, name, text, ok, x, y, w, h, badge) { const r = textSlot(c); let e = r.items[r.n]; if (!e) { e = {}; r.items[r.n] = e; } r.n++; e.name = name; e.text = text; e.ok = ok; e.x = x; e.y = y; e.w = w; e.h = h; e.badge = !!badge; return e; }
+  // R2: a text drawn inside maxW. The font (# in place of the size, as plFit) shrinks from size down to minSize; then the text breaks into lines (lineH: the line's height
+  // as a share of the size) up to maxLines; ok is false when even that does not fit. With textBaseline middle the lines are centred on y; textAlign places them on x.
+  function fitText(c, text, x, y, maxW, font, size, minSize, lineH, maxLines, name) {
+    let fs = size; c.font = font.replace('#', fs);
+    while (c.measureText(text).width > maxW && fs > minSize) { fs--; c.font = font.replace('#', fs); }
+    let lines = [text], w = c.measureText(text).width, ok = w <= maxW;
+    if (!ok && maxLines > 1) {
+      lines = []; let cur = '';
+      text.split(' ').forEach(function (word) { const t = cur ? cur + ' ' + word : word; if (cur && c.measureText(t).width > maxW) { lines.push(cur); cur = word; } else cur = t; });
+      lines.push(cur); w = 0; lines.forEach(function (l) { w = Math.max(w, c.measureText(l).width); }); ok = lines.length <= maxLines && w <= maxW;
+    }
+    const lh = fs * lineH, h = lines.length * lh, al = c.textAlign, bl = c.textBaseline;
+    lines.forEach(function (l, k) { c.fillText(l, x, bl === 'middle' ? y + (k - (lines.length - 1) / 2) * lh : y + k * lh); });
+    const x0 = al === 'center' ? x - w / 2 : al === 'right' || al === 'end' ? x - w : x, y0 = bl === 'middle' ? y - h / 2 : bl === 'top' ? y : y - fs;
+    textNote(c, name || text, text, ok, x0, y0, w, h, false); return fs;
+  }
   function label(text, color, sub, scale) {
     scale = scale || 1;
     measureCtx.font = "500 50px 'IBM Plex Mono', monospace"; let tw = measureCtx.measureText(text).width; if (sub) { measureCtx.font = "400 30px 'IBM Plex Mono', monospace"; tw = Math.max(tw, measureCtx.measureText(sub).width); }
     const W = Math.max(512, Math.ceil(tw + 56));
     const tex = canvasTex(W, sub ? 180 : 140, function (g, w, h) { g.fillStyle = 'rgba(8,6,16,0.88)'; g.fillRect(0, 0, w, h); g.strokeStyle = color; g.lineWidth = 6; g.strokeRect(3, 3, w - 6, h - 6); g.fillStyle = color; g.textBaseline = 'middle'; g.font = "500 50px 'IBM Plex Mono', monospace"; g.fillText(text, 26, sub ? 62 : h / 2 + 2); if (sub) { g.fillStyle = '#f1ecff'; g.font = "400 30px 'IBM Plex Mono', monospace"; g.fillText(sub, 26, 132); } });
-    const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false, fog: false })); s.scale.set(5.6 * scale * W / 512, (sub ? 1.97 : 1.53) * scale, 1); LABELS.push(s); return s;
+    const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false, fog: false })); s.scale.set(5.6 * scale * W / 512, (sub ? 1.97 : 1.53) * scale, 1); LABELS.push(s); signMark(s, text); return s;
   }
   const windowTex = canvasTex(64, 128, function (g, w, h) { const R = rng(4); g.fillStyle = '#0a0812'; g.fillRect(0, 0, w, h); for (let y = 6; y < h - 6; y += 10) for (let x = 6; x < w - 6; x += 13) { const r = R(); g.fillStyle = r > 0.55 ? '#ffffff' : r > 0.4 ? '#8f86b0' : '#1a1528'; g.fillRect(x, y, 8, 6); } });
 
@@ -443,9 +471,9 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     const grp = new THREE.Group();
     grp.add(new THREE.Mesh(new THREE.BoxGeometry(w + 0.5, h + 0.5, 0.4), new THREE.MeshStandardMaterial({ color: 0x14121c, metalness: 0.5, roughness: 0.5 })));
     const mat = new THREE.MeshBasicMaterial({ color: 0xffffff, toneMapped: false, fog: !!(S.era && S.era.style === 'hive') }); // (fog in the Colmeia only: see plLit)
-    const face = new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat); face.position.z = 0.21; grp.add(face);
+    const face = new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat); face.position.z = 0.21; grp.add(face); signMark(face);
     const back = face.clone(); back.rotation.y = Math.PI; back.position.z = -0.21; grp.add(back);
-    const glow = new THREE.Mesh(new THREE.PlaneGeometry(w + 1.4, h + 1.4), new THREE.MeshBasicMaterial({ color: accent, transparent: true, opacity: 0.2, depthWrite: false })); glow.position.z = 0.19; grp.add(glow);
+    const glow = new THREE.Mesh(new THREE.PlaneGeometry(w + 1.4, h + 1.4), new THREE.MeshBasicMaterial({ color: accent, transparent: true, opacity: 0.2, depthWrite: false })); glow.position.z = 0.19; glow.userData.rayIgnore = true; grp.add(glow);
     let t = Math.random() * 2, idx = 0; const vid = !src.video ? null : Array.isArray(src.video) ? playlist(src.video) : video(src.video); const frames = src.video ? frameTex[[].concat(src.video)[0]] : null;
     if (src.canvas) mat.map = src.canvas.texture; else if (frames) mat.map = frames[0];
     grp.userData.setLive = function (on) { glow.material.color.setHex(on ? 0xff3b3b : accent); };
@@ -3441,7 +3469,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
   // canvases and materials are made once for the era and hang from its world group; a block adds only the colliders, the curb opening of its bay and the places of its people. Nothing here allocates in a frame: the
   // canvases are redrawn only when what they show changes, the particles live in typed arrays and one instanced mesh.
   const plBx = function (w, h, d) { return new THREE.BoxGeometry(w, h, d); }, plCy = function (rt, rb, h, s) { return new THREE.CylinderGeometry(rt, rb, h, s || 10); }, plPl = function (w, h) { return new THREE.PlaneGeometry(w, h); };
-  const plBoard = function (grp, tex, w, h, x, y, z, ry, o) { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), plLit(tex, o)); m.position.set(x, y, z); m.rotation.y = ry; grp.add(m); return m; };
+  const plBoard = function (grp, tex, w, h, x, y, z, ry, o) { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), plLit(tex, o)); m.position.set(x, y, z); m.rotation.y = ry; grp.add(m); signMark(m); return m; };
   const plEase3 = function (x) { return 1 - Math.pow(1 - x, 3); }; // easeOutCubic
   const plCan = function (w, h) { const cv = document.createElement('canvas'); cv.width = w; cv.height = h; const t = new THREE.CanvasTexture(cv); t.encoding = THREE.sRGBEncoding; t.anisotropy = 4; return { cv: cv, c: cv.getContext('2d'), tex: t, w: w, h: h }; }; // a canvas that is redrawn now and then
   // the size (from `size` down) at which `text` fits `maxW` px; `font` has a # where the size goes; the context is left with that font
@@ -3711,48 +3739,50 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
   // kind: 'web' (a streaming site), 'tv' (an Android TV home), 'live' (a player), 'banner' (the three clients), 'standby' (dark, waiting), 'welcome' (the hotel), 'housi' (a small app for the apartments' TVs)
   // o: { client, title, accent, t (seconds, for what moves), live (the red AO VIVO frame), p (progress 0 to 1) }
   function vuiScreen(c, W, H, kind, o) {
-    o = o || {}; const acc = o.accent || VAL_CYAN, t = o.t || 0; c.save(); c.setTransform(W / 512, 0, 0, H / 288, 0, 0); c.textBaseline = 'middle'; c.textAlign = 'left';
+    o = o || {}; const acc = o.accent || VAL_CYAN, t = o.t || 0; c.save(); c.setTransform(W / 512, 0, 0, H / 288, 0, 0); c.textBaseline = 'middle'; c.textAlign = 'left'; textReset(c);
+    const tx = function (s, x, y, font, size, maxW) { fitText(c, s, x, y, maxW, font + VUI_SANS, size, Math.round(size * 0.7), 1.1, 1); }, tm = function (s, x, y, font, size, maxW) { fitText(c, s, x, y, maxW, font + VUI_MONO, size, Math.round(size * 0.7), 1.1, 1); };
     const bg = c.createLinearGradient(0, 0, 0, 288); bg.addColorStop(0, '#070d1f'); bg.addColorStop(1, '#111a3e'); c.fillStyle = bg; c.fillRect(0, 0, 512, 288);
     if (kind === 'web') {
-      c.fillStyle = '#0b1330'; c.fillRect(0, 0, 512, 32); c.fillStyle = acc; vuiRR(c, 12, 8, 16, 16, 4); c.fill(); c.fillStyle = '#f1f5ff'; c.font = '700 14px ' + VUI_SANS; c.fillText(o.client || 'ValiantGroup', 36, 17);
-      c.fillStyle = '#8fa0c8'; c.font = '500 11px ' + VUI_SANS; ['Início', 'Catálogo', 'Ao vivo'].forEach(function (s, i) { c.fillText(s, 336 + i * 54, 17); }); c.fillStyle = '#2a3a6a'; c.beginPath(); c.arc(496, 16, 9, 0, 6.3); c.fill();
+      c.fillStyle = '#0b1330'; c.fillRect(0, 0, 512, 32); c.fillStyle = acc; vuiRR(c, 12, 8, 16, 16, 4); c.fill(); c.fillStyle = '#f1f5ff'; tx(o.client || 'ValiantGroup', 36, 17, '700 #px ', 14, 290);
+      c.fillStyle = '#8fa0c8'; ['Início', 'Catálogo', 'Ao vivo'].forEach(function (s, i) { tx(s, 336 + i * 54, 17, '500 #px ', 11, 50); }); c.fillStyle = '#2a3a6a'; c.beginPath(); c.arc(496, 16, 9, 0, 6.3); c.fill();
       const hg = c.createLinearGradient(12, 42, 500, 146); hg.addColorStop(0, '#16257a'); hg.addColorStop(1, VUI_HUE[(o.hue || 0) % 8][0]); c.fillStyle = hg; vuiRR(c, 12, 42, 488, 104, 8); c.fill();
-      c.fillStyle = '#ffffff'; c.font = '800 24px ' + VUI_SANS; c.fillText(o.title || 'Em destaque', 30, 78); vuiBars(c, 30, 94, 210, 2, 'rgba(255,255,255,0.55)'); c.fillStyle = acc; vuiRR(c, 30, 114, 86, 24, 12); c.fill(); c.fillStyle = '#04101c'; c.font = '700 12px ' + VUI_SANS; c.fillText('Assistir', 52, 126);
-      c.fillStyle = '#c8d4f5'; c.font = '600 11px ' + VUI_SANS; c.fillText('Continuar assistindo', 14, 164);
+      c.fillStyle = '#ffffff'; tx(o.title || 'Em destaque', 30, 78, '800 #px ', 24, 450); vuiBars(c, 30, 94, 210, 2, 'rgba(255,255,255,0.55)'); c.fillStyle = acc; vuiRR(c, 30, 114, 86, 24, 12); c.fill(); c.fillStyle = '#04101c'; tx('Assistir', 52, 126, '700 #px ', 12, 60);
+      c.fillStyle = '#c8d4f5'; tx('Continuar assistindo', 14, 164, '600 #px ', 11, 300);
       for (let k = 0; k < 5; k++) { vuiPoster(c, 12 + k * 100, 174, 92, 62, k + (o.hue || 0), k === 1); vuiBars(c, 12 + k * 100, 244, 70, 2); }
     } else if (kind === 'tv') {
       c.fillStyle = 'rgba(255,255,255,0.06)'; c.fillRect(0, 0, 44, 288); for (let i = 0; i < 4; i++) { c.fillStyle = i === 0 ? acc : '#35456f'; c.beginPath(); c.arc(22, 56 + i * 46, 9, 0, 6.3); c.fill(); }
-      c.fillStyle = '#f1f5ff'; c.font = '700 14px ' + VUI_SANS; c.fillText(o.client || 'ValiantGroup', 62, 22); c.textAlign = 'right'; c.fillStyle = '#9fb0da'; c.font = '600 13px ' + VUI_MONO; c.fillText('21:40', 496, 22); c.textAlign = 'left';
+      c.fillStyle = '#f1f5ff'; tx(o.client || 'ValiantGroup', 62, 22, '700 #px ', 14, 360); c.textAlign = 'right'; c.fillStyle = '#9fb0da'; tm('21:40', 496, 22, '600 #px ', 13, 60); c.textAlign = 'left';
       const hg = c.createLinearGradient(62, 40, 362, 166); hg.addColorStop(0, '#16257a'); hg.addColorStop(1, VUI_HUE[(o.hue || 2) % 8][0]); c.fillStyle = hg; vuiRR(c, 62, 40, 300, 126, 8); c.fill();
-      c.fillStyle = '#ffffff'; c.font = '800 22px ' + VUI_SANS; c.fillText(o.title || 'Em destaque', 80, 78); vuiBars(c, 80, 94, 180, 2, 'rgba(255,255,255,0.55)'); c.fillStyle = '#ffffff'; vuiRR(c, 80, 130, 84, 22, 11); c.fill(); c.fillStyle = '#06101f'; c.font = '700 12px ' + VUI_SANS; c.fillText('Assistir', 100, 141);
+      c.fillStyle = '#ffffff'; tx(o.title || 'Em destaque', 80, 78, '800 #px ', 22, 270); vuiBars(c, 80, 94, 180, 2, 'rgba(255,255,255,0.55)'); c.fillStyle = '#ffffff'; vuiRR(c, 80, 130, 84, 22, 11); c.fill(); c.fillStyle = '#06101f'; tx('Assistir', 100, 141, '700 #px ', 12, 58);
       vuiPoster(c, 374, 40, 126, 58, 1 + (o.hue || 0), false); vuiPoster(c, 374, 108, 126, 58, 4 + (o.hue || 0), false);
-      c.fillStyle = '#c8d4f5'; c.font = '600 11px ' + VUI_SANS; c.fillText('Aplicativos', 64, 188); for (let k = 0; k < 6; k++) { vuiPoster(c, 62 + k * 74, 200, 62, 62, k + (o.hue || 0), k === 0); }
+      c.fillStyle = '#c8d4f5'; tx('Aplicativos', 64, 188, '600 #px ', 11, 200); for (let k = 0; k < 6; k++) { vuiPoster(c, 62 + k * 74, 200, 62, 62, k + (o.hue || 0), k === 0); }
     } else if (kind === 'live') {
       const sg = c.createRadialGradient(256, 120, 10, 256, 130, 280); sg.addColorStop(0, '#34489a'); sg.addColorStop(1, '#050816'); c.fillStyle = sg; c.fillRect(0, 0, 512, 288);
       c.fillStyle = 'rgba(255,255,255,0.07)'; [[150, 60], [256, 40], [362, 60]].forEach(function (q) { c.beginPath(); c.moveTo(q[0], 0); c.lineTo(q[0] - 70 + (q[0] - 256) * 0.3, 270); c.lineTo(q[0] + 70 + (q[0] - 256) * 0.3, 270); c.fill(); });
       [[190, 138], [256, 126], [322, 138]].forEach(function (q, i) { c.fillStyle = '#0a1024'; c.beginPath(); c.arc(q[0], q[1], 17, 0, 6.3); c.fill(); c.beginPath(); c.moveTo(q[0] - 34, 246); c.quadraticCurveTo(q[0], q[1] + 12 - i * 2, q[0] + 34, 246); c.fill(); });
       c.fillStyle = 'rgba(5,8,22,0.78)'; c.fillRect(0, 252, 512, 36); c.fillStyle = '#3a4a80'; c.fillRect(16, 270, 480, 4); c.fillStyle = acc; c.fillRect(16, 270, 480 * (o.p === undefined ? 0.42 : o.p), 4); c.beginPath(); c.arc(16 + 480 * (o.p === undefined ? 0.42 : o.p), 272, 6, 0, 6.3); c.fill();
-      c.fillStyle = '#f1f5ff'; c.font = '700 13px ' + VUI_SANS; c.fillText(o.title || 'Web e Android TV', 16, 261);
+      c.fillStyle = '#f1f5ff'; tx(o.title || 'Web e Android TV', 16, 261, '700 #px ', 13, 340);
       if (!o.live) { c.fillStyle = 'rgba(255,255,255,0.85)'; c.beginPath(); c.arc(256, 140, 30, 0, 6.3); c.fill(); c.fillStyle = '#10183a'; c.beginPath(); c.moveTo(246, 124); c.lineTo(246, 156); c.lineTo(274, 140); c.fill(); }
     } else if (kind === 'banner') {
       const g2 = c.createLinearGradient(0, 0, 512, 288); g2.addColorStop(0, '#0a1a5a'); g2.addColorStop(1, '#0d6a8a'); c.fillStyle = g2; c.fillRect(0, 0, 512, 288);
       c.fillStyle = 'rgba(255,255,255,0.06)'; for (let k = -2; k < 9; k++) { c.beginPath(); c.moveTo(k * 70, 0); c.lineTo(k * 70 + 36, 0); c.lineTo(k * 70 - 90, 288); c.lineTo(k * 70 - 126, 288); c.fill(); }
-      ['Hospital Sírio-Libanês', 'Housi', 'Fiesta Americana'].forEach(function (s, i) { c.fillStyle = VUI_HUE[[2, 1, 4][i]][0]; c.beginPath(); c.arc(40, 64 + i * 52, 9, 0, 6.3); c.fill(); c.fillStyle = '#ffffff'; c.font = '800 33px ' + VUI_SANS; c.fillText(s, 64, 64 + i * 52); });
-      c.fillStyle = acc; vuiRR(c, 30, 226, 210, 34, 17); c.fill(); c.fillStyle = '#04101c'; c.font = '800 17px ' + VUI_SANS; c.fillText('Web e Android TV', 52, 243);
+      ['Hospital Sírio-Libanês', 'Housi', 'Fiesta Americana'].forEach(function (s, i) { c.fillStyle = VUI_HUE[[2, 1, 4][i]][0]; c.beginPath(); c.arc(40, 64 + i * 52, 9, 0, 6.3); c.fill(); c.fillStyle = '#ffffff'; fitText(c, s, 64, 64 + i * 52, 428, '800 #px ' + VUI_SANS, 33, 22, 1.05, 2); });
+      c.fillStyle = acc; vuiRR(c, 30, 226, 210, 34, 17); c.fill(); c.fillStyle = '#04101c'; tx('Web e Android TV', 52, 243, '800 #px ', 17, 180);
     } else if (kind === 'standby') {
       c.fillStyle = '#04060d'; c.fillRect(0, 0, 512, 288); c.strokeStyle = 'rgba(80,100,160,0.10)'; c.lineWidth = 1; for (let x = 0; x < 512; x += 32) { c.beginPath(); c.moveTo(x, 0); c.lineTo(x, 288); c.stroke(); } for (let y = 0; y < 288; y += 32) { c.beginPath(); c.moveTo(0, y); c.lineTo(512, y); c.stroke(); }
-      c.textAlign = 'center'; c.fillStyle = '#2c3a66'; c.font = '700 54px ' + VUI_MONO; c.fillText('21:40', 256, 118); c.fillStyle = '#3a4a7a'; c.font = '600 18px ' + VUI_SANS; c.fillText(o.client || 'ValiantGroup', 256, 176); c.font = '500 13px ' + VUI_SANS; c.fillStyle = '#2c3a66'; c.fillText('em espera', 256, 206);
+      c.textAlign = 'center'; c.fillStyle = '#2c3a66'; tm('21:40', 256, 118, '700 #px ', 54, 300); c.fillStyle = '#3a4a7a'; tx(o.client || 'ValiantGroup', 256, 176, '600 #px ', 18, 470); c.fillStyle = '#2c3a66'; tx('em espera', 256, 206, '500 #px ', 13, 300);
     } else if (kind === 'welcome') {
       const g3 = c.createLinearGradient(0, 0, 512, 288); g3.addColorStop(0, '#2a0f5a'); g3.addColorStop(1, '#0d7a9a'); c.fillStyle = g3; c.fillRect(0, 0, 512, 288);
       c.fillStyle = 'rgba(255,255,255,0.10)'; c.beginPath(); c.arc(430, 250, 140, 0, 6.3); c.fill(); c.beginPath(); c.arc(70, 20, 90, 0, 6.3); c.fill();
-      c.textAlign = 'center'; c.fillStyle = '#ffffff'; c.font = '800 64px ' + VUI_SANS; c.fillText('Bem-vindo', 256, 112); c.font = '600 28px ' + VUI_SANS; c.fillStyle = '#c9f6ff'; c.fillText(o.client || 'Fiesta Americana', 256, 172); c.font = '500 18px ' + VUI_SANS; c.fillStyle = '#e8f0ff'; c.fillText('Seu quarto · TV · Web e Android TV', 256, 218);
+      c.textAlign = 'center'; c.fillStyle = '#ffffff'; tx('Bem-vindo', 256, 112, '800 #px ', 64, 470); c.fillStyle = '#c9f6ff'; tx(o.client || 'Fiesta Americana', 256, 172, '600 #px ', 28, 470); c.fillStyle = '#e8f0ff'; tx('Seu quarto · TV · Web e Android TV', 256, 218, '500 #px ', 18, 470);
     } else if (kind === 'housi') {
       const g4 = c.createLinearGradient(0, 0, 0, 288); g4.addColorStop(0, '#0f6a8a'); g4.addColorStop(1, '#10285a'); c.fillStyle = g4; c.fillRect(0, 0, 512, 288);
-      c.fillStyle = 'rgba(4,16,28,0.55)'; c.fillRect(0, 0, 512, 52); c.fillStyle = '#ffffff'; c.font = '800 34px ' + VUI_SANS; c.fillText('Housi', 24, 27);
+      c.fillStyle = 'rgba(4,16,28,0.55)'; c.fillRect(0, 0, 512, 52); c.fillStyle = '#ffffff'; tx('Housi', 24, 27, '800 #px ', 34, 460);
       for (let k = 0; k < 3; k++) { vuiPoster(c, 24 + k * 158, 80, 144, 90, k * 2 + 1, k === 1); } c.fillStyle = 'rgba(255,255,255,0.8)'; c.fillRect(24, 200, 300, 12); c.fillRect(24, 226, 210, 12);
     }
     if (o.live) { // the red AO VIVO: a frame and the badge
-      c.strokeStyle = VAL_RED; c.lineWidth = 8; c.strokeRect(4, 4, 504, 280); c.fillStyle = VAL_RED; vuiRR(c, 20, 18, 118, 34, 8); c.fill(); c.fillStyle = '#ffffff'; c.beginPath(); c.arc(40, 35, 7 + 1.5 * Math.sin(t * 6), 0, 6.3); c.fill(); c.font = '800 20px ' + VUI_SANS; c.textAlign = 'left'; c.fillText('AO VIVO', 54, 36);
+      c.strokeStyle = VAL_RED; c.lineWidth = 8; c.strokeRect(4, 4, 504, 280); c.fillStyle = VAL_RED; vuiRR(c, 378, 238, 118, 34, 8); c.fill(); c.fillStyle = '#ffffff'; c.beginPath(); c.arc(398, 255, 7 + 1.5 * Math.sin(t * 6), 0, 6.3); c.fill(); c.font = '800 20px ' + VUI_SANS; c.textAlign = 'left'; c.fillText('AO VIVO', 412, 256);
+      textNote(c, 'selo AO VIVO', 'AO VIVO', true, 378, 238, 118, 34, true); /* spec 2026-10-29 §5.3: at the top left it covered the client's name and the title */
     }
     c.restore();
   }
@@ -3848,11 +3878,15 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     const g = K.g, grp = new THREE.Group(); grp.name = 'praca-dos-teloes'; g.add(grp);
     const PZ = { live: false, liveAt: -1, acc: 0, flips: 0, ray: 0, rayT: 0, spin: 0, yaw: -Math.PI / 2, aim: -Math.PI / 2, rays: 0, turned: 0 };
     const VAR = [['web', { client: 'ValiantGroup', title: 'Em destaque', hue: 0 }], ['live', { title: 'Web e Android TV', p: 0.42 }], ['tv', { client: 'ValiantGroup', title: 'Android TV · Início', hue: 2 }], ['banner', {}]].map(function (v) { return vuiTex(512, 288, v[0], v[1]); });
-    // the screens: [variation, w, h, x, y, z, ry]; west wall (x -31 to -27) and east wall (27 to 31) with six each, and the four ribbons (x -26 to -12 and 12 to 26; z -31 to -28 and -14 to -11)
+    // the screens: [variation, w, h, x, y, z, ry]; west wall (x -31 to -27) and east wall (27 to 31) with eight each, and the four ribbons (x -26 to -12 and 12 to 26; z -31 to -28 and -14 to -11)
     const SC = []; let n = 0;
-    [[-26.96, Math.PI / 2], [26.96, -Math.PI / 2]].forEach(function (w) { [4.9, 10.5, 16.1].forEach(function (y) { [-25.5, -16.5].forEach(function (z) { SC.push([n++ % 4, 8.8, 5.2, w[0], y, z, w[1]]); }); }); });
+    // R3 (spec 2026-10-29 §5.3): each wall's screens fit the 12.7 m between the ribbons' inner faces (z -27.36 to -14.64), two columns of 6.2 x 3.5 m in four rows; at 8.8 m wide
+    // their outer thirds stood behind the ribbons and cut the clients' names
+    [[-26.96, Math.PI / 2], [26.96, -Math.PI / 2]].forEach(function (w) { [3.9, 8.0, 12.1, 16.2].forEach(function (y) { [-24.15, -17.85].forEach(function (z) { SC.push([n++ % 4, 6.2, 3.5, w[0], y, z, w[1]]); }); }); });
     [-1, 1].forEach(function (sd) { [[-27.36, 0], [-14.64, Math.PI]].forEach(function (e) { [4.5, 8.6].forEach(function (y) { [-22.5, -15.5].forEach(function (x) { SC.push([n++ % 4, 6.4, 3.6, sd * Math.abs(x), y, e[0], e[1]]); }); }); }); });
     const parts = [[], [], [], []]; SC.forEach(function (s) { parts[s[0]].push([plPl(s[1], s[2]), s[3], s[4], s[5], s[6]]); });
+    // R3: the east wall's six screens are what the stop's camera shows (one world rectangle each: centre, half width along the wall, half height)
+    SC.forEach(function (s, k) { if (s[3] > 26) subjectMark('praca-dos-teloes', { name: 'tela-leste-' + k, c: [s[3], s[4], s[5]], ax: [Math.cos(s[6]) * s[1] / 2, 0, -Math.sin(s[6]) * s[1] / 2], ay: [0, s[2] / 2, 0] }); });
     VAR.forEach(function (k, v) { const m = new THREE.Mesh(kitGeo(parts[v]), plLit(k.tex)); m.name = 'telao-da-praca-' + v; grp.add(m); });
     // the walls, the ribbons' bodies and the trim (cyan lines along the tops), the plinth and the paving of both blocks, the bleachers of the west block
     const W = [], tier = [0.5, 1.0, 1.5], TX0 = [-26.6, -24.0, -21.4];
@@ -3871,7 +3905,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     const pave = plTile(256, 256, function (c, Wd, H) { c.fillStyle = '#16294a'; c.fillRect(0, 0, Wd, H); const R = rng(17); for (let i = 0; i < 500; i++) { c.fillStyle = 'rgba(' + (R() < 0.5 ? '120,170,255' : '8,14,40') + ',0.06)'; c.fillRect(R() * Wd, R() * H, 6 + R() * 16, 6 + R() * 16); } c.fillStyle = 'rgba(70,120,200,0.45)'; for (let k = 0; k <= 4; k++) { c.fillRect(k * 64 - 1, 0, 2, H); c.fillRect(0, k * 64 - 1, Wd, 2); } c.fillStyle = '#3ee8ff'; c.fillRect(0, 0, Wd, 3); c.fillRect(0, 0, 3, H); }, 5, 5);
     [-21, 21].forEach(function (x) { const f = new THREE.Mesh(new THREE.PlaneGeometry(21, 21), plStd({ map: pave, roughness: 0.85, polygonOffset: true, polygonOffsetFactor: -3, polygonOffsetUnits: -3 })); f.rotation.x = -Math.PI / 2; f.position.set(x, 0.045, -21); f.name = 'piso-da-praca'; grp.add(f); });
     // the giant remote: the body and the lit details (buttons, the LED) are two meshes on a group that turns; on a plinth (a round platform with a cyan edge)
-    const RX = 19.0, RZ = -21, remote = new THREE.Group(); remote.name = 'controle-remoto-gigante'; remote.position.set(RX, 0.6, RZ); remote.rotation.y = PZ.yaw; grp.add(remote);
+    const RX = 15.5, RZ = -24.6, remote = new THREE.Group(); /* R3: at (19, -21) it stood between the stop's camera and the east wall's lower screens */ remote.name = 'controle-remoto-gigante'; remote.position.set(RX, 0.6, RZ); remote.rotation.y = PZ.yaw; grp.add(remote);
     const bodyP = [[plBx(1.3, 6.0, 0.7), 0, 3.0, 0, 0, 0x1b2340], [plBx(1.36, 0.5, 0.76), 0, 5.75, 0, 0, 0x0f1530], [plBx(1.0, 0.16, 0.06), 0, 0.3, 0.37, 0, 0x3ee8ff]], det = [[plBx(0.5, 0.14, 0.08), 0, 5.75, 0.4, 0, 0xff2b3d], [plCy(0.16, 0.16, 0.08, 12).rotateX(Math.PI / 2), -0.45, 5.15, 0.38, 0, 0xff2b3d], [plCy(0.46, 0.46, 0.08, 22).rotateX(Math.PI / 2), 0, 4.2, 0.38, 0, 0x2c3a6a], [plCy(0.2, 0.2, 0.1, 14).rotateX(Math.PI / 2), 0, 4.2, 0.4, 0, 0x3ee8ff]];
     [[-0.45, 0xff2b3d], [-0.15, 0x46ff8a], [0.15, 0xf2c230], [0.45, 0x4f8cff]].forEach(function (q) { det.push([plCy(0.13, 0.13, 0.08, 12).rotateX(Math.PI / 2), q[0], 3.3, 0.38, 0, q[1]]); });
     for (let r = 0; r < 4; r++) for (let q = -1; q <= 1; q++) det.push([plBx(0.3, 0.2, 0.06), q * 0.38, 2.6 - r * 0.42, 0.37, 0, 0x34457a]);
@@ -3886,11 +3920,12 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
         [plBx(17.1, 0.2, 0.5), 0, BG.y + 4.95, -11.9, 0, 0x3ee8ff], [plBx(17.1, 0.2, 0.5), 0, BG.y - 4.95, -11.9, 0, 0x3ee8ff], [plBx(0.2, 9.9, 0.5), -8.5, BG.y, -11.9, 0, 0x3ee8ff], [plBx(0.2, 9.9, 0.5), 8.5, BG.y, -11.9, 0, 0x3ee8ff]];
       [-12, -8, -4, 0, 4, 8, 12].forEach(function (x) { fr.push([plBx(0.3, 1.0, 0.3), x, 10.7, -11.62, 0, 0x3ee8ff]); }); // the truss's lit studs
       const tm = vBasic(fr); tm.name = 'trelica-do-telao-de-chegada'; grp.add(tm); }
-    const bigMat = plLit(VAR[BG.order[0]].tex), big = new THREE.Mesh(plPl(BG.w, BG.h), bigMat); big.position.set(BG.x, BG.y, BG.z); big.name = 'telao-de-chegada'; grp.add(big);
+    const bigMat = plLit(VAR[BG.order[0]].tex), big = new THREE.Mesh(plPl(BG.w, BG.h), bigMat); big.position.set(BG.x, BG.y, BG.z); big.name = 'telao-de-chegada'; grp.add(big); signMark(big);
     const tagTex = canvasTex(512, 128, function (c, W, H) { c.fillStyle = VAL_RED; vuiRR(c, 6, 6, W - 12, H - 12, 30); c.fill(); c.strokeStyle = '#ffd0d4'; c.lineWidth = 5; vuiRR(c, 6, 6, W - 12, H - 12, 30); c.stroke(); c.fillStyle = '#ffffff'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.font = "800 78px 'IBM Plex Sans', Arial, sans-serif"; c.fillText('AO VIVO', 306, H / 2 + 4); });
-    const tag = plBoard(grp, tagTex, 7.6, 1.9, -3.7, BG.y + BG.h / 2 - 1.2, BG.z + 0.12, 0); tag.name = 'etiqueta-ao-vivo'; tag.userData.text = 'AO VIVO';
+    // R4: the tag stands on the frame's top bar (BG.y + 5.05), off the picture it used to cover (the title and the client's name of each content)
+    const tag = plBoard(grp, tagTex, 7.6, 1.9, 0, BG.y + BG.h / 2 + 0.6 + 0.95, BG.z + 0.12, 0); tag.name = 'etiqueta-ao-vivo'; tag.userData.text = 'AO VIVO';
     const dot = new THREE.Mesh(new THREE.CircleGeometry(0.4, 18), new THREE.MeshBasicMaterial({ color: 0xffffff, toneMapped: false, fog: false })); dot.position.set(tag.position.x - 2.47, tag.position.y, BG.z + 0.14); dot.name = 'ponto-ao-vivo'; grp.add(dot);
-    const tagGlow = new THREE.Sprite(new THREE.SpriteMaterial({ map: softDot, color: 0xff3b4a, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0.55, fog: false })); tagGlow.position.set(tag.position.x, tag.position.y, BG.z + 0.3); tagGlow.scale.set(14, 5.5, 1); tagGlow.name = 'brilho-ao-vivo'; grp.add(tagGlow);
+    const tagGlow = new THREE.Sprite(new THREE.SpriteMaterial({ map: softDot, color: 0xff3b4a, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0.55, fog: false })); tagGlow.position.set(tag.position.x, tag.position.y, BG.z + 0.3); tagGlow.scale.set(14, 5.5, 1); tagGlow.name = 'brilho-ao-vivo'; overlayMark(tag, big); grp.add(tagGlow);
     // the state: live or not, in the same frame for the four canvases
     function setLive(on) {
       PZ.live = on; PZ.liveAt = S.t; PZ.flips++; S.live = on; VAR.forEach(function (k) { vuiRedraw(k, { live: on, t: S.t }); k.liveAt = S.t; }); glows.forEach(function (s) { s.material.color.setHex(on ? 0xff3b4a : 0x3ee8ff); });
@@ -3931,7 +3966,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
       plCol(B, 28.75, -21, 1.75, 9.4, 0, 0, 20, 'parede de telões'); plCol(B, 19, -28.9, 7, 1.5, 0, 0, 11, 'fita de telões'); plCol(B, 19, -13.1, 7, 1.5, 0, 0, 11, 'fita de telões');
       const pl = addCircleCol(RX, RZ, 3.0, 0, 0.6); pl.name = 'pedestal do controle'; pl.block = B.key; B.statics.push(pl); const rc = addCircleCol(RX, RZ, 0.75, 0.6, 6.7); rc.name = 'controle remoto gigante'; rc.block = B.key; B.statics.push(rc);
       // 15 places around the plinth, facing the east wall (the ones in front of the remote face it)
-      [[25.0, -27], [25.0, -24], [25.0, -21], [25.0, -18], [25.0, -15], [23.2, -25.5], [23.2, -22.5], [23.2, -19.5], [23.2, -16.5], [14.2, -27], [14.2, -24], [14.0, -18], [14.2, -15], [12.8, -25.5], [12.8, -16.5]].forEach(function (s, k) { B.spots.push({ x: s[0], z: s[1], h: plFacing(1, 0.05 * (k % 3 - 1)), anim: k % 3 === 1 ? 'holding-both' : 'idle', solid: true }); });
+      [[25.0, -27], [25.0, -24], [25.0, -21], [25.0, -18], [25.0, -15], [23.2, -25.5], [23.2, -22.5], [23.2, -19.5], [23.2, -16.5], [11.4, -27], [11.4, -22.6], [14.0, -18], [14.2, -15], [19.6, -26.2], [12.8, -16.5]].forEach(function (s, k) { B.spots.push({ x: s[0], z: s[1], h: plFacing(1, 0.05 * (k % 3 - 1)), anim: k % 3 === 1 ? 'holding-both' : 'idle', solid: true }); });
       return { skipSide: K.avenueSide, noLamp: function (sd) { return sd.dx === -1; }, curbGaps: [plGap(21 - 15.0, 21 - 10.5, bay.z)], clear: [{ x0: 21 - 14.2, x1: 21 - 10.5, z0: bay.z - 6, z1: bay.z + 6 }] };
     };
     K.PLV.plaza = { group: grp, PZ: PZ, VAR: VAR, screens: SC, remote: remote, remoteH: 6, ray: ray, bay: bay, stop: stop, blocks: ['-1,-1', '0,-1'], tiers: tier.length, glows: glows, BG: BG, big: big, bigMat: bigMat, tag: tag, dot: dot };
@@ -4387,15 +4422,15 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
   const JIRA_COLS = ['A fazer', 'Em andamento', 'Feito'], JIRA_W = 1280, JIRA_H = 372, JIRA_FIXED = [[['INT-101', 'Mapear a integração'], ['INT-103', 'Fluxo com o parceiro']], [['INT-098', 'Requisitos do parceiro'], ['INT-099', 'Validação da API']], [['INT-090', 'Contrato da API'], ['INT-091', 'Integração com o Google']]];
   function colJiraPaint(c, JR) {
     const SANS = "'IBM Plex Sans', Arial, sans-serif", MONO = "'IBM Plex Mono', monospace", cw = JIRA_W / 3, cx = function (col) { return col * cw + 14; }, slotY = function (k) { return 124 + k * 80; };
-    c.fillStyle = '#0f0c09'; c.fillRect(0, 0, JIRA_W, JIRA_H); c.fillStyle = '#1e1610'; c.fillRect(0, 0, JIRA_W, 58); c.textBaseline = 'middle'; c.textAlign = 'left'; c.fillStyle = COL_AMBER; c.font = '700 34px ' + SANS; c.fillText('Jira · quadro de integrações', 22, 30); c.textAlign = 'right'; c.fillStyle = '#c8a878'; c.font = '500 24px ' + MONO; c.fillText('Colmeia · fluxo da equipe', JIRA_W - 22, 30);
+    textReset(c); c.fillStyle = '#0f0c09'; c.fillRect(0, 0, JIRA_W, JIRA_H); c.fillStyle = '#1e1610'; c.fillRect(0, 0, JIRA_W, 58); c.textBaseline = 'middle'; c.textAlign = 'left'; c.fillStyle = COL_AMBER; c.font = '700 34px ' + SANS; c.fillText('Jira · quadro de integrações', 22, 30); c.textAlign = 'right'; c.fillStyle = '#c8a878'; c.font = '500 24px ' + MONO; c.fillText('Colmeia · fluxo da equipe', JIRA_W - 22, 30);
     JIRA_COLS.forEach(function (n, k) {
       c.fillStyle = '#17110c'; vuiRR(c, cx(k), 66, cw - 28, JIRA_H - 76, 12); c.fill(); c.textAlign = 'left'; c.fillStyle = k === 2 ? COL_GREEN : k === 1 ? '#6fe8ff' : '#ffd27a'; c.font = '700 26px ' + MONO; c.fillText(n.toUpperCase() + '  ' + (2 + (JR.col === k ? 1 : 0)) /* the cards drawn in the column: the two fixed ones and the package's when it is there (the count of FEITO used to grow with every delivery while the board showed three at most) */, cx(k) + 16, 92);
-      JIRA_FIXED[k].forEach(function (cd, s) { c.fillStyle = '#2a2018'; vuiRR(c, cx(k) + 10, slotY(s), cw - 48, 68, 9); c.fill(); c.fillStyle = k === 2 ? '#2a8a5a' : k === 1 ? '#3a7a9a' : '#a8883a'; c.fillRect(cx(k) + 10, slotY(s) + 8, 7, 52); c.fillStyle = '#9a8468'; c.font = '600 20px ' + MONO; c.fillText(cd[0], cx(k) + 28, slotY(s) + 21); c.fillStyle = '#e8dcc8'; plFit(c, cd[1], '600 #px ' + SANS, cw - 100, 25); c.fillText(cd[1], cx(k) + 28, slotY(s) + 47); });
+      JIRA_FIXED[k].forEach(function (cd, s) { c.fillStyle = '#2a2018'; vuiRR(c, cx(k) + 10, slotY(s), cw - 48, 68, 9); c.fill(); c.fillStyle = k === 2 ? '#2a8a5a' : k === 1 ? '#3a7a9a' : '#a8883a'; c.fillRect(cx(k) + 10, slotY(s) + 8, 7, 52); c.fillStyle = '#9a8468'; fitText(c, cd[0], cx(k) + 28, slotY(s) + 21, cw - 100, '600 #px ' + MONO, 20, 14, 1.1, 1); c.fillStyle = '#e8dcc8'; fitText(c, cd[1], cx(k) + 28, slotY(s) + 47, cw - 100, '600 #px ' + SANS, 25, 16, 1.1, 1); });
     });
     // the card of the package: rides the third row from "A fazer" to "Feito"; the glow while it moves
     const px = cx(0) + (cx(2) - cx(0)) * (JR.x / 2) + 10, py = slotY(2), moving = JR.mv;
     c.save(); c.shadowColor = moving ? '#ffffff' : COL_AMBER; c.shadowBlur = moving ? 26 : 14; c.fillStyle = '#3a2410'; vuiRR(c, px, py, cw - 48, 68, 9); c.fill(); c.restore(); c.strokeStyle = moving ? '#ffffff' : COL_AMBER; c.lineWidth = 4; vuiRR(c, px, py, cw - 48, 68, 9); c.stroke();
-    c.fillStyle = COL_AMBER; c.fillRect(px, py + 8, 7, 52); c.fillStyle = '#ffd890'; c.font = '700 20px ' + MONO; c.textAlign = 'left'; c.fillText(JR.id, px + 18, py + 21); c.fillStyle = '#fff6e4'; plFit(c, JR.title, '700 #px ' + SANS, cw - 100, 25); c.fillText(JR.title, px + 18, py + 47);
+    c.fillStyle = COL_AMBER; c.fillRect(px, py + 8, 7, 52); c.fillStyle = '#ffd890'; c.textAlign = 'left'; fitText(c, JR.id, px + 18, py + 21, cw - 100, '700 #px ' + MONO, 20, 14, 1.1, 1); c.fillStyle = '#fff6e4'; fitText(c, JR.title, px + 18, py + 47, cw - 100, '700 #px ' + SANS, 25, 16, 1.1, 1);
   }
   function colJira(K, PK) {
     const g = K.g, grp = new THREE.Group(); grp.name = 'galpao-da-jira'; g.add(grp);
@@ -4405,10 +4440,10 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     // the Kanban board on the avenue face (18.6 x 5.4 m), the door of the dock with its glow, the sign over it
     const JR = { col: 0, x: 0, mv: false, t: 0, phase: 0, done: 0, id: 'INT-107', title: 'Integração com o parceiro', draws: 0, deliveries: 0, pkgT: -1, picks: 0, cards: 0, paintAt: 0 };
     const BC = plCan(JIRA_W, JIRA_H); function paint() { colJiraPaint(BC.c, JR); BC.tex.needsUpdate = true; JR.draws++; } paint();
-    const board = plBoard(grp, BC.tex, 18.6, 5.4, X0 - 0.06, 5.9, cz, -Math.PI / 2); board.name = 'quadro-kanban'; board.userData.text = JIRA_COLS.join(' · ');
+    const board = plBoard(grp, BC.tex, 18.6, 5.4, X0 - 0.06, 5.9, cz, -Math.PI / 2); board.name = 'quadro-kanban'; board.userData.text = JIRA_COLS.join(' · '); subjectMark('quadro-kanban', board);
     grp.add(vBasic([[plBx(0.06, 3.0, 3.4), X0 - 0.04, 1.5, CZ, 0, 0xffc880], [plBx(0.14, 3.3, 0.18), X0 - 0.07, 1.65, CZ - 1.75, 0, 0x14100c], [plBx(0.14, 3.3, 0.18), X0 - 0.07, 1.65, CZ + 1.75, 0, 0x14100c], [plBx(0.14, 0.2, 3.7), X0 - 0.07, 3.2, CZ, 0, 0xffb347]]));
-    // over the door frame's top bar (3.1-3.3 m, 6 cm proud of the wall): at 3.55 the bar hid "entregas · Jira"
-    const sg = colSign('DOCA 1', 'entregas · Jira', 512, 128, COL_GREEN); const sgm = plBoard(grp, sg, 3.4, 0.85, X0 - 0.08, 3.8, CZ, -Math.PI / 2); sgm.name = 'letreiro-da-doca'; sgm.userData.text = 'DOCA 1';
+    // beside the door, on the wall under the board (its bottom is at 3.2 m), 6 cm proud of the wall
+    const sg = colSign('DOCA 1', 'entregas · Jira', 512, 128, COL_GREEN); const sgm = plBoard(grp, sg, 3.4, 0.85, X0 - 0.08, 2.3, CZ - 3.75, -Math.PI / 2); /* R4 (spec 2026-10-29 §5.3): over the door (y 3.8) it covered the board's bottom row, the card INT-107 */ sgm.name = 'letreiro-da-doca'; sgm.userData.text = 'DOCA 1'; overlayMark(sgm, board);
     // the dock: the slab with its yellow edge, the conveyor over it into the door (its belt with lit rollers), the mark of the drop
     const roll = canvasTex(64, 64, function (c, w, h) { c.fillStyle = '#1a1612'; c.fillRect(0, 0, w, h); for (let x = 4; x < w; x += 12) { c.fillStyle = '#6a5a48'; c.fillRect(x, 0, 6, h); c.fillStyle = '#ffb347'; c.fillRect(x + 2, 0, 2, h); } }); roll.wrapS = roll.wrapT = THREE.RepeatWrapping; roll.repeat.set(7, 1);
     grp.add(new THREE.Mesh(kitGeo([[plBx(DX1 - DX0, DY, DZ1 - DZ0), (DX0 + DX1) / 2, DY / 2, (DZ0 + DZ1) / 2, 0, 0x7a6e60], [plBx(0.3, 0.5, DZ1 - DZ0 - 0.4), DX0 + 0.15, DY + 0.25, (DZ0 + DZ1) / 2, 0, 0x2b2420], [plBx(0.18, 1.0, 0.18), DX0 + 0.3, 0.5, DZ0 + 0.2, 0, 0x14100c], [plBx(0.18, 1.0, 0.18), DX0 + 0.3, 0.5, DZ1 - 0.2, 0, 0x14100c]]), K.propMat));
@@ -4427,7 +4462,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
       c.fillStyle = JR.col === 2 && !JR.mv && JR.picks > 0 ? COL_GREEN : '#e8dcc8'; plFit(c, DB.sub, "600 #px 'IBM Plex Mono', monospace", 700, 40); c.fillText(DB.sub, 384, 208);
       DC.tex.needsUpdate = true; DB.draws++;
     }
-    lb.scale.set(7.4, 2.47, 1); lb.position.set(DROP.x, DY + 8.6, CZ); lb.name = 'placar-da-doca'; LABELS.push(lb); grp.add(lb); dockPaint(); DB.sig = JR.deliveries + '|' + JR.picks + '|' + JR.col + '|' + JR.mv;
+    lb.scale.set(7.4, 2.47, 1); lb.position.set(DROP.x, DY + 9.6, CZ); /* R4: 1 m higher than it was, its bottom over the board's top seen from the dock's arrival */ lb.name = 'placar-da-doca'; LABELS.push(lb); grp.add(lb); overlayMark(lb, board); dockPaint(); DB.sig = JR.deliveries + '|' + JR.picks + '|' + JR.col + '|' + JR.mv;
     K.upd.push(function () { const sg = JR.deliveries + '|' + JR.picks + '|' + JR.col + '|' + JR.mv; if (sg !== DB.sig) { DB.sig = sg; dockPaint(); } });
     const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: softDot, color: 0xffb347, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0.35, fog: false })); glow.position.set(X0 - 2, 4.5, cz); glow.scale.set(24, 10, 1); grp.add(glow);
     // roof units and a sign on the roof edge
@@ -5533,7 +5568,8 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     for (let i = 0; i < 5; i++) { const v = motoboy(i); v.visible = false; hwGroup.add(v); const k = hwCar(v, 'moto', i % 2 ? 2.6 : -2.6, 30 + i * 18, 0); k.on = false; hw.motos.push(k); }
     const towers = ['building-skyscraper-a', 'building-skyscraper-b', 'building-skyscraper-c', 'building-skyscraper-d', 'building-skyscraper-e', 'building-i', 'building-j', 'building-k'];
     for (let i = 0; i < 18; i++) { const side = i % 2 ? 1 : -1, m = model(towers[i % towers.length], { fit: { len: 10 }, s: 1 + (i % 3) * 0.25, x: side * (18 + (i % 4) * 5), z: -Math.floor(i / 2) * 46, ry: (i % 4) * Math.PI / 2 }); m.visible = false; hwGroup.add(m); hw.skyline.push(m); }
-    hw.sign = new THREE.Group(); const sg = model('overheadLights', { fit: { w: 21 } }); hw.sign.add(sg); const s1 = label('MARGINAL TIETÊ', '#2fd37a', 'pista expressa · sentido Castello', 1.3); s1.position.set(-3.2, 9.6, 0); hw.sign.add(s1); const s2 = label('LENTIDÃO 112 KM', '#ffb347', 'CET · 18h07', 1.1); s2.position.set(4.6, 9.4, 0); hw.sign.add(s2); hw.sign.visible = false; hwGroup.add(hw.sign);
+    hw.sign = new THREE.Group(); hw.sign.name = 'placa-da-marginal'; const sg = model('overheadLights', { fit: { w: 21 } }); hw.sign.add(sg); const sgz = new THREE.Box3().setFromObject(sg).max.z + 0.4; /* R1 (spec 2026-10-29 §5.3): at z 0 the gantry's light boxes stood in front of the labels */
+    const s1 = label('MARGINAL TIETÊ', '#2fd37a', 'pista expressa · sentido Castello', 1.3); s1.position.set(-3.2, 9.6, sgz); hw.sign.add(s1); const s2 = label('LENTIDÃO 112 KM', '#ffb347', 'CET · 18h07', 1.1); s2.position.set(4.6, 9.4, sgz); hw.sign.add(s2); HW_SIGNS.push(s1, s2); hw.sign.visible = false; hwGroup.add(hw.sign);
   }
   function hwActive() { const out = []; hw.traffic.forEach(function (k) { if (k.on) out.push(k); }); hw.jamCars.forEach(function (k) { if (k.on) out.push(k); }); hw.motos.forEach(function (k) { if (k.on) out.push(k); }); return out; }
   function startJam() {
@@ -5543,6 +5579,8 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     hw.jamCars.forEach(function (k, i) { k.leaving = false; const li = i % 3; k.lane = LANES[li]; k.x = k.lane; front[li] -= (k.hl * 2 + 2.2 + (Math.random() < 0.18 ? 9 : Math.random() * 3)); k.z = front[li]; k.sp0 = 0; k.sp = 2; k.vx = 0; k.rot = 0; k.spin = 0; k.on = true; k.v.visible = true; });
     hw.motos.forEach(function (k, i) { k.lane = i % 2 ? 2.6 : -2.6; k.x = k.lane; k.z = 28 + i * 22; k.sp = 0; k.on = true; k.v.visible = true; k.rot = 0; k.spin = 0; k.vx = 0; });
     hw.skyline.forEach(function (m) { m.visible = true; }); hw.mountains.forEach(function (m) { m.visible = false; }); hw.sign.visible = true; hw.sign.position.z = -60;
+    /* R1 (spec 2026-10-29 §5.3): the sign takes the slot of the first plain gantry more than 40 m ahead, hidden while the sign shows, so no gantry stands between the camera and it within 52 m */
+    let slot = null; hw.gantries.forEach(function (gt) { if (gt.position.z < -40 && (!slot || gt.position.z > slot.position.z)) slot = gt; }); if (slot) { hw.sign.position.z = slot.position.z; slot.visible = false; } hw.signSlot = slot;
     scene.fog.color.setHex(0x3a3046); scene.fog.near = 30; scene.fog.far = 260; hw.sunMat.uniforms.uTop.value.setHex(0xffb36b); hw.sunMat.uniforms.uBot.value.setHex(0xa8664a); hw.grid.material.color.setHex(0x5a5068); hw.edgeMat.color.setHex(0xffd23f);
     const b = $('sp'); b.classList.remove('on'); void b.offsetWidth; b.classList.add('on'); stage.classList.add('sp-on'); S.spBanner = 3.6; $('toast').style.opacity = 0; toastTimer = 0;
   }
@@ -6278,7 +6316,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
   }
   function enterEra(idx) {
     if (world) { scene.remove(world.group); disposeGroup(world.group); world.screens.forEach(function (s) { if (s.userData.video) s.userData.video.el.pause(); }); }
-    S.enters = (S.enters || 0) + 1; MEDIA_LOG.length = 0; STATICS = []; GRID = new Map(); DYN = []; LABELS.length = 0; colView = null; colRings = []; clearTalk(); stopBugle(); clearStops(); beatsOff(); BEATS = {}; BEATT = {}; clearPeople(); ESP = null; ESPG = null; ABI = null; CAMPI = null; ESQI = null; PLC = null; PLV = null; PLK = null; EVK = null; LCQ.q.length = 0; LCQ.cur = null; LCQ.shown = 0; AMANI = null; ENGI = null; TELI = null; TFMI = null; COURSE_FINISH = null; BRI = null; BRIDGE_TEST = null; peopleGroup.visible = true; AUD.bellAt = 0; VEN.bar = VEN.obra = VEN.escola = 99; /* the school bell and the nearest places of the era before do not carry over */
+    S.enters = (S.enters || 0) + 1; MEDIA_LOG.length = 0; SIGNS.length = 0; SUBJECTS.length = 0; OVERLAYS.length = 0; TEXTFIT.clear(); STATICS = []; GRID = new Map(); DYN = []; LABELS.length = 0; colView = null; colRings = []; clearTalk(); stopBugle(); clearStops(); beatsOff(); BEATS = {}; BEATT = {}; clearPeople(); ESP = null; ESPG = null; ABI = null; CAMPI = null; ESQI = null; PLC = null; PLV = null; PLK = null; EVK = null; LCQ.q.length = 0; LCQ.cur = null; LCQ.shown = 0; AMANI = null; ENGI = null; TELI = null; TFMI = null; COURSE_FINISH = null; BRI = null; BRIDGE_TEST = null; peopleGroup.visible = true; AUD.bellAt = 0; VEN.bar = VEN.obra = VEN.escola = 99; /* the school bell and the nearest places of the era before do not carry over */
     trafficRefs.length = 0; cellRefs.length = 0; ringRefs.length = 0; S.course = null; S.bridge = null; S.convoy = null; CVI = null; S.delivered = 0; S.sla = 0; S.inMud = false; S.inTrench = false; S.transit = -1; transitDone = null; tunnel.visible = false; S.jump = -1; S.flash = 0; S.jam = null; S.spBanner = 0; $('sp').classList.remove('on'); stage.classList.remove('sp-on'); $('guide').hidden = true;
     S.eraIdx = idx; S.era = ERAS[idx]; S.eraPlu = 0; S.live = false; S.carrying = false; pkgOnRoof.visible = false; S.migr = 0; S.finaleT = 0;
     const next = ERAS[(idx + 1) % CYCLE];
@@ -6349,7 +6387,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     S.hwSpeed = clamp(Math.abs(S.car.speed), 12, 16); S.hwX = 0; S.hwLatV = 0; S.hwVx = 0; S.jump = -1; S.car.y = 0; S.car.vy = 0; S.car.w = 0; stage.classList.remove('flying'); $('altBox').hidden = true; S.car.h = 0; S.car.air = false;
     hw.traffic.forEach(function (k, i) { k.on = true; k.v.visible = true; k.z = -40 - i * 26; k.lane = LANES[i % 3]; k.x = k.lane; k.sp = k.sp0; k.vx = 0; k.rot = 0; k.spin = 0; });
     hw.jamCars.forEach(function (k) { k.on = false; k.v.visible = false; }); hw.motos.forEach(function (k) { k.on = false; k.v.visible = false; });
-    hw.skyline.forEach(function (m) { m.visible = false; }); hw.mountains.forEach(function (m) { m.visible = true; }); hw.sign.visible = false;
+    hw.skyline.forEach(function (m) { m.visible = false; }); hw.mountains.forEach(function (m) { m.visible = true; }); hw.sign.visible = false; if (hw.signSlot) { hw.signSlot.visible = true; hw.signSlot = null; }
     S.jam = null;
     if (S.era.id === 'redbit') startJam();
     else toast(next.id === 'final' ? 'Último salto: de volta a hoje' : 'Destino ' + next.date + ' · acelere até 88', 2.4);
@@ -6466,7 +6504,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     hw.dashes.forEach(function (d) { d.position.z += scroll; if (d.position.z > 10) d.position.z -= 400; });
     hw.gantries.forEach(function (gt) { gt.position.z += scroll; if (gt.position.z > 14) gt.position.z -= 416; });
     hw.skyline.forEach(function (m) { m.position.z += scroll; if (m.position.z > 30) m.position.z -= 414; });
-    if (hw.sign.visible) { hw.sign.position.z += scroll; if (hw.sign.position.z > 20) hw.sign.visible = false; }
+    if (hw.sign.visible) { hw.sign.position.z += scroll; if (hw.sign.position.z > 20) { hw.sign.visible = false; if (hw.signSlot) { hw.signSlot.visible = true; hw.signSlot = null; } } }
     hw.barriers.position.z = (hw.barriers.position.z + scroll) % 6; hw.grid.position.z = (hw.grid.position.z + scroll) % 4;
     const sp = hw.streakPos; for (let i = 0; i < sp.length; i += 6) { sp[i + 2] += scroll * 1.6; sp[i + 5] += scroll * 1.6; if (sp[i + 2] > 10) { sp[i + 2] -= 210; sp[i + 5] -= 210; } } hw.streaks.geometry.attributes.position.needsUpdate = true; hw.streakMat.opacity = clamp((mph - 50) / 40, 0, 0.8);
     trails.forEach(function (t) { if (t.life > 0) t.mesh.position.z += scroll; });
@@ -6808,6 +6846,68 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
       /* EVIG-HOOK:END */
       videos: function () { const out = []; if (VGATE.spots) VGATE.spots.forEach(function (l, v) { out.push({ name: (v.el.src.match(/([\w-]+)\.webm/) || [])[1], playing: !v.el.paused, spots: l.length }); }); return out; },
       textLog: function () { return TEXT_LOG.slice(); },
+      // the scene rules from the camera (cam: { pos, look } fixes it; without, the camera as it is). R1: each marked sign in the frame and within 60 m, rays to 9 points of its
+      // text area, hits = the rays nothing stops before it; R3: each subject, blocked = the rays something stops, by = what; R4: each overlay, the share of its rectangle on the
+      // screen that lies over its board's. A ray ignores what does not hide: invisible, glow, glass and particles (transparent, additive or not writing depth), sprites, lines.
+      sceneRules: function (cam) {
+        const only = cam && cam.only; /* only: the names of the signs to read (R1 alone); a sweep of every sign of a stop is the slow part */
+        if (cam && cam.pos) { camera.position.set(cam.pos[0], cam.pos[1], cam.pos[2]); camera.lookAt(cam.look[0], cam.look[1], cam.look[2]); }
+        camera.updateMatrixWorld(true); scene.updateMatrixWorld(true);
+        const V = THREE.Vector3, rc = new THREE.Raycaster(), cp = camera.position.clone(), right = new V().setFromMatrixColumn(camera.matrixWorld, 0), up = new V().setFromMatrixColumn(camera.matrixWorld, 1);
+        rc.camera = camera;
+        const nameOf = function (o) { for (let q = o; q; q = q.parent) { if (q.userData && q.userData.sign && q.userData.sign.name) return q.userData.sign.name; if (q.name) return q.name; } return o.type; };
+        const shown = function (o) { for (let q = o; q; q = q.parent) { if (!q.visible) return false; if (q === scene) return true; } return false; };
+        const hides = function (o) { if (o.userData.rayIgnore || o.isSprite || o.isLine || o.isPoints || !shown(o)) return false; const m = Array.isArray(o.material) ? o.material[0] : o.material; return !(m && m.transparent && (m.opacity < 0.5 || m.blending === THREE.AdditiveBlending || m.depthWrite === false)); };
+        // the world point at (u, v) of a target: a sprite faces the camera, a plane uses its geometry, a rectangle its axes, anything else its world box (the face towards the camera)
+        const at = function (t, u, v) {
+          if (t.c) return new V(t.c[0] + t.ax[0] * (2 * u - 1) + t.ay[0] * (2 * v - 1), t.c[1] + t.ax[1] * (2 * u - 1) + t.ay[1] * (2 * v - 1), t.c[2] + t.ax[2] * (2 * u - 1) + t.ay[2] * (2 * v - 1));
+          if (t.isSprite) { const s = new V(), p = new V().setFromMatrixPosition(t.matrixWorld); s.setFromMatrixScale(t.matrixWorld); return p.addScaledVector(right, (u - 0.5) * s.x).addScaledVector(up, (v - 0.5) * s.y); }
+          if (t.geometry && t.geometry.parameters && t.geometry.parameters.width !== undefined && t.geometry.parameters.height !== undefined && t.geometry.type === 'PlaneGeometry') { const q = t.geometry.parameters; return new V((u - 0.5) * q.width, (v - 0.5) * q.height, 0).applyMatrix4(t.matrixWorld); }
+          const b = new THREE.Box3().setFromObject(t), c = b.getCenter(new V()); return c.addScaledVector(right, (u - 0.5) * (b.max.x - b.min.x)).add(new V(0, (v - 0.5) * (b.max.y - b.min.y), 0));
+        };
+        const owns = function (t, o) { if (t.c) return false; for (let q = o; q; q = q.parent) if (q === t) return true; return false; };
+        const rays = function (t, uv) {
+          let hit = 0; const by = [];
+          for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++) {
+            const p = at(t, uv[0] + (uv[2] - uv[0]) * (i + 0.5) / 3, uv[1] + (uv[3] - uv[1]) * (j + 0.5) / 3), d = p.clone().sub(cp), dist = d.length(); d.divideScalar(dist);
+            rc.set(cp, d); rc.near = 0.1; rc.far = Math.max(0.1, dist - 0.08);
+            const first = rc.intersectObjects(scene.children, true).find(function (h) { return hides(h.object) && !owns(t, h.object); });
+            if (first) { const n = nameOf(first.object); if (by.indexOf(n) < 0) by.push(n); } else hit++;
+          }
+          return { hits: hit, blocked: 9 - hit, by: by };
+        };
+        const ndc = function (p) { return p.clone().project(camera); };
+        const inFrame = function (t) { const c = ndc(at(t, 0.5, 0.5)); return c.z < 1 && Math.abs(c.x) < 1 && Math.abs(c.y) < 1; };
+        // a target's outline on the screen (its four corners in order) and the area of a polygon; an oblique board is a trapezoid, and its bounding box would cover what lies under it
+        const quad = function (t) { return [[0, 0], [1, 0], [1, 1], [0, 1]].map(function (q) { const c = ndc(at(t, q[0], q[1])); return [c.x, c.y]; }); };
+        const area = function (P) { let a = 0; for (let i = 0; i < P.length; i++) { const p = P[i], q = P[(i + 1) % P.length]; a += p[0] * q[1] - q[0] * p[1]; } return a / 2; };
+        // the part of the convex polygon A inside the convex polygon B (Sutherland-Hodgman, B's edges in its own winding)
+        const clip = function (A, B) {
+          const s = area(B) < 0 ? -1 : 1; let out = A;
+          for (let i = 0; i < B.length && out.length; i++) {
+            const e0 = B[i], e1 = B[(i + 1) % B.length], side = function (p) { return s * ((e1[0] - e0[0]) * (p[1] - e0[1]) - (e1[1] - e0[1]) * (p[0] - e0[0])); }, inp = out; out = [];
+            for (let k = 0; k < inp.length; k++) {
+              const a = inp[k], b = inp[(k + 1) % inp.length], sa = side(a), sb = side(b);
+              if (sa >= 0) out.push(a); if ((sa >= 0) !== (sb >= 0)) { const t = sa / (sa - sb); out.push([a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]); }
+            }
+          }
+          return out;
+        };
+        const signs = SIGNS.concat(S.mode === 'highway' ? HW_SIGNS : []).filter(function (o) { return (!only || only.indexOf(nameOf(o)) >= 0) && shown(o) && inFrame(o) && at(o, 0.5, 0.5).distanceTo(cp) <= 60; });
+        const r1 = signs.map(function (o) { const q = rays(o, o.userData.sign.uv); return { name: nameOf(o), hits: q.hits, by: q.by }; });
+        const r3 = SUBJECTS.filter(function (s) { return !only && (s.obj.c || shown(s.obj)); }).map(function (s) { const q = rays(s.obj, s.uv); return { id: s.id, name: s.obj.c ? s.obj.name : nameOf(s.obj), inFrame: inFrame(s.obj), blocked: q.blocked, by: q.by }; });
+        const r4 = OVERLAYS.filter(function (o) { return !only && shown(o.obj) && shown(o.board); }).map(function (o) {
+          const a = quad(o.obj), whole = Math.abs(area(a)), part = Math.abs(area(clip(a, quad(o.board))));
+          return { name: nameOf(o.obj), board: nameOf(o.board), inFrame: inFrame(o.obj) && inFrame(o.board), overlap: whole > 0 ? Math.round(part / whole * 1000) / 1000 : 0 };
+        });
+        return { r1: r1, r3: r3, r4: r4 };
+      },
+      // R2: every text of the era's canvases drawn through fitText (ok false: it did not fit even at its smallest size and lines) and, for each, the badges over it on its canvas
+      textFit: function () {
+        const out = [];
+        TEXTFIT.forEach(function (r) { const items = r.items.slice(0, r.n); items.forEach(function (e) { const under = e.badge ? [] : items.filter(function (b) { return b.badge && b.x < e.x + e.w && e.x < b.x + b.w && b.y < e.y + e.h && e.y < b.y + b.h; }).map(function (b) { return b.name; }); out.push({ name: e.name, text: e.text, ok: e.ok, badge: e.badge, under: under, box: [Math.round(e.x), Math.round(e.y), Math.round(e.w), Math.round(e.h)] }); }); });
+        return out;
+      },
       // R7: what this era shows: the videos of its screens (each of a playlist), the images it loaded (MEDIA_LOG) and the video of each of its stops' kiosks
       media: function () {
         const era = S.era.id, out = [], file = function (el) { const m = (el.src || '').match(/video\/([\w-]+\.webm)/); return m ? 'video/' + m[1] : el.src; };
