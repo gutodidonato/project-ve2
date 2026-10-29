@@ -285,7 +285,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     <h2>As eras</h2>
     <ul>
       <li><b>2019–2021 · Exército:</b> EsPCEx, AMAN e Engenharia. Pista de obstáculos cronometrada, espadim, ponte na brecha e um comboio sob o seu comando.</li>
-      <li><b>2023–2024 · FIAP + RedBit:</b> desenvolvedor front-end. O escritório, o radar de carregamento, a Rua das Conversões e as animações em JS; a FIAP fica na avenida.</li>
+      <li><b>2023–2024 · FIAP + RedBit:</b> desenvolvedor front-end. O escritório, a Rua das Conversões e as animações em JS; a FIAP fica na avenida.</li>
       <li><b>2025 · ValiantGroup:</b> streaming. Telões com os apps rodando, a praça ao vivo e as TVs dos clientes: hospital, Housi e hotel.</li>
       <li><b>2025–2026 · Colmeia:</b> integrações. O DeLorean abre asas e voa entre as torres hexagonais, sob o monotrilho; atravesse o hub dos projetos e leve o pacote do heliponto até a Jira.</li>
       <li><b>2026 · EVIG:</b> CTO. Em órbita, o DeLorean vira nave: cada argola leva um serviço do GCP para a AWS, e as plataformas de pouso (segure Q) mostram o assistente financeiro com IA e o agente de triagem.</li>
@@ -3161,7 +3161,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
   const REDBIT_BULLETS = ['Criei e otimizei sites com foco em responsividade e SEO, reduzindo o carregamento médio de aproximadamente 2 s para 0,5 s em projetos selecionados.', 'Configurei tags, eventos e conversões com Google Tag Manager e Google Ads.'];
   const REDBIT_CARD = { title: 'RedBit · Desenvolvedor Front-end', period: 'mar 2023 – nov 2024', text: REDBIT_BULLETS.join('\n'), values: [] };
   const MISSION_OFFICE = 'Front-end na RedBit: pare na vaga do <b>escritório da RedBit</b>, à direita.';
-  let PLC = null; // what the test hooks places(), radar(), conversions() and jsAnimations() read
+  let PLC = null; // what the test hooks places(), conversions() and jsAnimations() read
   const plFacing = function (dx, dz) { return Math.atan2(-dx, -dz); };    // heading of a person (or the car) that looks along (dx, dz)
   const plStd = function (o) { return new THREE.MeshStandardMaterial(Object.assign({ roughness: 0.8, metalness: 0.05 }, o)); };
   // The lit boards of the places do not take the haze (they glow), except in the Colmeia: its haze is the orange sky, the buildings of a far place fade into it and a board with no fog stayed behind as a dark plate floating in the sky
@@ -3201,7 +3201,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
   function plGap(x0, x1, z) { return { x0: x0, x1: x1, z0: z - 6, z1: z + 6 }; }
 
   function buildCareerPlaces(g, era, special, upd, screens, pools, reserveLot, avenueSide) {
-    const PL = { fiap: {}, redbit: {}, radar: {} }; PLC = PL;
+    const PL = { fiap: {}, redbit: {} }; PLC = PL;
     const cxOf = function (i) { return i * BLOCK + HALF; };
     const dark = plStd({ color: 0x2a2734, metalness: 0.5, roughness: 0.5 }), roof = plStd({ color: 0x4d4958, roughness: 0.9 }), propMat = plStd({ vertexColors: true, roughness: 0.7 });
     const Bx = function (w, h, d) { return new THREE.BoxGeometry(w, h, d); }, Cy = function (rt, rb, h, s) { return new THREE.CylinderGeometry(rt, rb, h, s || 10); };
@@ -3414,72 +3414,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
       };
     }
 
-    /* ---------------- L3: the speed trap of the avenue, row j 0 (the strip at z 12, clear of the zebras: their bands are 6.2 to 8.6 and 33.4 to 35.8) ---------------- */
-    {
-      const STRIP_Z = 12, PX = 9.2, grp = new THREE.Group(); grp.name = 'lombada-eletronica'; g.add(grp);
-      const RD = { state: 'idle', time: 2.0, best: null, text: '2,0 s', sub: 'TEMPO DE CARREGAMENTO', inside: false, panelDraws: 0, outdoor: { state: 'idle', progress: 0, t: 0, dur: 4, redraw: 0, draws: 0 } };
-      // the panel: 9 x 4.5 m, the big digits are 56% of its height (2.5 m: 16 px high at 100 m on a 1280 x 720 screen)
-      const pc = document.createElement('canvas'); pc.width = 1024; pc.height = 578; const pg = pc.getContext('2d'), ptex = new THREE.CanvasTexture(pc); ptex.encoding = THREE.sRGBEncoding; ptex.anisotropy = 4;
-      pg.font = "700 450px 'IBM Plex Mono', 'Consolas', monospace"; const mm = pg.measureText('0'), capPx = mm.actualBoundingBoxAscent ? mm.actualBoundingBoxAscent : 0.7 * 450; // the digits' height in the canvas (font 450 px), measured
-      function paintPanel() {
-        const green = RD.state === 'fast', col = green ? '#46ff8a' : '#ff3b30', big = RD.time.toFixed(1).replace('.', ','); RD.col = col;
-        pg.fillStyle = '#080508'; pg.fillRect(0, 0, 1024, 578); pg.fillStyle = 'rgba(255,255,255,0.04)'; for (let y = 0; y < 578; y += 4) pg.fillRect(0, y, 1024, 1);
-        pg.strokeStyle = col; pg.lineWidth = 8; pg.strokeRect(10, 10, 1004, 558); pg.textBaseline = 'alphabetic';
-        pg.font = "700 450px 'IBM Plex Mono', 'Consolas', monospace"; pg.textAlign = 'left'; const wBig = pg.measureText(big).width; pg.font = "700 110px 'IBM Plex Mono', 'Consolas', monospace"; const wS = pg.measureText(' s').width, x0 = (1024 - wBig - wS) / 2;
-        pg.shadowColor = col; pg.shadowBlur = 26; pg.fillStyle = col; pg.font = "700 450px 'IBM Plex Mono', 'Consolas', monospace"; pg.fillText(big, x0, 420); pg.font = "700 110px 'IBM Plex Mono', 'Consolas', monospace"; pg.fillText(' s', x0 + wBig, 420); pg.shadowBlur = 0;
-        pg.font = "600 52px 'IBM Plex Mono', monospace"; pg.textAlign = 'center'; pg.fillStyle = '#f1ecff'; pg.fillText(green ? 'SEO ok' : RD.state === 'slow' ? 'Lento' : 'TEMPO DE CARREGAMENTO', 512, 530); if (RD.best !== null) { pg.font = "500 34px 'IBM Plex Mono', monospace"; pg.textAlign = 'right'; pg.fillStyle = '#46ff8a'; pg.fillText('melhor ' + RD.best.toFixed(1).replace('.', ',') + ' s', 990, 60); }
-        ptex.needsUpdate = true; RD.panelDraws++;
-      }
-      const panel = new THREE.Mesh(new THREE.PlaneGeometry(7.8, 4.4), plLit(ptex)); panel.position.set(7.0, 6.5, STRIP_Z); panel.name = 'painel-led'; grp.add(panel);
-      const back = new THREE.Mesh(new THREE.BoxGeometry(8.1, 4.7, 0.3), dark); back.position.set(7.0, 6.5, STRIP_Z - 0.17); grp.add(back);
-      // the pole, the arm that holds the panel, two cameras on it (they turn to the car) and the yellow sign
-      const P = [[Cy(0.26, 0.32, 9.8, 10), PX, 4.9, STRIP_Z - 0.4, 0, 0x4a4856], [Bx(PX - 3.0, 0.34, 0.34), (PX + 3.0) / 2, 9.3, STRIP_Z - 0.17, 0, 0x4a4856], [Bx(0.1, 0.5, 0.1), 4.0, 8.95, STRIP_Z - 0.17, 0, 0x4a4856], [Bx(0.1, 0.5, 0.1), 8.4, 8.95, STRIP_Z - 0.17, 0, 0x4a4856]];
-      grp.add(new THREE.Mesh(kitGeo(P), propMat));
-      const camGeo = kitGeo([[Bx(0.7, 0.45, 1.0), 0, 0, 0, 0, 0x2a2a32], [Cy(0.13, 0.13, 0.4, 10), 0, 0, 0.62, 0, 0x101018], [Bx(0.2, 0.08, 0.2), 0, 0.3, -0.1, 0, 0xff3b30]]);
-      const lensGeo = new THREE.CylinderGeometry(0.1, 0.1, 0.05, 8), lensMat = new THREE.MeshBasicMaterial({ color: 0xff3b30 }), cams = [4.2, 8.4].map(function (x) { const m = new THREE.Mesh(camGeo, propMat); m.position.set(x, 9.75, STRIP_Z); m.rotation.y = 0; grp.add(m); const l = new THREE.Mesh(lensGeo, lensMat); l.rotation.x = Math.PI / 2; l.position.set(0, 0, 0.84); m.add(l); return m; });
-      // the painted strip across the road: white border, black field, "RADAR" in yellow, read by the driver (the up of the letters points down the avenue)
-      const stripTex = canvasTex(1024, 192, function (c, W, H) { c.fillStyle = 'rgba(14,12,20,0.92)'; c.fillRect(0, 0, W, H); c.strokeStyle = '#f2f0f8'; c.lineWidth = 12; c.strokeRect(8, 8, W - 16, H - 16); c.fillStyle = '#ffd23a'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.font = "900 150px 'Arial Black', Arial, sans-serif"; c.fillText('RADAR', W / 2, H / 2 + 8); });
-      const strip = new THREE.Mesh(new THREE.PlaneGeometry(12.4, 2.3), new THREE.MeshBasicMaterial({ map: stripTex, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -5, polygonOffsetUnits: -5 })); strip.rotation.x = -Math.PI / 2; strip.position.set(0, 0.08, STRIP_Z); strip.renderOrder = 2; strip.name = 'faixa-radar'; grp.add(strip);
-      const signTex = canvasTex(512, 320, function (c, W, H) { c.fillStyle = '#ffd23a'; c.fillRect(0, 0, W, H); c.strokeStyle = '#17141c'; c.lineWidth = 10; c.strokeRect(8, 8, W - 16, H - 16); c.fillStyle = '#17141c'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.font = "800 44px 'Arial Narrow', 'IBM Plex Sans', Arial, sans-serif"; c.fillText('FISCALIZAÇÃO', W / 2, 62); c.fillText('ELETRÔNICA', W / 2, 118); c.font = "700 36px 'IBM Plex Sans', Arial, sans-serif"; c.fillText('TEMPO DE CARREGAMENTO', W / 2, 196); c.fillStyle = '#17141c'; c.fillRect(W / 2 - 52, 236, 104, 46); c.fillStyle = '#ffd23a'; c.beginPath(); c.arc(W / 2, 259, 15, 0, 6.3); c.fill(); });
-      const sx = PX - 0.5, sz = STRIP_Z + 6.2; /* (the walkers' lane is at x 10 to 10.4: the pole stands 1.3 m inside it) */ const ysign = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 1.625), plLit(signTex, { fog: true })); ysign.position.set(sx, 2.7, sz); grp.add(ysign);
-      grp.add(new THREE.Mesh(kitGeo([[Cy(0.06, 0.06, 3.4, 6), sx, 1.7, sz - 0.08, 0, 0x4a4856]]), propMat));
-      addCircleCol(PX, STRIP_Z - 0.4, 0.38, 0, 9.8).name = 'poste do radar'; addCircleCol(sx, sz - 0.08, 0.1, 0, 3.4).name = 'placa do radar';
-      // the outdoor beside it, in the avenue-side lot of block (0, 0) that faces the oncoming traffic: a site that loads
-      const ol = reserveLot('0,0', -1, -1), OW = 640, OH = 360, oc = document.createElement('canvas'); oc.width = OW; oc.height = OH; const og = oc.getContext('2d'), otex = new THREE.CanvasTexture(oc); otex.encoding = THREE.sRGBEncoding;
-      function paintOutdoor() {
-        const o = RD.outdoor, p = o.state === 'loaded' ? 1 : o.progress; og.fillStyle = '#0b0f1c'; og.fillRect(0, 0, OW, OH);
-                // header, hero, three cards: each shows when the load reaches it; before, a grey skeleton stands in
-        og.fillStyle = p >= 0.12 ? '#151a2e' : '#1a2036'; og.fillRect(0, 0, OW, 52); if (p >= 0.12) { og.fillStyle = PL_PINK; og.fillRect(20, 14, 26, 26); og.fillStyle = '#f1ecff'; og.font = "700 24px 'IBM Plex Sans', Arial, sans-serif"; og.textAlign = 'left'; og.textBaseline = 'middle'; og.fillText('site.dev', 56, 28); og.fillStyle = '#9aa3c8'; og.font = "500 18px 'IBM Plex Sans', Arial, sans-serif"; ['Início', 'Serviços', 'Contato'].forEach(function (t, k) { og.fillText(t, 380 + k * 90, 28); }); }
-        if (p >= 0.4) { const gr = og.createLinearGradient(0, 52, 0, 212); gr.addColorStop(0, '#2a1a5e'); gr.addColorStop(1, '#ed145b'); og.fillStyle = gr; og.fillRect(0, 52, OW, 160); og.fillStyle = '#ffd23a'; og.beginPath(); og.arc(500, 120, 34, 0, 6.3); og.fill(); og.fillStyle = '#1a1038'; og.beginPath(); og.moveTo(0, 212); og.lineTo(150, 130); og.lineTo(260, 190); og.lineTo(380, 110); og.lineTo(520, 212); og.fill(); og.fillStyle = '#ffffff'; og.font = "800 38px 'IBM Plex Sans', Arial, sans-serif"; og.textAlign = 'left'; og.fillText('Rápido em qualquer tela', 28, 150); } else { og.fillStyle = '#161b30'; og.fillRect(0, 52, OW, 160); }
-        [0.65, 0.8, 0.95].forEach(function (k, c) { const x = 20 + c * 204; if (p >= k) { og.fillStyle = '#1b2140'; og.fillRect(x, 228, 188, 90); og.fillStyle = ['#3fd0ff', '#58f0a0', '#ffd23a'][c]; og.fillRect(x, 228, 188, 8); og.fillStyle = '#e6e9ff'; og.font = "700 20px 'IBM Plex Sans', Arial, sans-serif"; og.fillText(['Rápido', 'Responsivo', 'SEO'][c], x + 12, 262); og.fillStyle = '#6b739a'; og.fillRect(x + 12, 280, 140, 6); og.fillRect(x + 12, 294, 100, 6); } else { og.fillStyle = '#161b30'; og.fillRect(x, 228, 188, 90); } });
-        // the bar and the state line
-        og.fillStyle = 'rgba(5,7,16,0.92)'; og.fillRect(0, OH - 34, OW, 34); og.fillStyle = '#2a3150'; og.fillRect(16, OH - 22, OW - 32, 10); og.fillStyle = o.state === 'loaded' ? '#46ff8a' : '#ffb347'; og.fillRect(16, OH - 22, (OW - 32) * p, 10);
-        og.font = "600 16px 'IBM Plex Mono', monospace"; og.textAlign = 'left'; og.fillStyle = '#f1ecff'; og.fillText(o.state === 'loaded' ? 'carregado · 100%' : o.state === 'loading' ? 'carregando… ' + Math.round(p * 100) + '%' : 'aguardando carregamento', 16, OH - 40 + 0);
-        otex.needsUpdate = true; o.draws++;
-      }
-      const oscr = makeScreen(8, 4.5, era.color, { canvas: { texture: otex, tick: function () {} } }); oscr.position.set(ol.x, 3.4 + 2.25 + 0.25, ol.z); grp.add(oscr); screens.push(oscr);
-      [-1, 1].forEach(function (k) { const lx = ol.x + k * 3.5; const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.22, 4.0, 8), dark); leg.position.set(lx, 2.0, ol.z); grp.add(leg); const o = addCircleCol(lx, ol.z, 0.24, 0, 4.0); o.name = 'pé do outdoor'; o.tag = 'telão'; });
-      // the state machine: the car crosses the strip; the panel and the outdoor answer in the same frame
-      function pass(speed) {
-        const mph = Math.abs(speed) * 2.2, fast = mph > 60; RD.time = fast ? 0.5 : clamp(2.0 - 1.2 * Math.min(1, mph / 60), 0.8, 2.0); RD.state = fast ? 'fast' : 'slow'; S.radar = RD.time; S.radarShown = true;
-        const t = RD.time.toFixed(1).replace('.', ','); RD.text = fast ? '0,5 s · SEO ok' : 'Lento: ' + t + ' s'; if (fast && (RD.best === null || RD.time < RD.best)) RD.best = RD.time;
-        const o = RD.outdoor; if (fast) { o.state = 'loaded'; o.progress = 1; } else { o.state = 'loading'; o.progress = 0; o.t = 0; o.dur = RD.time * 2.5; }
-        paintPanel(); paintOutdoor(); o.redraw = 0;
-        toast(fast ? 'Carregamento 0,5 s · SEO ok' : 'Lento: ' + t + ' s', 1.6); setMission(fast ? 'Site otimizado: <b>0,5 s</b>' : 'Passe <b>mais rápido</b> pelo radar para otimizar o site');
-        if (AUD.on && radio.ctx) { chime([fast ? 84 : 72], 0, 'triangle'); if (fast) chime([88, 93], 0.1); }
-      }
-      upd.push(function (dt) {
-        const c = S.car, inZone = Math.abs(c.z - STRIP_Z) < 2 && Math.abs(c.x) < 6.5 && c.y < 4.2;
-        if (inZone) { if (!RD.inside) { RD.inside = true; pass(c.speed); } } else RD.inside = false;
-        const o = RD.outdoor; if (o.state === 'loading') { o.t += dt; o.progress = Math.min(1, o.t / o.dur); o.redraw += dt; if (o.progress >= 1) { o.state = 'loaded'; paintOutdoor(); } else if (o.redraw >= 0.1) { o.redraw = 0; paintOutdoor(); } }
-        // the cameras turn toward the car while it is within 90 m
-        const near = Math.hypot(c.x - 6.0, c.z - STRIP_Z) < 90; cams.forEach(function (m) { const ty = near ? Math.atan2(c.x - m.position.x, c.z - m.position.z) : 0; m.rotation.y += clamp(((ty - m.rotation.y + Math.PI * 3) % (Math.PI * 2)) - Math.PI, -3 * dt, 3 * dt); });
-      });
-      paintPanel(); paintOutdoor(); RD.panelDraws = 1;
-      PL.radar = { rd: RD, grp: grp, panel: panel, glyphM: capPx / 578 * 4.4, stripZ: STRIP_Z, pole: [PX, STRIP_Z], sign: signTex, ol: ol };
-    }
-
-    // the Rua das Conversões (wraps block 0,0 after the radar's outdoor) and the facades of JS (0,-2); the blocks the other places used to hold (-1,0 -1,-1 0,-1 -1,-2) are the avenue's ordinary district blocks
+    // the Rua das Conversões (wraps block 0,0) and the facades of JS (0,-2); the blocks the other places used to hold (-1,0 -1,-1 0,-1 -1,-2) are the avenue's ordinary district blocks
     const K = { g: g, era: era, special: special, upd: upd, screens: screens, pools: pools, reserveLot: reserveLot, avenueSide: avenueSide, PL: PL, roof: roof, propMat: propMat, dark: dark };
     placeConversions(K); placeJsAnimations(K);
     return PL;
@@ -3621,7 +3556,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
         if (glow[k].visible) glow[k].material.opacity = 0.55 + 0.25 * Math.sin(t * 12);
       }
     });
-    // block (0, 0) keeps what it had (the lots, the radar's outdoor) minus the lot of the shop; the shop's colliders, the cart and the people with bags are added
+    // block (0, 0) keeps what it had (the lots) minus the lot of the shop; the shop's colliders, the cart and the people with bags are added
     const prev = K.special['0,0'];
     K.special['0,0'] = function (B, h) {
       const wrap = Object.assign({}, h, { lots: function (B2, kinds, low, skip) { return h.lots(B2, kinds, low, function (lx, lz) { return (skip && skip(lx, lz)) || (lx === 1 && lz === -1); }); } });
@@ -3730,6 +3665,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     };
     K.PL.jsa = { JS: JS, size: [FW, FH], canvas: [CW, CH], start: START, end: END, bay: { x: CX - 12.25, z: BZ }, pos: POS, win: WIN };
   }
+  /* VALIANT:BEGIN */
   /* ------------------------------------------------ the career places of the Valiant (part 5, curated to three: V1 office, V2 plaza of the big screens, V3 the clients' block) ------------------------------------------------ */
   // ValiantGroup, mar 2025 - nov 2025: streaming, the platforms of three clients (web and Android TV). Like the RedBit's places, each is a block of the avenue of the
   // Valiant city (V1 (-1, 1) office, V2 (-1, -1) and (0, -1) the plaza of the big screens, V3 (-1, 0) the clients' block with the three towers; the chatbot and the e-Saúde are not places any more): the meshes, canvases and
@@ -4562,7 +4498,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     pools.curbTree = makePool(g, 'tree_oak', { h: 7.5 }, 800); pools.kit = makeStreetKit(g, era, pools.curbTree); if (era.life) pools.tk = makeTypeKit(g, era);
     const follow = buildRoadGrid(g, era);
     const special = {};
-    const avenueSide = function (sd) { return sd.dx !== 0; };   // district blocks keep the avenue curbs free for screens and the radar
+    const avenueSide = function (sd) { return sd.dx !== 0; };   // district blocks keep the avenue curbs free for screens
     for (let j = -3; j <= 2; j++) { special['0,' + j] = special['0,' + j] || function (B, h) { if (era.style === 'hive' && j === -1) { monorailLegs(B, pools.support); const id = pools.support.add(B.cx, B.cz, 0, 1, 0); B.ids.push([pools.support, id]); } h.lots ? (era.style === 'hive' ? h.lots(B, null, j === -1) : h.lots(B, era.life ? SITE_KINDS : TOWER_KINDS)) : 0; return { skipSide: avenueSide, curbGaps: j === -3 ? [{ x0: -7.2, x1: 7.2, z0: CITY_GATE_Z - 0.62, z1: CITY_GATE_Z + 0.62 }] : undefined }; }; special['-1,' + j] = special['-1,' + j] || special['0,' + j]; }
     function reserveLot(key, sx, sz) {
       const ij = key.split(',').map(Number), prev = special[key];
@@ -5619,15 +5555,17 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     return out;
   }
   function tripRender() { const L = tripLines(), box = $('trip'), chips = $('tripChips'); chips.textContent = ''; L.forEach(function (l) { const e = document.createElement('span'); e.dataset.k = l[0]; e.textContent = l[1]; chips.appendChild(e); }); box.hidden = !L.length; }
-  const S = { mode: 'world', eraIdx: 0, era: ERAS[0], car: { x: 0, z: 66, y: 0, vy: 0, h: 0, speed: 0, lat: 0, w: 0, air: false }, zoom: 1, parked: 0, wp: 0, dwell: 0, demo: true, idle: 0, jump: -1, hwSpeed: 0, hwX: 0, hwLatV: 0, lights: true, shake: 0, t: 0, flash: 0, flashOut: 0, lastDate: '--- ----', plu: 0, eraPlu: 0, neon: false, radar: 2.0, radarShown: false, live: false, carrying: false, migr: 0, finaleT: 0, photo: false, steer: 0, transit: -1, stuck: 0, unstick: 0, hwVx: 0, draft: false, arrive: 0, stats: { knocks: 0, hwHits: 0, propHits: 0, trainHits: 0, trench: 0, ringMiss: 0, wallHits: 0, jumps: 0 }, course: null, delivered: 0, sla: 0, inMud: false, inTrench: false, lastTrainHit: -9, portalMissT: -9, jam: null, spBanner: 0, stopK: 0, drill: { phase: 'idle', t: 0 }, trip: null };
+  const S = { mode: 'world', eraIdx: 0, era: ERAS[0], car: { x: 0, z: 66, y: 0, vy: 0, h: 0, speed: 0, lat: 0, w: 0, air: false }, zoom: 1, parked: 0, wp: 0, dwell: 0, demo: true, idle: 0, jump: -1, hwSpeed: 0, hwX: 0, hwLatV: 0, lights: true, shake: 0, t: 0, flash: 0, flashOut: 0, lastDate: '--- ----', plu: 0, eraPlu: 0, neon: false, live: false, carrying: false, migr: 0, finaleT: 0, photo: false, steer: 0, transit: -1, stuck: 0, unstick: 0, hwVx: 0, draft: false, arrive: 0, stats: { knocks: 0, hwHits: 0, propHits: 0, trainHits: 0, trench: 0, ringMiss: 0, wallHits: 0, jumps: 0 }, course: null, delivered: 0, sla: 0, inMud: false, inTrench: false, lastTrainHit: -9, portalMissT: -9, jam: null, spBanner: 0, stopK: 0, drill: { phase: 'idle', t: 0 }, trip: null };
   S.trip = tripNew();
   const keys = new Set(); let active = false;
-  let toastTimer = 0; function toast(msg, secs) { if (S.spBanner > 0 || (cardShown && innerHeight <= 500)) return; const t = $('toast'); t.textContent = msg; t.style.opacity = 1; toastTimer = secs || 2.2; }
+  const TEXT_LOG = []; /* what the toast and the mission said, by era (the hook textLog), the last 400 */
+  function logText(kind, text) { if (TEXT_LOG.length >= 400) TEXT_LOG.shift(); TEXT_LOG.push({ era: S.era.id, kind: kind, text: String(text) }); }
+  let toastTimer = 0; function toast(msg, secs) { if (S.spBanner > 0 || (cardShown && innerHeight <= 500)) return; logText('toast', msg); const t = $('toast'); t.textContent = msg; t.style.opacity = 1; toastTimer = secs || 2.2; }
   // The mission line has a short variant for a phone in portrait (under 500 px wide and over 500 px tall): the strip there is 351 px wide, two lines hold about 85 characters. The long text is the desktop's and the landscape phone's;
   // the short one is given by the caller (setMission(long, short)) or looked up by the long text in MSHORT (the static lines of the eras). The line shows one of the two (never both), and turns when the window turns.
   const MISSION = { long: '', short: '', shown: null }, PORTRAIT = window.matchMedia('(max-width: 500px) and (min-height: 501px)');
   function renderMission() { const m = $('mission'); if (!MISSION.long) { if (MISSION.shown !== '') { MISSION.shown = ''; m.hidden = true; } return; } const t = PORTRAIT.matches && MISSION.short ? MISSION.short : MISSION.long; if (MISSION.shown === t && !m.hidden) return; MISSION.shown = t; m.hidden = false; m.innerHTML = t; }
-  function setMission(html, short) { MISSION.long = html || ''; MISSION.short = short !== undefined ? short : (MSHORT[html] || ''); renderMission(); }
+  function setMission(html, short) { if (html) logText('mission', html); MISSION.long = html || ''; MISSION.short = short !== undefined ? short : (MSHORT[html] || ''); renderMission(); }
   if (PORTRAIT.addEventListener) PORTRAIT.addEventListener('change', renderMission); else if (PORTRAIT.addListener) PORTRAIT.addListener(renderMission);
   MSHORT[MISSION_OFFICE] = 'Front-end na RedBit: pare na vaga do <b>escritório</b>, à direita.';
   MSHORT[MISSION_VALIANT] = 'Pare no <b>escritório</b> e nos <b>clientes</b>; depois, a <b>praça dos telões</b>.';
@@ -6318,7 +6256,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
   function enterEra(idx) {
     if (world) { scene.remove(world.group); disposeGroup(world.group); world.screens.forEach(function (s) { if (s.userData.video) s.userData.video.el.pause(); }); }
     S.enters = (S.enters || 0) + 1; STATICS = []; GRID = new Map(); DYN = []; LABELS.length = 0; colView = null; colRings = []; clearTalk(); stopBugle(); clearStops(); beatsOff(); BEATS = {}; BEATT = {}; clearPeople(); ESP = null; ESPG = null; ABI = null; CAMPI = null; ESQI = null; PLC = null; PLV = null; PLK = null; EVK = null; LCQ.q.length = 0; LCQ.cur = null; LCQ.shown = 0; AMANI = null; ENGI = null; TELI = null; TFMI = null; COURSE_FINISH = null; BRI = null; BRIDGE_TEST = null; peopleGroup.visible = true; AUD.bellAt = 0; VEN.bar = VEN.obra = VEN.escola = 99; /* the school bell and the nearest places of the era before do not carry over */
-    trafficRefs.length = 0; cellRefs.length = 0; ringRefs.length = 0; S.course = null; S.bridge = null; S.convoy = null; CVI = null; S.delivered = 0; S.sla = 0; S.radar = 2.0; S.radarShown = false; S.inMud = false; S.inTrench = false; S.transit = -1; transitDone = null; tunnel.visible = false; S.jump = -1; S.flash = 0; S.jam = null; S.spBanner = 0; $('sp').classList.remove('on'); stage.classList.remove('sp-on'); $('guide').hidden = true;
+    trafficRefs.length = 0; cellRefs.length = 0; ringRefs.length = 0; S.course = null; S.bridge = null; S.convoy = null; CVI = null; S.delivered = 0; S.sla = 0; S.inMud = false; S.inTrench = false; S.transit = -1; transitDone = null; tunnel.visible = false; S.jump = -1; S.flash = 0; S.jam = null; S.spBanner = 0; $('sp').classList.remove('on'); stage.classList.remove('sp-on'); $('guide').hidden = true;
     S.eraIdx = idx; S.era = ERAS[idx]; S.eraPlu = 0; S.live = false; S.carrying = false; pkgOnRoof.visible = false; S.migr = 0; S.finaleT = 0;
     const next = ERAS[(idx + 1) % CYCLE];
     world = S.era.kind === 'nature' ? buildExercito(S.era, next) : S.era.kind === 'space' ? buildEvig(S.era, next) : S.era.kind === 'finale' ? buildFinale(S.era) : buildCity(S.era, next);
@@ -6846,7 +6784,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
       },
       /* EVIG-HOOK:END */
       videos: function () { const out = []; if (VGATE.spots) VGATE.spots.forEach(function (l, v) { out.push({ name: (v.el.src.match(/([\w-]+)\.webm/) || [])[1], playing: !v.el.paused, spots: l.length }); }); return out; },
-      radar: function () { const P = PLC; if (!P) return null; const R = P.radar, D = R.rd, o = D.outdoor; return { state: D.state, text: D.text, time: D.time, best: D.best, color: D.col, fov: camera.fov, panel: { w: 7.8, h: 4.4, glyphM: R.glyphM }, pole: { x: R.pole[0], z: R.pole[1], h: 9.8 }, cameras: 2, strip: { z: R.stripZ, text: 'RADAR' }, sign: { text: 'FISCALIZAÇÃO ELETRÔNICA · TEMPO DE CARREGAMENTO' }, outdoor: { state: o.state, progress: o.progress, x: R.ol.x, z: R.ol.z, draws: o.draws }, panelDraws: D.panelDraws }; },
+      textLog: function () { return TEXT_LOG.slice(); },
       conversions: function () { const P = PLC; if (!P || !P.conv) return null; const q = P.conv, CV = q.CV; return { count: CV.count, step: CV.step, last: CV.last, names: CV_NAMES.slice(), gates: q.GX.map(function (x, k) { return { name: CV_NAMES[k], x: x, lit: CV.lit[k] > 0, mode: CV.mode[k], next: !!CV.nx[k], strip: q.road[k].visible, stripOpacity: q.road[k].material.opacity, draws: CV.gateDraws[k] }; }), events: CV.events.map(function (e) { return { name: e.name, ok: e.ok, clock: e.clock }; }), panel: { text: CV.panelText, draws: CV.panelDraws }, screen: { lines: CV.lines.slice(), draws: CV.screenDraws }, plaque: CV_PLAQUE, shop: { name: 'Loja Exemplo', block: '0,0', x: q.shop.x, z: q.shop.z }, played: { tag: AUD.played.tag || 0, caixa: AUD.played.caixa || 0, erro: AUD.played.erro || 0 } }; },
       jsAnimations: function () { const P = PLC; if (!P || !P.jsa) return null; const q = P.jsa, J = q.JS; return { progress: J.p.slice(), target: J.tgt.slice(), scroll: J.P, mode: J.mode, bayT: J.bayT, maxStep: J.maxStep, draws: J.draws.slice(), entered: J.entered, size: q.size, canvas: q.canvas, facades: J.p.length, start: q.start, end: q.end, bay: q.bay, title: JS_TITLE.join(' '), tagline: JS_TAG, swish: AUD.played.swish || 0, card: JS_CARD.title }; },
       // the crosswalk arms of the loaded blocks (the ones a walker may cross by)
@@ -6910,7 +6848,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
       teleport: function (o) { const c = S.car; ['x', 'y', 'z', 'h', 'speed'].forEach(function (k) { if (o[k] !== undefined) c[k] = o[k]; }); if (o.hwX !== undefined) { S.hwX = o.hwX; S.hwVx = 0; } if (o.wp !== undefined) S.wp = o.wp; c.vy = 0; c.lat = 0; c.w = 0; c.air = false; S.hwLatV = 0; S.parked = 0; S.dwell = 0; S.unstick = 0; S.stuck = 0; S.demo = !!o.demo; S.idle = 0; camYaw = c.h; camPos.set(c.x + Math.sin(c.h) * 8.5, c.y + 3.6, c.z + Math.cos(c.h) * 8.5); camLook.set(c.x - Math.sin(c.h) * 6, c.y + 1, c.z - Math.cos(c.h) * 6); car.position.set(c.x, c.y, c.z); if (S.course) S.course.pz = c.z; ringRefs.forEach(function (rg) { rg.side = null; }); },
       // the trip scoreboard: the record, the lines it shows and what the showroom's card has in the page (L2b)
       trip: function () { const box = $('trip'), cd = $('finale'); return { rec: JSON.parse(JSON.stringify(S.trip)), lines: tripLines().map(function (l) { return l[1]; }), shown: !box.hidden, heading: box.querySelector('b').textContent, chips: Array.from($('tripChips').children).map(function (e) { return e.textContent; }), on: cd.classList.contains('on'), plu: S.plu }; },
-      info: function () { return JSON.parse(JSON.stringify({ era: S.era.id, mode: S.mode, car: S.car, course: S.course, bridge: S.bridge, convoy: S.convoy, radar: S.radar, live: S.live, carrying: S.carrying, delivered: S.delivered, sla: S.sla, migr: S.migr, plu: S.plu, eraPlu: S.eraPlu, stats: S.stats, stopK: S.stopK, drill: S.drill, photo: S.photo, radio: radio.on, hwSpeed: S.hwSpeed, hwX: S.hwX, draft: S.draft, arrive: S.arrive, jam: S.jam, statics: STATICS.length, bodies: DYN.length, jump: S.jump, transit: S.transit, flying: !!(world && world.flight), minAlt: world && world.minAlt, maxAlt: world && world.maxAlt, meta: world && world.meta, demo: S.demo, inMud: S.inMud, wp: S.wp, active: active, neon: S.neon, t: S.t, train: world && world.meta && hiveMeta ? hiveMeta.train.position.x : null })); },
+      info: function () { return JSON.parse(JSON.stringify({ era: S.era.id, mode: S.mode, car: S.car, course: S.course, bridge: S.bridge, convoy: S.convoy, live: S.live, carrying: S.carrying, delivered: S.delivered, sla: S.sla, migr: S.migr, plu: S.plu, eraPlu: S.eraPlu, stats: S.stats, stopK: S.stopK, drill: S.drill, photo: S.photo, radio: radio.on, hwSpeed: S.hwSpeed, hwX: S.hwX, draft: S.draft, arrive: S.arrive, jam: S.jam, statics: STATICS.length, bodies: DYN.length, jump: S.jump, transit: S.transit, flying: !!(world && world.flight), minAlt: world && world.minAlt, maxAlt: world && world.maxAlt, meta: world && world.meta, demo: S.demo, inMud: S.inMud, wp: S.wp, active: active, neon: S.neon, t: S.t, train: world && world.meta && hiveMeta ? hiveMeta.train.position.x : null })); },
       hwTraffic: function () { return hwActive().map(function (k) { return { lane: k.lane, x: k.x, z: k.z, kind: k.kind, sp: k.sp, hl: k.hl }; }); },
       cells: function () { return cellRefs.map(function (k) { return { x: k.g.position.x, y: k.y0, z: k.g.position.z, got: k.got }; }); },
       rings: function () { return ringRefs.map(function (rg) { return { x: rg.m.position.x, y: rg.m.position.y, z: rg.m.position.z, ry: rg.m.rotation.y, done: rg.done }; }); },
