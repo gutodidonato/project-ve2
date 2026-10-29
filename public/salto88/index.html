@@ -6371,6 +6371,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     S.eraIdx = idx; S.era = ERAS[idx]; S.eraPlu = 0; S.live = false; S.carrying = false; pkgOnRoof.visible = false; S.migr = 0; S.finaleT = 0;
     const next = ERAS[(idx + 1) % CYCLE];
     world = S.era.kind === 'nature' ? buildExercito(S.era, next) : S.era.kind === 'space' ? buildEvig(S.era, next) : S.era.kind === 'finale' ? buildFinale(S.era) : buildCity(S.era, next);
+    world.goal = GOALS[S.era.id] || null;
     { const tp = world.group.getObjectByName('portal-do-tempo'); world.portal3 = tp ? tp.userData.portal : null; world.portalLabel = tp ? tp.userData.labelSprite : null; if (tp) world.updates.push(tp.userData.update); }
     // floating screens block what flies or jumps into them
     world.group.children.forEach(function (o) { const ss = o.userData.screenSize; if (!ss) return; const sc = addBoxCol(o.position.x, o.position.z, (ss[0] + 0.5) / 2, 0.3, o.rotation.y, o.position.y - ss[1] / 2 - 0.25, o.position.y + ss[1] / 2 + 0.25); sc.name = 'telão'; sc.tag = 'telão'; });
@@ -6693,6 +6694,53 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     guideBox.l = r.left - cr.left; guideBox.r = r.right - cr.left; guideBox.t = r.top - cr.top; guideBox.b = r.bottom - cr.top; guideBox.w = cr.width; guideBox.h = cr.height; guideBox.ok = true;
     ge.hidden = was;
   }
+  /* ------------------------------------------------ the mission's goal (spec 2026-10-29 §3.1) ------------------------------------------------ */
+  // A mission with a place has a goal: GOALS holds one function per era, called once a frame through world.goal, that fills GOAL (one object, reused) or returns null. The arrow
+  // names the goal and its distance; the beacon is one column of light in the era's colour (additive, no fog, no depth write) with the goal's icon turning on top, made once and
+  // moved from goal to goal. It goes out in 0,4 s within 6 m of the goal and in photo mode; with reduced motion the icon does not turn.
+  const GOAL = { x: 0, y: 0, z: 0, label: '', icon: '◆' }, goalV = new THREE.Vector3();
+  // the obstacle course's legs: [the car's z past which the leg is behind it, name, x, z]
+  const GOAL_LEGS = [[-29, 'CONES', -45, -22.5], [-36, 'LAMA', -45, -34], [-41, 'RAMPA', -47.6, -39], [-1e9, 'CHEGADA', -45, -53]];
+  const VAL_GOALS = [['valiantgroup', 'ESCRITÓRIO'], ['clientes', 'CLIENTES'], ['praca-dos-teloes', 'PRAÇA']];
+  function goalSet(x, y, z, label, icon) { GOAL.x = x; GOAL.y = y; GOAL.z = z; GOAL.label = label; GOAL.icon = icon || '◆'; return GOAL; }
+  function stopById(id) { for (let i = 0; i < STOPS.length; i++) if (STOPS[i].id === id) return STOPS[i]; return null; }
+  const GOALS = {
+    exercito: function () {
+      const k = S.course, cv = S.convoy;
+      if (k && k.active) for (let i = 0; i < GOAL_LEGS.length; i++) { const q = GOAL_LEGS[i]; if (S.car.z > q[0]) return goalSet(q[2], 0, q[3], q[1]); }
+      if (cv && cv.state === 'following') return goalSet(-45, 0, -45, 'PONTE');
+      if (cv && cv.state === 'crossed') { const st = stopById('comando'); if (!st || !st.visited) return goalSet(st ? st.x : 41, 0, st ? st.z : 25, 'COMANDO'); }
+      if (k && !k.active && k.done === 0) return goalSet(-45, 0, -12, 'LARGADA');
+      return null;
+    },
+    redbit: function () { if (MISSION.long !== MISSION_OFFICE) return null; const st = stopById('redbit'); return st ? goalSet(st.x, 0, st.z, 'ESCRITÓRIO') : null; },
+    valiant: function () { for (let i = 0; i < VAL_GOALS.length; i++) { const st = stopById(VAL_GOALS[i][0]); if (st && !st.visited) return goalSet(st.x, 0, st.z, VAL_GOALS[i][1]); } return null; },
+    colmeia: function () { const P = PLK; if (!P || S.delivered >= 1) return null; if (S.carrying) { const d = P.jira.drop; return goalSet(d.x, d.y, d.z, 'DOCA', '⬇'); } const q = P.heliport.pick; return goalSet(q.x, q.y, q.z, 'PACOTE', '▣'); },
+    evig: function () { for (let i = 0; i < ringRefs.length; i++) { const r = ringRefs[i]; if (!r.done) return goalSet(r.m.position.x, r.m.position.y, r.m.position.z, 'ARGOLA', '◯'); } return null; }
+  };
+  // One mesh, one draw (spec 2026-10-29 §6): the open cylinder of the column and a square with the icon over it, merged, on one canvas (the column's fade on the left half, the icon on
+  // the right half); the whole mesh turns, so the icon turns and the round column does not show it.
+  const BEACON = { g: new THREE.Group(), op: 0, icon: '', ic: plCan(256, 128) };
+  { const B = BEACON, col = new THREE.CylinderGeometry(0.6, 0.6, 40, 16, 1, true).translate(0, 20, 0), sq = new THREE.PlaneGeometry(3.2, 3.2).translate(0, 41.6, 0), pos = [], uv = [], ind = [];
+    [[col, 0], [sq, 0.5]].forEach(function (q) { const g = q[0], b = pos.length / 3, P = g.attributes.position, U = g.attributes.uv; for (let i = 0; i < P.count; i++) { pos.push(P.getX(i), P.getY(i), P.getZ(i)); uv.push(q[1] + U.getX(i) * 0.5, U.getY(i)); } g.index.array.forEach(function (k) { ind.push(b + k); }); });
+    const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); geo.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2)); geo.setIndex(ind);
+    B.mat = new THREE.MeshBasicMaterial({ map: B.ic.tex, color: 0xffffff, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, fog: false, side: THREE.DoubleSide });
+    B.mesh = new THREE.Mesh(geo, B.mat); B.mesh.userData.rayIgnore = true; B.mesh.frustumCulled = false; B.g.add(B.mesh); B.g.name = 'farol-do-objetivo'; B.g.visible = false; scene.add(B.g);
+    const c = B.ic.c, gr = c.createLinearGradient(0, 128, 0, 0); gr.addColorStop(0, 'rgba(255,255,255,0.9)'); gr.addColorStop(1, 'rgba(255,255,255,0.15)'); c.fillStyle = gr; c.fillRect(0, 0, 128, 128); }
+  function beaconIcon(icon) {
+    if (BEACON.icon === icon) return; BEACON.icon = icon; const c = BEACON.ic.c;
+    c.clearRect(128, 0, 128, 128); c.fillStyle = '#ffffff'; c.font = "700 84px 'IBM Plex Sans', Arial, sans-serif"; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(icon, 192, 68); BEACON.ic.tex.needsUpdate = true;
+  }
+  // the goal of this frame (null without one) and the beacon brought to it
+  function updateGoal(dt) {
+    const g = S.mode === 'world' && world && world.goal ? world.goal() : null, B = BEACON;
+    const want = g && !S.photo && Math.hypot(g.x - S.car.x, g.y - S.car.y, g.z - S.car.z) >= 6 ? 1 : 0;
+    B.op = clamp(B.op + clamp(want - B.op, -dt / 0.4, dt / 0.4), 0, 1);
+    if (g) { B.g.position.set(g.x, g.y, g.z); beaconIcon(g.icon); B.mat.color.setHex(S.era.color); }
+    B.mat.opacity = 0.6 * B.op; B.g.visible = B.op > 0;
+    if (!reduce) B.mesh.rotation.y = (S.t * Math.PI * 2 / 3) % (Math.PI * 2);
+    return g;
+  }
   function labelOverGuide(margin) {
     const lb = world.portalLabel, g = guideBox; if (!lb || !g.ok || lb.material.opacity < 0.05) return false;
     lb.getWorldPosition(labelV); camera.updateMatrixWorld(); sndV.copy(labelV).applyMatrix4(camera.matrixWorldInverse); if (sndV.z > -0.5) return false;
@@ -6717,11 +6765,18 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     updateArcs(S.mode === 'highway' ? (S.jump >= 0 ? 1 : clamp((mph - 70) / 18, 0, 1) * 0.7) : S.arrive * 0.8);
     $('mph').textContent = String(Math.round(mph)).padStart(2, '0');
     if (S.mode === 'world' && world.flight) $('alt').textContent = String(Math.max(0, Math.round(S.car.y))).padStart(2, '0');
-    const gt = S.mode === 'world' && world && world.gate, gd = gt ? Math.hypot(gt.x - S.car.x, gt.z - S.car.z) : 0;
-    { const ge = $('guide'); let hideGuide = !gt || gd < 40 || S.photo;
+    const gt = S.mode === 'world' && world && world.gate, gd = gt ? Math.hypot(gt.x - S.car.x, gt.z - S.car.z) : 0, gl = updateGoal(dt), jam = S.mode === 'highway' && S.jam && !S.jam.done;
+    if (gl) { /* the mission's goal: the arrow hides while the goal is on screen within 40 m (the beacon is enough) */
+      const ge = $('guide'), d = Math.hypot(gl.x - S.car.x, gl.z - S.car.z); goalV.set(gl.x, gl.y, gl.z).project(camera); guideYield = false;
+      ge.hidden = S.photo || (goalV.z < 1 && Math.abs(goalV.x) < 1 && Math.abs(goalV.y) < 1 && d < 40);
+      $('guideText').textContent = gl.label + ' · ' + Math.round(d) + ' m';
+      if (!ge.hidden) { const yaw = Math.atan2(gl.x - camera.position.x, gl.z - camera.position.z), fwd = Math.atan2(camLook.x - camera.position.x, camLook.z - camera.position.z); $('guideArrow').style.transform = 'rotate(' + (-(yaw - fwd) * 180 / Math.PI - 90) + 'deg)'; }
+    } else if (jam) { /* the Marginal: the way out is straight ahead */
+      const ge = $('guide'); guideYield = false; ge.hidden = S.photo; $('guideArrow').style.transform = 'rotate(-90deg)'; $('guideText').textContent = 'SAÍDA · ' + Math.max(0, Math.round(S.jam.len - S.jam.dist)) + ' m';
+    } else { const ge = $('guide'); let hideGuide = !gt || gd < 40 || S.photo;
       if (!hideGuide && world.portalLabel) { if (!guideBox.ok) measureGuide(ge); if (guideLabel !== world.portalLabel) { guideLabel = world.portalLabel; guideYield = false; } guideYield = labelOverGuide(guideYield ? 22 : 6); hideGuide = guideYield; } else guideYield = false;
       ge.hidden = hideGuide; }
-    if (gt && gd >= 40) { const yaw = Math.atan2(gt.x - camera.position.x, gt.z - camera.position.z), fwd = Math.atan2(camLook.x - camera.position.x, camLook.z - camera.position.z); $('guideArrow').style.transform = 'rotate(' + (-(yaw - fwd) * 180 / Math.PI - 90) + 'deg)'; $('guideText').textContent = (world.portal3 ? 'PORTAL' : 'RODOVIA') + ' · ' + Math.round(gd) + ' m'; }
+    if (!gl && !jam && gt && gd >= 40) { const yaw = Math.atan2(gt.x - camera.position.x, gt.z - camera.position.z), fwd = Math.atan2(camLook.x - camera.position.x, camLook.z - camera.position.z); $('guideArrow').style.transform = 'rotate(' + (-(yaw - fwd) * 180 / Math.PI - 90) + 'deg)'; $('guideText').textContent = (world.portal3 ? 'PORTAL' : 'RODOVIA') + ' · ' + Math.round(gd) + ' m'; }
     $('flux').classList.toggle('hot', mph > 60 && Math.floor(S.t * (4 + clamp((mph - 60) / 28, 0, 1) * 18)) % 2 === 0);
     if (toastTimer > 0) { toastTimer -= dt; if (toastTimer <= 0) $('toast').style.opacity = 0; }
     if (S.toastQ && S.t >= S.toastQ.at) { if (S.mode === 'world') toast(S.toastQ.msg, S.toastQ.secs); S.toastQ = null; }
@@ -6896,6 +6951,11 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
       /* EVIG-HOOK:END */
       videos: function () { const out = []; if (VGATE.spots) VGATE.spots.forEach(function (l, v) { out.push({ name: (v.el.src.match(/([\w-]+)\.webm/) || [])[1], playing: !v.el.paused, spots: l.length }); }); return out; },
       textLog: function () { return TEXT_LOG.slice(); },
+      noGoal: function () { if (world) world.goal = null; }, /* tests of the portal's arrow: this era without its mission's goal, as before 2026-10-29 */
+      goal: function () {
+        const g = S.mode === 'world' && world && world.goal ? world.goal() : null; let n = 0; scene.traverse(function (o) { if (o.name === 'farol-do-objetivo') n++; });
+        return { label: g ? g.label : null, icon: g ? g.icon : null, x: g ? g.x : null, y: g ? g.y : null, z: g ? g.z : null, guide: { hidden: $('guide').hidden, text: $('guideText').textContent }, beacon: { visible: BEACON.g.visible, opacity: Math.round(BEACON.op * 1000) / 1000, count: n, meshes: BEACON.g.children.filter(function (o) { return o.isMesh || o.isSprite; }).length } };
+      },
       gallery: function () {
         const G = PLC && PLC.gallery; if (!G || S.era.id !== 'redbit') return null;
         const bytes = performance.getEntriesByType('resource').filter(function (r) { return /redbit-sites/.test(r.name); }).reduce(function (a, r) { return a + (r.encodedBodySize || r.transferSize || 0); }, 0);
