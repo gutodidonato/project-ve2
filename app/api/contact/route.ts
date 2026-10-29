@@ -2,7 +2,7 @@ import { Resend } from 'resend';
 import { contactSchema, createRateLimiter } from '@/lib/contact';
 
 const MAX_BODY_BYTES = 10_000;
-const DEFAULT_FROM = 'Rodovia 2026 <onboarding@resend.dev>';
+const DEFAULT_FROM = 'Luis Didonato <onboarding@resend.dev>';
 
 // One limiter per server process: 5 messages per 10 minutes per client IP.
 const allow = createRateLimiter({ limit: 5, windowMs: 10 * 60_000 });

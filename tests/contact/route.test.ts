@@ -194,7 +194,7 @@ describe('POST /api/contact', () => {
     expect(payload.replyTo).toBe('ada@example.com');
     expect(payload.to).toBe('owner@example.com');
     expect(payload.subject).toBe('Portfolio: Ada Lovelace');
-    expect(payload.from).toBe('Rodovia 2026 <onboarding@resend.dev>');
+    expect(payload.from).toBe('Luis Didonato <onboarding@resend.dev>');
     expect(payload.text).toContain(valid.message);
     expect(payload.text).toContain('ada@example.com');
   });
