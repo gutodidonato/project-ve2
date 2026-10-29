@@ -1,7 +1,12 @@
 # Salto 88: claro e jogável — Design
 
 Data: 2026-10-29 · Branch: `salto-88-claro` · Autor: Luis Didonato (com Claude)
-Parte A da revisão geral do portfólio. Muda o spec `2026-10-28-salto-88-paradas-que-explicam-design.md` em um ponto: o radar da RedBit sai do mundo inteiro (§5.1), não só da história da parada (aquele spec, §4.3). O resto dele continua valendo.
+Parte A da revisão geral do portfólio. Muda o spec `2026-10-28-salto-88-paradas-que-explicam-design.md` em dois pontos:
+
+- o radar da RedBit sai do mundo inteiro (§5.1), não só da história da parada (aquele spec, §4.3);
+- os vídeos e as telas trocam de parada conforme o que mostram de fato (§4.7 e §5.4).
+
+O resto dele continua valendo.
 
 ## 1. Por quê
 
@@ -19,6 +24,8 @@ O que ele apontou no jogo:
 - O jogo precisa funcionar no celular.
 - Há inconsistências, como "os 2.0s, do nada, na redbit" (o radar que saiu da história mas ficou no mundo).
 - Algumas paradas travam: o carro "trava na parada e começa a tentar rodar e buga por causa da camera view".
+- Mídias fora de contexto: "preciso que reveja todas as paradas/videos/fotos pq tem muita coisa fora de contexto". Exemplo dele: "aquele video de sites que vc passa é um video do streamming do siriolibanes que fiz, na outra metade do video tem os sites". Ele pediu "mais assertividade".
+- As fotos dos sites que ele fez, que no project-ve2 antigo "entravam em um emaranhado rotatorio de imagens de sites", precisam voltar, na RedBit. Ele disse ainda: "toda ref de hospital sirio libanes/housi/posadas na valiantgroup".
 
 Público do portfólio, na ordem que o Luis definiu: recrutador (CTO / Tech Lead), cliente, comunidade. Para o recrutador, um jogo com defeito visível ou que trava pesa contra.
 
@@ -41,6 +48,11 @@ Público do portfólio, na ordem que o Luis definiu: recrutador (CTO / Tech Lead
 | Celular | Entra na varredura: em pé (375×812) e deitado (812×375) |
 | Radar da RedBit | Sai do mundo inteiro: pista, poste, placa, outdoor, avisos, missão e menção no "Sobre" |
 | "Pontos" | Cada parada ganha uma nota de experiência (chegar, entender, sair). Dar itens explicados às outras paradas fica para a parte D |
+| Mídias | Cada vídeo e cada imagem tem um assunto declarado e só aparece na era desse assunto (R7). Os vídeos trocados voltam para o lugar certo (§5.4) |
+| Formatura | O vídeo `comemoracao` é a formatura da FIAP: sai do Exército e vai para a FIAP |
+| Sírio-Libanês, Housi, Posadas | Só na ValiantGroup: textos, telas, vídeos e capturas |
+| Galeria de sites | As capturas dos sites que o Luis fez voltam, como um emaranhado de sites girando na RedBit (§5.5) |
+| Capturas que não são sites | As de streaming (Housi, catálogos) vão para a ValiantGroup. Os painéis de dados e o DataChat ficam para a parte B |
 
 ## 3. As três peças
 
@@ -176,12 +188,59 @@ As regras valem em toda parada e cena. Cada uma vira um teste automático.
 | **R4 · aviso fora do quadro** | Avisos 3D (o contador "Entregas", a placa DOCA 1) ficam acima ou ao lado do quadro que acompanham, nunca na frente | Na tela, o retângulo projetado do aviso não cruza o retângulo projetado do quadro |
 | **R5 · sem sobras** | Nenhum texto ou objeto conta algo que a história atual não conta | O inventário (§4.3) é comparado com uma lista de termos proibidos, começando por "radar", "2,0 s" e "TEMPO DE CARREGAMENTO". A lista cresce a cada sobra encontrada |
 | **R6 · parada não trava** | Depois de parar, qualquer tecla de direção tira o carro da vaga em até 3 s. Sem girar no lugar, sem prender em colisão, sem volante invertido por causa da câmera. A câmera devolve o controle suavemente | O teste do §4.4: tempo até sair da vaga ≤ 3 s, rotação acumulada ≤ 120° numa saída com W, e o carro fora da vaga ao fim |
+| **R7 · mídia no contexto** | Cada vídeo e cada imagem só aparece na era do seu assunto. Sírio-Libanês, Housi e Posadas (Fiesta Americana) só aparecem na ValiantGroup, em texto ou em mídia | Cada arquivo de mídia está no manifesto do §4.7, com assunto e era. O teste lista toda tela, painel e textura com mídia, em cada era, e compara a era de cada uma com a do manifesto. Um arquivo fora do manifesto também falha. O inventário de textos do §4.3 não pode ter essas três marcas fora da era da ValiantGroup |
 
 A regra R4 trata de avisos que fazem parte da cena 3D. A regra R3 também cobre o painel do quiosque, que não pode tapar o lugar do item que ele explica (como já diz o spec dos itens).
 
 ### 4.6 Nota de experiência da parada
 
-Cada parada recebe, além das fotos, uma nota de 0 a 10 em três pontos: **chegar** (dá para achar e parar), **entender** (o lugar mostra o que o painel diz) e **sair** (R6). As paradas mais fracas ficam registradas como entrada para a parte D. A meta desta parte é só "sair" em 10 em todas, e "chegar" e "entender" sem nenhum defeito das regras R1 a R5.
+Cada parada recebe, além das fotos, uma nota de 0 a 10 em três pontos: **chegar** (dá para achar e parar), **entender** (o lugar mostra o que o painel diz) e **sair** (R6). As paradas mais fracas ficam registradas como entrada para a parte D. A meta desta parte é só "sair" em 10 em todas, e "chegar" e "entender" sem nenhum defeito das regras R1 a R5 e R7.
+
+### 4.7 Frente de mídia
+
+Cada mídia é conferida pelo que **mostra**, não pelo nome do arquivo. Nos vídeos, isso é feito olhando um quadro por segundo; nas imagens, a imagem inteira. Os vídeos têm 640×360 e de 10 a 12 s.
+
+**O que existe hoje (levantado em 29 out):**
+
+| Arquivo | O que mostra | Onde aparece | Situação |
+|---------|--------------|--------------|----------|
+| `aman.webm` | AMAN: Competição Internacional Chimaltlalli (março) e aniversário da AMAN com a Esquadrilha da Fumaça (abril) | Telão do Exército e painel da parada `aman` | Certo |
+| `fiap.webm` | Evento FIAP NEXT: participantes, VR, batalha de robôs | Telão da FIAP e item "vídeo" do painel da `redbit` | Certo (a era é FIAP + RedBit) |
+| `mobile.webm` | App de streaming do Hospital Sírio-Libanês (trabalho da ValiantGroup) | Painel da parada `animacoes`, na RedBit | **Errado**: vai para a ValiantGroup |
+| `fullstack.webm` | Site Bellastone (pisos para piscinas) | Painel da parada `valiantgroup` | **Errado**: vai para a RedBit |
+| `comemoracao.webm` | Formatura da FIAP (becas, faixa azul, plateia) | Painel da parada `comando`, no Exército | **Errado**: vai para a FIAP |
+
+**Manifesto de mídia (`proto/media.json`):** uma entrada por arquivo, com:
+
+- `file`;
+- `subject` (o que mostra, em uma frase);
+- `era`;
+- `stops` (as paradas onde pode aparecer);
+- `crop` (o recorte aplicado, quando houver).
+
+Os vídeos passam a ter o nome do assunto:
+
+| Hoje | Depois |
+|------|--------|
+| `mobile.webm` | `valiant-sirio-streaming.webm` |
+| `fullstack.webm` | `redbit-site-bellastone.webm` |
+| `comemoracao.webm` | `fiap-formatura.webm` |
+| `fiap.webm` | `fiap-next.webm` |
+| `aman.webm` | `exercito-aman.webm` |
+
+Um vídeo ou imagem novo só entra no jogo depois de ganhar uma entrada no manifesto. O conteúdo é conferido quadro a quadro antes.
+
+**Capturas de sites:** as 28 capturas do project-ve2 antigo voltam do histórico do git. Estavam em `public/imgs/sites/site1.png` a `site28.png` (commit `1464479`) e foram removidas na reconstrução de 15 out 2026. Ganham o mesmo manifesto e a divisão abaixo:
+
+| Grupo | Capturas | Era |
+|-------|----------|-----|
+| Sites de clientes: Bellastone, Leal EPI, transportadora / Transzecão, Dr. Luiz Henrique, Projeto Beta, Forster Seguros, Colamax, Vitrine (piscinas), Agibusiness | 1, 2, 4–17, 19, 25–28 | FIAP + RedBit (galeria, §5.5) |
+| Streaming: Housi, catálogo de filmes, Bolt | 3, 18, 20 | ValiantGroup |
+| Painéis de dados e DataChat | 21–24 | Fora do jogo; ficam para a parte B |
+
+A atribuição de cada número ao grupo é conferida de novo, imagem a imagem, no plano. Na dúvida, o Luis decide.
+
+**Telefones:** várias capturas mostram o telefone do cliente na faixa do topo. Seguindo a regra de nenhum telefone no portfólio, essa faixa é recortada, e o recorte fica no manifesto. Uma captura com telefone no meio da página é recortada ou sai.
 
 ## 5. Consertos já conhecidos
 
@@ -220,11 +279,57 @@ As quatro cenas dos prints entram na leva 1 e precisam passar em R1 a R4 nas tr�
 - painel AO VIVO da Valiant;
 - quadro Jira da Colmeia.
 
+### 5.4 Vídeos e capturas no lugar certo
+
+**Vídeos:**
+
+| Vídeo | Sai de | Vai para |
+|-------|--------|----------|
+| `valiant-sirio-streaming` | Painel da `animacoes` (RedBit) | Painel da `valiantgroup` e a TV do hospital na parada `clientes`, no lugar da tela desenhada |
+| `redbit-site-bellastone` | Painel da `valiantgroup` | Painel da `animacoes` |
+| `fiap-formatura` | Painel do `comando` (Exército) | Telão da FIAP, que passa a tocar o FIAP NEXT e a formatura, um depois do outro |
+
+O painel do `comando` fica sem vídeo.
+
+**Capturas de streaming:**
+
+- A captura do Housi (3) vai para a TV do Housi na parada `clientes`, no lugar da tela desenhada.
+- As do catálogo de filmes (18) e do Bolt (20) entram no rodízio dos telões da praça, junto com as telas desenhadas que já existem.
+
+### 5.5 Galeria de sites na RedBit
+
+As capturas dos sites de clientes (§4.7) voltam como um **emaranhado de sites girando**, na parada `animacoes`, no lugar do vídeo errado.
+
+**Forma:** a grade do project-ve2 antigo (`GridMotion`) levada para 3D.
+
+- Uma parede inclinada com 4 fileiras de capturas.
+- Fileiras alternadas deslizam em sentidos opostos, em laço contínuo.
+- A parede inteira gira devagar em torno do próprio eixo.
+- Fica de frente para a câmera da parada.
+- Quando o carro chega (a chegada da parada, como no spec dos itens), as fileiras aceleram um pouco.
+
+**Imagens:**
+
+- Recortadas sem a faixa de telefone.
+- Reduzidas para 1024×512 (enquadramento de capa).
+- Comprimidas em WebP.
+- Montadas em até 2 atlas, para a galeria custar no máximo 4 chamadas de desenho.
+- Download total de no máximo 2,5 MB.
+- O carregamento só começa quando a era FIAP + RedBit entra. Nada disso pesa na abertura do jogo.
+
+**Regras:**
+
+- A galeria passa em R1 (nenhuma captura tapada da câmera da parada) e em R3 nas três telas.
+- Com `prefers-reduced-motion`, as fileiras ficam paradas e a parede não gira.
+
+O painel da `animacoes` continua com o texto que já tem. O vídeo dele passa a ser o do site Bellastone (§5.4).
+
 ## 6. Desempenho
 
 - O farol custa no máximo uma chamada de desenho a mais.
 - Os avisos de tecla e de som são DOM, sem canvas novo.
 - As regras R2 (medir texto) rodam só quando o canvas é redesenhado.
+- A galeria de sites custa no máximo 4 chamadas de desenho e 2,5 MB, carregados só na era FIAP + RedBit (§5.5).
 - O teste de desempenho existente não pode perder mais de 5% de fps.
 
 ## 7. Acessibilidade
@@ -242,6 +347,8 @@ As quatro cenas dos prints entram na leva 1 e precisam passar em R1 a R4 nas tr�
 - O radar fora (§5.1).
 - O conserto das paradas que travam (§5.2).
 - As cenas dos prints (§5.3).
+- O manifesto de mídia, os vídeos e as capturas no lugar certo (§4.7 e §5.4).
+- A galeria de sites na RedBit (§5.5).
 - Os testes de §9 para tudo isso.
 
 ### Leva 2
@@ -268,6 +375,7 @@ Os testes ficam no laboratório (`.superpowers/salto88-lab/e2e`), seguindo o pad
 | `cena-regras` | R1 a R4 em toda parada, lugar de item e cena dos prints, nas três telas |
 | `conteudo` | R5: o inventário não contém nenhum termo proibido |
 | `paradas-saida` | R6 nas 14 paradas, com as quatro formas de saída |
+| `midia` | R7: toda mídia em tela está no manifesto, na era certa e numa parada permitida. Sírio-Libanês, Housi e Posadas não aparecem fora da ValiantGroup. A galeria carrega só na era FIAP + RedBit, com no máximo 2,5 MB e 4 chamadas de desenho. Nenhuma captura tem a faixa de telefone |
 | desempenho | O teste existente, com no máximo 5% de perda |
 
 Os testes que já existem continuam passando:
@@ -286,7 +394,9 @@ Os testes que dependem do radar saem junto com ele.
 
 - **B · Projetos e casos:**
   - casos da EVIG contados;
-  - o que for mostrável do GitHub (candidatos: `ecosaveAPI-dotnet`, `Streamlit-estoque`, `mk-group` com OK do cliente).
+  - o que for mostrável do GitHub (candidatos: `ecosaveAPI-dotnet`, `Streamlit-estoque`, `mk-group` com OK do cliente);
+  - as capturas dos painéis de dados e do DataChat (21–24);
+  - se a galeria de sites também volta ao LuisOS.
 - **C · Primeiro minuto do recrutador:** caminho direto para quem é, nível, entregas e contato, sem depender do 3D.
 - **D · Mais diversão:** itens explicados nas outras 13 paradas, eras novas, easter eggs.
 
@@ -299,3 +409,5 @@ Os testes que dependem do radar saem junto com ele.
 | R1 e R3 por raio dão falso positivo (vidro, partículas, objetos transparentes) | Teste vermelho sem defeito real | Objetos transparentes ou sem colisão visual são marcados para os raios ignorarem; cada exceção é registrada no teste |
 | Tirar o radar quebra testes antigos | Suíte vermelha | Os testes do radar saem no mesmo commit, e a suíte inteira roda antes do commit |
 | Varredura grande demais para uma leva | Demora para ir ao ar | Duas levas: a leva 1 vai ao ar antes da varredura completa |
+| Captura atribuída ao grupo errado | Sai mais uma mídia fora de contexto | A divisão é conferida imagem a imagem no plano; na dúvida, o Luis decide |
+| Galeria pesada no celular | Engasgos na RedBit | Atlas, WebP, limite de 2,5 MB e carregamento só na era; as fotos do celular decidem se a galeria perde fileiras na tela pequena |
