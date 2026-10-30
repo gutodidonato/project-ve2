@@ -578,6 +578,11 @@ Seção `conteudo` em `kiosk-check.mjs`:
 
 Segue o ciclo de fotos. Não há TDD por defeito; cada regra nova ou caso novo de regra entra na seção dela.
 
+**Vindo da Leva 1** (decisões de 2026-10-30):
+- **Câmera em retrato:** no celular em pé (375×812) o campo horizontal fica em ~28°. Placas, telões e o carro saem do quadro. O R3 da praça no celular é desta tarefa: o Luis tirou da Leva 1 a parte do celular do spec §5.3. Hoje `cena-regras` lista as telas leste 9, 11, 13 e 15 (2–3/9 tapadas pela estrutura da praça) em vez de falhar; depois do conserto, volta a falhar.
+- **Fileira de cima no desktop médio (721–1180 px):** a missão passa por cima do relógio e das ferramentas. Decidir entre texto curto e missão abaixo da fileira.
+- **Pendentes do Luis:** a galeria com 7 chamadas de desenho (o spec pede 4) e a captura do Projeto Beta com o registro profissional de um médico.
+
 **Files:**
 - Modify: template, para as marcações e os consertos.
 - Modify: `e2e/kiosk-check.mjs`:
