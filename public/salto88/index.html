@@ -1061,6 +1061,7 @@ button kbd { min-width: 0; margin: 0 0 0 0.3em; line-height: 1; padding: 0 0.32e
   const nearBuf = [];
   function queryStatics(x, z, pad) { nearBuf.length = 0; const ix0 = Math.floor((x - pad) / CELL), ix1 = Math.floor((x + pad) / CELL), iz0 = Math.floor((z - pad) / CELL), iz1 = Math.floor((z + pad) / CELL); for (let ix = ix0; ix <= ix1; ix++) for (let iz = iz0; iz <= iz1; iz++) { const a = GRID.get(ix * 4096 + iz); if (a) for (let i = 0; i < a.length; i++) if (nearBuf.indexOf(a[i]) < 0) nearBuf.push(a[i]); } return nearBuf; }
   const HIT = { nx: 0, nz: 0, pen: 0 };
+  const CAR_HIT = { on: false }; // the car ran into a solid this frame (the way out of a bay, stepWorld)
   // circle against a static; fills HIT with the push-out normal (toward the circle) and the depth
   function circleVs(o, px, pz, r) {
     const dx = px - o.x, dz = pz - o.z;
@@ -1076,7 +1077,7 @@ button kbd { min-width: 0; margin: 0 0 0 0.3em; line-height: 1; padding: 0 0.32e
   // DeLorean against statics: push out, keep the sliding part of the velocity, bounce a little, spin from off-centre hits.
   // In flight a shallower vertical overlap lands the car on top (tower roofs, platforms) or bumps it down from below.
   function collideCar(c) {
-    const fx = -Math.sin(c.h), fz = -Math.cos(c.h); let worst = 0;
+    const fx = -Math.sin(c.h), fz = -Math.cos(c.h); let worst = 0; CAR_HIT.on = false;
     for (let pass = 0; pass < 2; pass++) for (let k = -1; k <= 1; k += 2) {
       const ox = fx * CAR_OFF * k, oz = fz * CAR_OFF * k, list = queryStatics(c.x + ox, c.z + oz, 3);
       for (let i = 0; i < list.length; i++) {
@@ -1085,7 +1086,7 @@ button kbd { min-width: 0; margin: 0 0 0 0.3em; line-height: 1; padding: 0 0.32e
         const penTop = o.y1 - c.y, penBot = c.y + CAR_H - o.y0;
         if (world.flight && Math.min(penTop, penBot) < HIT.pen) { if (penTop < penBot) { c.y = o.y1; c.vy = Math.max(0, c.vy); } else { c.y = o.y0 - CAR_H; c.vy = Math.min(0, c.vy); } continue; }
         c.x += HIT.nx * HIT.pen; c.z += HIT.nz * HIT.pen;
-        const v = carVel(c), vn = v[0] * HIT.nx + v[1] * HIT.nz; if (vn >= 0) continue;
+        const v = carVel(c), vn = v[0] * HIT.nx + v[1] * HIT.nz; if (vn >= 0) continue; CAR_HIT.on = true;
         const j = -vn, tx = v[0] - vn * HIT.nx, tz = v[1] - vn * HIT.nz, fr = 1 - Math.min(0.55, j * 0.035);
         setCarVel(c, tx * fr + 0.25 * j * HIT.nx, tz * fr + 0.25 * j * HIT.nz);
         c.w += (oz * HIT.nx - ox * HIT.nz) * j * 0.09;
@@ -5689,7 +5690,7 @@ button kbd { min-width: 0; margin: 0 0 0 0.3em; line-height: 1; padding: 0 0.32e
     return out;
   }
   function tripRender() { const L = tripLines(), box = $('trip'), chips = $('tripChips'); chips.textContent = ''; L.forEach(function (l) { const e = document.createElement('span'); e.dataset.k = l[0]; e.textContent = l[1]; chips.appendChild(e); }); box.hidden = !L.length; }
-  const S = { mode: 'world', eraIdx: 0, era: ERAS[0], car: { x: 0, z: 66, y: 0, vy: 0, h: 0, speed: 0, lat: 0, w: 0, air: false }, zoom: 1, parked: 0, wp: 0, dwell: 0, demo: true, idle: 0, jump: -1, hwSpeed: 0, hwX: 0, hwLatV: 0, lights: true, shake: 0, t: 0, flash: 0, flashOut: 0, lastDate: '--- ----', plu: 0, eraPlu: 0, neon: false, live: false, carrying: false, migr: 0, finaleT: 0, photo: false, steer: 0, transit: -1, stuck: 0, unstick: 0, hwVx: 0, draft: false, arrive: 0, stats: { knocks: 0, hwHits: 0, propHits: 0, trainHits: 0, trench: 0, ringMiss: 0, wallHits: 0, jumps: 0 }, course: null, delivered: 0, sla: 0, inMud: false, inTrench: false, lastTrainHit: -9, portalMissT: -9, jam: null, spBanner: 0, stopK: 0, drill: { phase: 'idle', t: 0 }, trip: null };
+  const S = { mode: 'world', eraIdx: 0, era: ERAS[0], car: { x: 0, z: 66, y: 0, vy: 0, h: 0, speed: 0, lat: 0, w: 0, air: false }, zoom: 1, parked: 0, bayOut: 0, bayH: 0, bayX: 0, bayZ: 0, wp: 0, dwell: 0, demo: true, idle: 0, jump: -1, hwSpeed: 0, hwX: 0, hwLatV: 0, lights: true, shake: 0, t: 0, flash: 0, flashOut: 0, lastDate: '--- ----', plu: 0, eraPlu: 0, neon: false, live: false, carrying: false, migr: 0, finaleT: 0, photo: false, steer: 0, transit: -1, stuck: 0, unstick: 0, hwVx: 0, draft: false, arrive: 0, stats: { knocks: 0, hwHits: 0, propHits: 0, trainHits: 0, trench: 0, ringMiss: 0, wallHits: 0, jumps: 0 }, course: null, delivered: 0, sla: 0, inMud: false, inTrench: false, lastTrainHit: -9, portalMissT: -9, jam: null, spBanner: 0, stopK: 0, drill: { phase: 'idle', t: 0 }, trip: null };
   S.trip = tripNew();
   const keys = new Set(); let active = false;
   const TEXT_LOG = []; /* what the toast and the mission said, by era (the hook textLog), the last 400 */
@@ -6332,8 +6333,9 @@ button kbd { min-width: 0; margin: 0 0 0 0.3em; line-height: 1; padding: 0 0.32e
       // the pointer is a landmark from afar and a nuisance up close: hidden beyond 80 m (it costs 2 draws a stop), full size from 24 m and shrinking to 40% as the car comes into the bay
       const dm2 = dx * dx + dz * dz; st.mark.visible = !st.active && dm2 < 6400;
       if (st.mark.visible) { const k = Math.min(1, Math.max(0.4, Math.sqrt(dm2) / 24)); st.mark.scale.set(k, k, k); st.mark.position.y = 3 * (0.55 + 0.45 * k) + Math.sin(S.t * 3 + st.phase) * 0.25 * k; st.mark.rotation.y += dt * 1.6; }
-      if (st.active) any = true;
+      if (st.active) { any = true; S.bayH = st.h || 0; S.bayX = st.x; S.bayZ = st.z; }
     }
+    if (any) S.bayOut = 3; else if (S.bayOut > 0) S.bayOut -= dt;
     S.stopK += ((any ? 1 : 0) - S.stopK) * (1 - Math.pow(0.04, dt));
   }
   /* ------------------------------------------------ landing on a pad (the ship of the EVIG) ------------------------------------------------ */
@@ -6392,7 +6394,7 @@ button kbd { min-width: 0; margin: 0 0 0 0.3em; line-height: 1; padding: 0 0.32e
     if (world) { scene.remove(world.group); disposeGroup(world.group); world.screens.forEach(function (s) { if (s.userData.video) s.userData.video.el.pause(); }); }
     S.enters = (S.enters || 0) + 1; MEDIA_LOG.length = 0; SIGNS.length = 0; SUBJECTS.length = 0; OVERLAYS.length = 0; TEXTFIT.clear(); STATICS = []; GRID = new Map(); DYN = []; LABELS.length = 0; colView = null; colRings = []; clearTalk(); stopBugle(); clearStops(); beatsOff(); BEATS = {}; BEATT = {}; clearPeople(); ESP = null; ESPG = null; ABI = null; CAMPI = null; ESQI = null; PLC = null; PLV = null; PLK = null; EVK = null; LCQ.q.length = 0; LCQ.cur = null; LCQ.shown = 0; AMANI = null; ENGI = null; TELI = null; TFMI = null; COURSE_FINISH = null; BRI = null; BRIDGE_TEST = null; peopleGroup.visible = true; AUD.bellAt = 0; VEN.bar = VEN.obra = VEN.escola = 99; /* the school bell and the nearest places of the era before do not carry over */
     trafficRefs.length = 0; cellRefs.length = 0; ringRefs.length = 0; S.course = null; S.bridge = null; S.convoy = null; CVI = null; S.delivered = 0; S.sla = 0; S.inMud = false; S.inTrench = false; S.transit = -1; transitDone = null; tunnel.visible = false; S.jump = -1; S.flash = 0; S.jam = null; S.spBanner = 0; $('sp').classList.remove('on'); stage.classList.remove('sp-on'); $('guide').hidden = true;
-    S.eraIdx = idx; S.era = ERAS[idx]; S.eraPlu = 0; S.live = false; S.carrying = false; pkgOnRoof.visible = false; S.migr = 0; S.finaleT = 0;
+    S.eraIdx = idx; S.era = ERAS[idx]; S.bayOut = 0; S.eraPlu = 0; S.live = false; S.carrying = false; pkgOnRoof.visible = false; S.migr = 0; S.finaleT = 0;
     const next = ERAS[(idx + 1) % CYCLE];
     world = S.era.kind === 'nature' ? buildExercito(S.era, next) : S.era.kind === 'space' ? buildEvig(S.era, next) : S.era.kind === 'finale' ? buildFinale(S.era) : buildCity(S.era, next);
     world.goal = GOALS[S.era.id] || null;
@@ -6536,6 +6538,10 @@ button kbd { min-width: 0; margin: 0 0 0 0.3em; line-height: 1; padding: 0 0.32e
       if (c.air) { c.vy -= 24 * dt; c.y += c.vy * dt; if (c.y <= 0) { c.y = 0; c.vy = 0; c.air = false; S.shake = 0.4; play('soft', 0.8, 0.8); burst(c.x, 0.3, c.z, 24, 5, 0xffd9a0); } }
     }
     collideCar(c); collideCarBodies(c);
+    // The way out of a bay (S.bayOut: a stop active or left less than 3 s ago, the car within 6 m of it): a car that runs into the curb, a facade or a prop beside the bay turns
+    // back to the bay's own heading (S.bayH, the way out that is always clear) and scrapes on (spec 2026-10-29 R6). It used to grind into it with the wheel turned, turning on
+    // the spot, wedged between the facade and the RedBit's ecoponto or the Valiant's tree and bench, until the stop opened again under the keys.
+    if (S.bayOut > 0 && CAR_HIT.on && inp.thr > 0 && Math.hypot(c.x - S.bayX, c.z - S.bayZ) < 6) c.h += clamp(wrap(S.bayH - c.h), -6 * dt, 6 * dt);
     if (Math.abs(c.lat) > 2.2 && !c.air && !world.hover) [-0.9, 0.9].forEach(function (s) { emitTrail(c.x + rx * s - fx * 1.4, c.y, c.z + rz * s - fz * 1.4, c.h, S.neon ? 0xc8ff3d : S.era.color, 2.6, false); });
     stepBodies(dt);
     // The exit is a ring you drive through (P6): the car crosses the portal's plane from larger z with its nose forward (backing through it does nothing). Above the ring's centre
