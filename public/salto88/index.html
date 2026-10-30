@@ -4117,7 +4117,7 @@ button kbd { min-width: 0; margin: 0 0 0 0.3em; line-height: 1; padding: 0 0.32e
     }
     function start() { reset(true); setAll(TU, 0); CL.active = true; CL.runs++; }
     const bay = { x: cx + 12.25, z: cz - 5.5 };
-    const stop = addStop(g, { id: 'clientes', x: bay.x, z: bay.z, h: 0, kiosk: { cam: KS_CAM_LEFT }, card: VAL_CLIENTS_CARD, onArrive: function () { start(); }, onLeave: function () { reset(false); } });
+    const stop = addStop(g, { id: 'clientes', x: bay.x, z: bay.z, h: 0, kiosk: { cam: KS_CAM_CLIENTS }, card: VAL_CLIENTS_CARD, onArrive: function () { start(); }, onLeave: function () { reset(false); } });
     K.upd.push(function (dt) {
       // the pass: within 30 m of the facade the next content comes up it in a wave, once until the car is 50 m away again (a car that is at the bay has the show instead)
       const car = S.car, dzf = Math.max(0, ZS[0] - car.z, car.z - (ZS[2] + W)), dd = Math.hypot(car.x - X1, dzf);
@@ -5983,7 +5983,10 @@ button kbd { min-width: 0; margin: 0 0 0 0.3em; line-height: 1; padding: 0 0.32e
     const R = rng(((B.i * 73856093) ^ (B.j * 19349663) ^ era.seed ^ 0x51ed270b) >>> 0); R(); const cnt = TYPE_PEOPLE[B.type || 'distrito'] || [5, 6], n = cnt[0] + Math.floor(R() * (cnt[1] - cnt[0] + 1)), nWalk = n >= 6 ? 3 : 2, kinds = PEOPLE_LIB.list;
     const free = function (x, z, r) { const near = queryStatics(x, z, r + 1.5); for (let i = 0; i < near.length; i++) { const o = near[i]; if (o.name === 'meio-fio' || o.y0 > 1.7 || o.y1 < 0.1) continue; if (circleVs(o, x, z, r)) return false; } return true; };
     const faceOf = function (nx, nz) { return Math.atan2(-nx, -nz); }, away = function (x, z) { return Math.abs(x - B.cx) > Math.abs(z - B.cz) ? [Math.sign(x - B.cx), 0] : [0, Math.sign(z - B.cz)]; };
-    const spots = [], used = [], take = function (x, z, h, anim, y, solid) { for (let i = 0; i < used.length; i++) if (Math.hypot(used[i][0] - x, used[i][1] - z) < 0.9) return; used.push([x, z]); spots.push({ x: x, z: z, h: h, anim: anim || 'idle', y: y || 0, solid: !!solid }); };
+    // nobody stands in a bay's curb opening (B.gaps: the sidewalk from the road to the bay and 6 m either side), unless a place put them there: one stood in the RedBit's bay,
+    // inside the parked car and in front of the kiosk's camera
+    const inBay = function (x, z) { return !!B.gaps && B.gaps.some(function (g) { return x > g.x0 && x < g.x1 && z > g.z0 && z < g.z1; }); };
+    const spots = [], used = [], take = function (x, z, h, anim, y, solid) { if (!solid && inBay(x, z)) return; for (let i = 0; i < used.length; i++) if (Math.hypot(used[i][0] - x, used[i][1] - z) < 0.9) return; used.push([x, z]); spots.push({ x: x, z: z, h: h, anim: anim || 'idle', y: y || 0, solid: !!solid }); };
     if (B.spotsFirst) (B.spots || []).forEach(function (q) { take(q.x, q.z, q.h, q.anim || 'idle', q.y, q.solid); }); // the places' own people first (a block with a place has the people of its scene before the bench and the shelter)
     B.kit.forEach(function (q) {
       if (q.k === 'banco') { const a = away(q.x, q.z); take(q.x, q.z, faceOf(a[0], a[1]), 'sit', 0.19, true); }
@@ -6137,6 +6140,8 @@ button kbd { min-width: 0; margin: 0 0 0 0.3em; line-height: 1; padding: 0 0.32e
   const KS_CAM_ROAD = { pos: [-5.5, 4.5, 4.5], look: [3.5, 1.6, -2.5] };
   // further back on the road (the AMAN's arcades, the convoy's yard: wide places), and its mirror for a place on the car's left
   const KS_CAM_ROAD_BACK = { pos: [-6, 4, 8], look: [3, 1.2, -1] }, KS_CAM_LEFT = { pos: [6, 4, 8], look: [-3, 1.2, -1] };
+  // the clients' bay: from the avenue behind the car, up and across at the three towers' TV faces (x -18, 9.25 m to the left of the bay, up to 35 m high), the car in front
+  const KS_CAM_CLIENTS = { pos: [5, 6, 16], look: [-9.25, 13, 2] };
   const KS_CAM = { pos: [-7, 3.4, 6], look: [0, 1.2, -6] }, KV = { f: new THREE.Vector3(), r: new THREE.Vector3(), u: new THREE.Vector3(), up: new THREE.Vector3(0, 1, 0) };
   function stopPoint(st, p, out) { const c = Math.cos(st.h), sn = Math.sin(st.h); return out.set(st.x + p[0] * c + p[2] * sn, (st.y === undefined ? 0 : st.y) + p[1], st.z - p[0] * sn + p[2] * c); }
   function kioskFrame() { const cam = (KS.st.kiosk && KS.st.kiosk.cam) || KS_CAM; stopPoint(KS.st, cam.pos, KS.pos); stopPoint(KS.st, cam.look, KS.look); if (KS.sheet) KS.pos.sub(KS.look).multiplyScalar(1.6).add(KS.look); } // a phone held upright sees a narrow strip: the camera 1.6x further back along the same line
