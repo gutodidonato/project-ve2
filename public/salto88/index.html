@@ -56,6 +56,27 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
 .radio.on .freq { color: var(--led-green); text-shadow: 0 0 8px rgba(70, 255, 138, 0.7); }
 .start { position: absolute; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 6; padding: 9px 18px; border: 1px solid var(--sun); border-radius: 999px; background: var(--panel); color: var(--sun); font-family: var(--font-display); font-size: 0.78rem; letter-spacing: 0.08em; cursor: pointer; white-space: nowrap; }
 .start:hover { background: var(--sun); color: var(--night); }
+/* spec 2026-10-29 §3.2 and §3.3: one key style for the whole game, the key hint, the sound cue, the touch layout (a finger draws no key, its buttons are 44 px or more) */
+kbd { display: inline-block; min-width: 1.45em; margin: 0 0.1em; padding: 0.02em 0.38em; font-family: var(--font-mono); font-size: 0.84em; line-height: 1.3; text-align: center; color: var(--ink); background: #1c1730; border: 1px solid #5d5280; border-bottom-width: 3px; border-radius: 4px; box-shadow: 0 1px 0 rgba(0, 0, 0, 0.6); }
+.start kbd { margin: 0 0.06em; }
+.stage.touch kbd { display: none; }
+.keyhint { position: absolute; left: 50%; bottom: calc(68px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 5; padding: 7px 14px; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; font-family: var(--font-mono); font-size: 0.86rem; color: var(--ink); white-space: nowrap; pointer-events: none; }
+.keyhint[hidden] { display: none; }
+.keyhint.top { bottom: auto; top: calc(58px + env(safe-area-inset-top, 0px)); }
+.keyhint.by-lift { left: calc(var(--sl) + 104px); transform: none; bottom: calc(110px + env(safe-area-inset-bottom, 0px)); white-space: normal; max-width: 180px; }
+@media (max-width: 720px) and (min-height: 501px) { .keyhint.by-lift { left: var(--sl); bottom: calc(222px + env(safe-area-inset-bottom, 0px)); } } /* standing, over the lift: beside it the zoom is in the way */
+.sndcue { position: absolute; left: 50%; top: 56%; width: max-content; max-width: calc(100% - 32px); box-sizing: border-box; transform: translate(-50%, -50%); z-index: 7; padding: 14px 22px; background: var(--panel); border: 2px solid var(--sun); border-radius: 10px; font-family: var(--font-display); font-size: clamp(0.9rem, 3.6vw, 1.3rem); color: var(--ink); text-align: center; pointer-events: none; } /* 56%, one line where it fits: under the arrival toast, clear of the mission on every screen */
+.sndcue[hidden] { display: none; }
+#sndBtn.pulse { animation: sndPulse 1s ease-in-out infinite; border-color: var(--sun); }
+@keyframes sndPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(255, 179, 71, 0); } 50% { box-shadow: 0 0 0 6px rgba(255, 179, 71, 0.5); } }
+#sndBtn.attn { border-color: var(--sun); box-shadow: 0 0 0 3px rgba(255, 179, 71, 0.55); }
+.zoom #hornBtn { width: auto; min-width: 34px; padding: 0 6px; }
+.stage.touch .zoom button, .stage.touch .zoom #hornBtn { min-width: 44px; min-height: 44px; }
+.stage.touch .lift button { width: 88px; height: 46px; font-size: 0.8rem; }
+/* a key on a button keeps the button's height and about the tools' width (no space before it, tighter padding): the HUD's layout was measured without keys. On the phone-sized layouts there is no room for them, nor for a key hint (a finger's hint, by the lift, stays) */
+button kbd { min-width: 0; margin: 0 0 0 0.3em; line-height: 1; padding: 0 0.32em; border-bottom-width: 2px; }
+.tools { gap: 4px; } .tools button { padding: 6px 6px; }
+@media (max-width: 720px), (max-height: 500px) { .tools kbd, .zoom kbd, .radio kbd { display: none; } .stage:not(.touch) .keyhint { display: none; } }
 .stage.active .start, .stage.in-finale .start { display: none; }
 .toast { position: absolute; left: 50%; top: max(18%, calc(104px + env(safe-area-inset-top, 0px))); transform: translateX(-50%); z-index: 4; font-family: var(--font-display); font-size: clamp(0.66rem, 2.95vw, 1.1rem); text-align: center; text-shadow: 0 0 14px #000, 0 0 3px #000; pointer-events: none; width: max-content; max-width: 94%; overflow: visible; padding: 6px 12px; background: rgba(10, 8, 20, 0.62); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 8px; transition: opacity 0.35s; } .toast:empty { display: none; } .stage.in-finale .toast { display: none; } /* the showroom card (up to seven lines with Sua viagem) takes the screen and already says what the arrival hint did: no toast over it, at any size */ /* overflow stays visible: the 14 px halo of the text-shadow is not clipped into a hard band on a bright sky; a text longer than 94% wraps */
 .flash { position: absolute; inset: 0; z-index: 5; background: #fff; opacity: 0; pointer-events: none; }
@@ -241,12 +262,12 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
   <div class="panel mission" id="mission" hidden></div>
   <div class="panel tools">
     <span class="plu" id="plu" title="Células de plutônio">☢ 0/25</span>
-    <button type="button" id="sndBtn" title="Som (M)" aria-pressed="false">Som</button>
-    <button type="button" id="photoBtn" title="Modo foto (F)">Foto</button>
-    <button type="button" id="infoBtn" title="Sobre o protótipo (I)">i</button>
+    <button type="button" id="sndBtn" title="Som (M)" aria-label="Som (M)" aria-pressed="false">Som<kbd>M</kbd></button>
+    <button type="button" id="photoBtn" title="Modo foto (F)" aria-label="Modo foto (F)">Foto<kbd>F</kbd></button>
+    <button type="button" id="infoBtn" title="Sobre o protótipo (I)" aria-label="Sobre o protótipo (I)">i<kbd>I</kbd></button>
   </div>
-  <div class="panel lift" id="lift"><button type="button" id="upBtn" aria-label="Subir (E ou Espaço)">▲ E</button><button type="button" id="downBtn" aria-label="Descer (Q ou Shift)">▼ Q</button></div>
-  <div class="panel zoom"><button type="button" id="hornBtn" aria-label="Buzina (H)" title="Buzina (H)">📣</button><button type="button" id="zin" aria-label="Aproximar câmera">+</button><button type="button" id="zout" aria-label="Afastar câmera">−</button></div>
+  <div class="panel lift" id="lift"><button type="button" id="upBtn" aria-label="Subir (E ou Espaço)">▲<kbd>E</kbd></button><button type="button" id="downBtn" aria-label="Descer (Q ou Shift)">▼<kbd>Q</kbd></button></div>
+  <div class="panel zoom"><button type="button" id="hornBtn" aria-label="Buzina (H)" title="Buzina (H)">📣<kbd>H</kbd></button><button type="button" id="zin" aria-label="Aproximar câmera">+</button><button type="button" id="zout" aria-label="Afastar câmera">−</button></div>
   <div class="panel dash" aria-hidden="true">
     <svg class="flux" id="flux" viewBox="0 0 46 46"><line x1="23" y1="23" x2="8" y2="8"></line><line x1="23" y1="23" x2="38" y2="8"></line><line x1="23" y1="23" x2="23" y2="41"></line></svg>
     <div class="alt" id="altBox" hidden><b id="alt">00</b><span>ALT M</span></div>
@@ -255,15 +276,17 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
   <div class="panel radio" id="radio">
     <span class="freq" id="freq">--.-</span>
     <span class="name" id="station">Rádio desligado</span>
-    <span class="ctrl"><button type="button" id="rPrev" aria-label="Estação anterior">◀</button><button type="button" id="rPower">Ligar (R)</button><button type="button" id="rNext" aria-label="Próxima estação">▶</button></span>
+    <span class="ctrl"><button type="button" id="rPrev" aria-label="Estação anterior">◀</button><button type="button" id="rPower" aria-label="Ligar o rádio (R)">Ligar<kbd>R</kbd></button><button type="button" id="rNext" aria-label="Próxima estação">▶</button></span>
   </div>
   <div class="panel card" id="card" hidden aria-live="polite"><div class="head"><b id="cardTitle"></b><span class="per" id="cardPeriod"></span></div><p id="cardText"></p><div class="vals" id="cardVals"></div></div>
   <aside class="panel kiosk" id="kiosk" role="dialog" aria-modal="false" aria-labelledby="kTitle" hidden><div class="head"><b id="kTitle"></b><span class="per" id="kPer"></span></div><p id="kLead"></p><section id="kDid"><h3 id="kDidH"></h3><ul id="kList"></ul></section><div id="kCase"></div><video id="kVid" muted loop playsinline preload="none" hidden></video><div class="acts"><button type="button" class="primary" id="kNext"></button><button type="button" id="kDrive"></button></div></aside>
   <div class="toast" id="toast" aria-live="polite"></div>
+  <div class="keyhint" id="keyhint" aria-live="polite" hidden></div>
+  <div class="sndcue" id="sndCue" aria-live="polite" hidden></div>
   <div class="guide" id="guide" hidden><span class="arrow" id="guideArrow">➤</span><span id="guideText">PORTAL</span></div>
   <div class="sp" id="sp" aria-live="polite"><b>VOCÊ CAIU EM SÃO PAULO :)</b><span>Marginal Tietê · 18h07 · 112 km de lentidão · motoboys no corredor</span></div>
   <div class="flash" id="flash"></div>
-  <button type="button" class="start" id="start">▶ Dirigir · WASD</button>
+  <button type="button" class="start" id="start" aria-label="Dirigir (W A S D)">▶ Dirigir <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></button>
   <div class="panel photo" id="photo"><button type="button" data-f="none">Normal</button><button type="button" data-f="vhs">VHS</button><button type="button" data-f="neon">Neon</button><button type="button" data-f="bw">P&amp;B</button><button type="button" id="snap">Capturar</button><button type="button" id="photoExit">Sair (F)</button></div>
   <div class="shot" id="shot"><img id="shotImg" alt="Foto capturada do Salto 88"><p>Clique com o botão direito na imagem para salvar.</p><button type="button" id="shotClose">Fechar</button></div>
   <div class="finale" id="finale">
@@ -799,7 +822,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
   function hornStop() { AUD.hornOn = false; const h = AUD.horn; if (!h) return; const t = radio.ctx.currentTime; h.g.gain.setTargetAtTime(0, t, 0.02); h.nodes.forEach(function (o) { o.stop(t + 0.2); }); AUD.horn = null; }
   function setSound(on) {
     if (on && !audioInit()) return; AUD.on = on; if (on) radio.ctx.resume();
-    $('sndBtn').classList.toggle('on', on); $('sndBtn').textContent = on ? 'Som ●' : 'Som'; $('sndBtn').setAttribute('aria-pressed', on ? 'true' : 'false');
+    $('sndBtn').classList.toggle('on', on); $('sndBtn').innerHTML = (on ? 'Som ●' : 'Som') + '<kbd>M</kbd>'; $('sndBtn').setAttribute('aria-pressed', on ? 'true' : 'false'); soundCueUsed();
     if (!on) { if (radio.on) toggleRadio(); hornStop(); stopBugle(); } toast(on ? 'Som ligado (M)' : 'Som desligado (M)', 0.9);
   }
   function setStation(i) {
@@ -809,7 +832,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
   }
   function toggleRadio() {
     if (!radio.on && !AUD.on) { setSound(true); if (!AUD.on) return; }
-    radio.on = !radio.on; $('radio').classList.toggle('on', radio.on); $('rPower').textContent = radio.on ? 'Desligar (R)' : 'Ligar (R)';
+    radio.on = !radio.on; $('radio').classList.toggle('on', radio.on); $('rPower').innerHTML = (radio.on ? 'Desligar' : 'Ligar') + '<kbd>R</kbd>'; $('rPower').setAttribute('aria-label', (radio.on ? 'Desligar' : 'Ligar') + ' o rádio (R)');
     if (radio.on) radio.ctx.resume(); else if (radio.el) radio.el.pause();
     setStation(radio.st);
   }
@@ -6194,6 +6217,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
   // bay's own 3 s wait ran out (after, the route had already moved on to the way out; a release there must not skip it)
   function demoRelease() { S.dwell = 0; if (world && world.demoWps && world.demoExit !== undefined) S.wp = Math.max(S.wp, world.demoExit); }
   function openKiosk(st, auto) {
+    if (!TOUCH) keyHint('kiosk', '<kbd>Enter</kbd> próximo · <kbd>Esc</kbd> dirigir', function () { return HINT_KEYS.has('Enter') || HINT_KEYS.has('NumpadEnter') || HINT_KEYS.has('Escape') || !KS.open; }, true);
     const d = KIOSK_DATA.KIOSK[st.id] || { head: null, period: null, bullets: [], cases: [], video: null, highlight: true }, card = st.card || { title: '', period: '', text: '' }, L = KIOSK_DATA.LABELS;
     if (S.tour && S.tour.target === st) tourStop('arrived');
     KS.open = true; KS.st = st; KS.t = 0; KS.armed = false; kioskFrame();
@@ -6372,6 +6396,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     const next = ERAS[(idx + 1) % CYCLE];
     world = S.era.kind === 'nature' ? buildExercito(S.era, next) : S.era.kind === 'space' ? buildEvig(S.era, next) : S.era.kind === 'finale' ? buildFinale(S.era) : buildCity(S.era, next);
     world.goal = GOALS[S.era.id] || null;
+    if (world.flight) keyHint('fly', TOUCH ? 'Use ▲ e ▼ para subir e descer' : '<kbd>E</kbd> sobe · <kbd>Q</kbd> desce', function () { return (HINT_KEYS.has('KeyE') || HINT_KEYS.has('Space')) && (HINT_KEYS.has('KeyQ') || HINT_KEYS.has('ShiftLeft') || HINT_KEYS.has('ShiftRight')); });
     { const tp = world.group.getObjectByName('portal-do-tempo'); world.portal3 = tp ? tp.userData.portal : null; world.portalLabel = tp ? tp.userData.labelSprite : null; if (tp) world.updates.push(tp.userData.update); }
     // floating screens block what flies or jumps into them
     world.group.children.forEach(function (o) { const ss = o.userData.screenSize; if (!ss) return; const sc = addBoxCol(o.position.x, o.position.z, (ss[0] + 0.5) / 2, 0.3, o.rotation.y, o.position.y - ss[1] / 2 - 0.25, o.position.y + ss[1] / 2 + 0.25); sc.name = 'telão'; sc.tag = 'telão'; });
@@ -6777,6 +6802,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
       if (!hideGuide && world.portalLabel) { if (!guideBox.ok) measureGuide(ge); if (guideLabel !== world.portalLabel) { guideLabel = world.portalLabel; guideYield = false; } guideYield = labelOverGuide(guideYield ? 22 : 6); hideGuide = guideYield; } else guideYield = false;
       ge.hidden = hideGuide; }
     if (!gl && !jam && gt && gd >= 40) { const yaw = Math.atan2(gt.x - camera.position.x, gt.z - camera.position.z), fwd = Math.atan2(camLook.x - camera.position.x, camLook.z - camera.position.z); $('guideArrow').style.transform = 'rotate(' + (-(yaw - fwd) * 180 / Math.PI - 90) + 'deg)'; $('guideText').textContent = (world.portal3 ? 'PORTAL' : 'RODOVIA') + ' · ' + Math.round(gd) + ' m'; }
+    updateHints(dt); updateSoundCue(dt);
     $('flux').classList.toggle('hot', mph > 60 && Math.floor(S.t * (4 + clamp((mph - 60) / 28, 0, 1) * 18)) % 2 === 0);
     if (toastTimer > 0) { toastTimer -= dt; if (toastTimer <= 0) $('toast').style.opacity = 0; }
     if (S.toastQ && S.t >= S.toastQ.at) { if (S.mode === 'world') toast(S.toastQ.msg, S.toastQ.secs); S.toastQ = null; }
@@ -6793,7 +6819,53 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
   // P3-4: the game opens in attract mode (the demo car crosses the EsPCEx gate 0.4 s after the load). The first activation (Start, a key, a tap) restarts era 0 from the arrival, so every player sees the
   // gate, the sentinel, the bugle and the chapter card; later activations (after Esc) leave the game where it is.
   let started = false;
-  function activate() { if (active) return; active = true; stage.classList.add('active'); canvas.tabIndex = 0; canvas.focus({ preventScroll: true }); if (!started) { started = true; if (world) { S.lastDate = '--- ----'; S.plu = 0; S.trip = tripNew(); tripRender(); S.photo = false; enterEra(0); S.car.speed = 6; $('plu').textContent = '☢ 0/25'; } } S.demo = false; S.idle = 0; kick(); }
+  function activate() { if (active) return; active = true; soundCue(); if (!TOUCH) keyHint('drift', '<kbd>Espaço</kbd> derrapa', function () { return HINT_KEYS.has('Space'); }); stage.classList.add('active'); canvas.tabIndex = 0; canvas.focus({ preventScroll: true }); if (!started) { started = true; if (world) { S.lastDate = '--- ----'; S.plu = 0; S.trip = tripNew(); tripRender(); S.photo = false; enterEra(0); S.car.speed = 6; $('plu').textContent = '☢ 0/25'; } } S.demo = false; S.idle = 0; kick(); }
+  /* ------------------------------------------------ keys in context and the sound cue (spec 2026-10-29 §3.2 and §3.3) ------------------------------------------------ */
+  // TOUCH: a finger (a coarse pointer) draws no key and gets bigger buttons with words; it follows the pointer, never the screen's size, so turning a phone changes nothing.
+  const touchMQ = window.matchMedia('(pointer: coarse)'); let TOUCH = touchMQ.matches;
+  function applyTouch() { stage.classList.toggle('touch', TOUCH); $('upBtn').innerHTML = TOUCH ? '▲ Subir' : '▲<kbd>E</kbd>'; $('downBtn').innerHTML = TOUCH ? '▼ Descer' : '▼<kbd>Q</kbd>'; }
+  if (touchMQ.addEventListener) touchMQ.addEventListener('change', function (e) { TOUCH = e.matches; applyTouch(); }); applyTouch();
+  // A key hint: one at a time, at most once a visit (HINTS_SEEN, the page's memory), gone when done() turns true or after 8 s on screen, the next one queued; never in the demo, the
+  // tour, photo mode or the showroom. HINT_KEYS: the keys (and touch buttons) used since the current hint showed. Over the kiosk or the card it moves to the free part of the screen.
+  const HINTS_SEEN = new Set(), HINT_Q = [], HINT_KEYS = new Set(), KH = { cur: null, t: 0, shown: false, carry: false, hornT: 0 };
+  // urgent (the kiosk's and the package's, the mission's own): it goes first, and the hint on screen goes back to the queue's head
+  function keyHint(id, html, done, urgent) {
+    if (HINTS_SEEN.has(id) || (KH.cur && KH.cur.id === id) || HINT_Q.some(function (q) { return q.id === id; })) return; const h = { id: id, html: html, done: done };
+    if (!urgent) { HINT_Q.push(h); return; } if (KH.cur) { HINT_Q.unshift(KH.cur); KH.cur = null; } HINT_Q.unshift(h);
+  }
+  function hintBlocked() { return S.demo || S.tour || S.photo || S.era.kind === 'finale'; }
+  function hintNear() {
+    const c = S.car; if (!world || !world.blocks) return false;
+    let near = false; world.blocks.forEach(function (B) { const P = B.people; if (near || !P) return; for (let k = 0; k < P.length && !near; k++) { const r = P[k].root; near = r.visible && Math.abs(r.position.y - c.y) < 3 && Math.hypot(r.position.x - c.x, r.position.z - c.z) < 6; } }); if (near) return true; /* world.blocks is a Map */
+    for (let i = 0; i < DYN.length; i++) { const b = DYN[i]; if (!b.prop && !b.flying && Math.hypot(b.vx || 0, b.vz || 0) < 0.5 && Math.hypot(b.x - c.x, b.z - c.z) < 6) return true; }
+    return false;
+  }
+  function updateHints(dt) {
+    const el = $('keyhint');
+    if (S.mode === 'world' && !TOUCH && !hintBlocked()) {
+      if (S.carrying && !KH.carry) keyHint('drop', '<kbd>Q</kbd> desça até a doca', function () { return HINT_KEYS.has('KeyQ') || HINT_KEYS.has('ShiftLeft') || HINT_KEYS.has('ShiftRight') || !S.carrying; }, true);
+      KH.hornT -= dt; if (KH.hornT <= 0 && !HINTS_SEEN.has('horn') && !KS.open && Math.abs(S.car.speed) > 1) { KH.hornT = 0.3; if (hintNear()) keyHint('horn', '<kbd>H</kbd> buzina', function () { return HINT_KEYS.has('KeyH'); }); }
+    }
+    KH.carry = S.carrying;
+    const block = hintBlocked();
+    if (KH.cur && !block) { KH.t += dt; if (KH.cur.done() || KH.t >= 8) { HINTS_SEEN.add(KH.cur.id); KH.cur = null; } }
+    if (!KH.cur && HINT_Q.length && !block) { KH.cur = HINT_Q.shift(); KH.t = 0; HINT_KEYS.clear(); el.innerHTML = KH.cur.html; el.classList.toggle('by-lift', TOUCH && KH.cur.id === 'fly'); el.classList.remove('top'); el.style.left = ''; }
+    const show = !!KH.cur && !block; if (el.hidden === show) el.hidden = !show; KH.shown = show;
+    if (show && !el.classList.contains('by-lift')) { /* the free part of the screen when the kiosk or the card is in the way */
+      const sr = stage.getBoundingClientRect(), r = el.getBoundingClientRect(), hit = function (sel) { const e = document.querySelector(sel); if (!e || e.hidden || getComputedStyle(e).display === 'none') return null; const q = e.getBoundingClientRect(); return q.width && q.left < r.right && r.left < q.right && q.top < r.bottom && r.top < q.bottom ? q : null; };
+      const q = hit('#kiosk') || hit('#card');
+      if (q) { if (q.left - sr.left > r.width + 16) el.style.left = ((q.left - sr.left) / 2) + 'px'; else el.classList.add('top'); }
+    }
+  }
+  // the sound cue: on the first Dirigir of the visit, a big notice for 4 s and the Som button pulsing (a steady border with reduced motion) until it is used or 20 s go by
+  const SCUE = { done: false, t: 0, pulse: 0, cls: '' };
+  function soundCue() {
+    if (SCUE.done) return; SCUE.done = true; const el = $('sndCue');
+    el.innerHTML = TOUCH ? 'Este jogo tem som · toque em Som' : 'Este jogo tem som · <kbd>M</kbd> ou toque em Som'; el.hidden = false; SCUE.t = 4; SCUE.pulse = 20; SCUE.cls = reduce ? 'attn' : 'pulse'; $('sndBtn').classList.add(SCUE.cls);
+  }
+  function soundCueUsed() { if (SCUE.cls) { $('sndBtn').classList.remove(SCUE.cls); SCUE.cls = ''; } SCUE.pulse = 0; }
+  function updateSoundCue(dt) { if (SCUE.t > 0) { SCUE.t -= dt; if (SCUE.t <= 0 || hintBlocked()) { SCUE.t = 0; $('sndCue').hidden = true; } } if (SCUE.pulse > 0) { SCUE.pulse -= dt; if (SCUE.pulse <= 0) soundCueUsed(); } }
+  ['upBtn', 'downBtn', 'hornBtn'].forEach(function (id, k) { $(id).addEventListener('pointerdown', function () { HINT_KEYS.add(['KeyE', 'KeyQ', 'KeyH'][k]); }); });
   function deactivate() { active = false; keys.clear(); stage.classList.remove('active'); S.demo = true; }
   $('start').addEventListener('click', activate);
   function togglePhoto(on) { S.photo = on === undefined ? !S.photo : on; $('photo').classList.toggle('on', S.photo); $('kiosk').classList.toggle('photo-off', S.photo); if (S.photo) { photoCam.yaw = camYaw + 0.6; photoCam.dist = 12; toast('Modo foto: arraste para girar, scroll para zoom', 1.8); } else { $('vhs').style.display = 'none'; canvas.style.filter = ''; } }
@@ -6806,6 +6878,7 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
   const GAME_KEYS = ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space', 'KeyE', 'KeyQ', 'ShiftLeft', 'ShiftRight'];
   window.addEventListener('keydown', function (e) {
     if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+    HINT_KEYS.add(e.code);
     if (e.code === 'KeyM' && !e.repeat) { setSound(!AUD.on); return; }
     if (e.code === 'KeyH') { e.preventDefault(); if (!e.repeat) hornStart(); return; }
     if (e.code === 'KeyR' && !e.repeat) { toggleRadio(); return; }
@@ -6951,6 +7024,9 @@ button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
       /* EVIG-HOOK:END */
       videos: function () { const out = []; if (VGATE.spots) VGATE.spots.forEach(function (l, v) { out.push({ name: (v.el.src.match(/([\w-]+)\.webm/) || [])[1], playing: !v.el.paused, spots: l.length }); }); return out; },
       textLog: function () { return TEXT_LOG.slice(); },
+      hints: function () { const r = $('keyhint').getBoundingClientRect(); return { current: KH.shown ? KH.cur.id : null, seen: Array.from(HINTS_SEEN), rect: KH.shown ? { left: r.left, right: r.right, top: r.top, bottom: r.bottom } : null }; },
+      soundCue: function () { return { shown: !$('sndCue').hidden, cls: SCUE.cls }; },
+      deactivate: function () { deactivate(); },
       noGoal: function () { if (world) world.goal = null; }, /* tests of the portal's arrow: this era without its mission's goal, as before 2026-10-29 */
       goal: function () {
         const g = S.mode === 'world' && world && world.goal ? world.goal() : null; let n = 0; scene.traverse(function (o) { if (o.name === 'farol-do-objetivo') n++; });
