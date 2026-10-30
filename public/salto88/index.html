@@ -1061,7 +1061,7 @@ button kbd { min-width: 0; margin: 0 0 0 0.3em; line-height: 1; padding: 0 0.32e
   const nearBuf = [];
   function queryStatics(x, z, pad) { nearBuf.length = 0; const ix0 = Math.floor((x - pad) / CELL), ix1 = Math.floor((x + pad) / CELL), iz0 = Math.floor((z - pad) / CELL), iz1 = Math.floor((z + pad) / CELL); for (let ix = ix0; ix <= ix1; ix++) for (let iz = iz0; iz <= iz1; iz++) { const a = GRID.get(ix * 4096 + iz); if (a) for (let i = 0; i < a.length; i++) if (nearBuf.indexOf(a[i]) < 0) nearBuf.push(a[i]); } return nearBuf; }
   const HIT = { nx: 0, nz: 0, pen: 0 };
-  const CAR_HIT = { on: false }; // the car ran into a solid this frame (the way out of a bay, stepWorld)
+  const CAR_HIT = { on: false }; /* the car ran into a solid this frame (the way out of a bay, stepWorld) */
   // circle against a static; fills HIT with the push-out normal (toward the circle) and the depth
   function circleVs(o, px, pz, r) {
     const dx = px - o.x, dz = pz - o.z;
@@ -3479,7 +3479,8 @@ button kbd { min-width: 0; margin: 0 0 0 0.3em; line-height: 1; padding: 0 0.32e
         // the other two lots: the bakery and the pharmacy, facing the east street
         const f1 = h.front(B, h.LOW[Math.floor(B.R() * h.LOW.length)], 1, -1, 'x', h.SN.pao, Math.floor(B.R() * 4)), f2 = h.front(B, h.LOW[Math.floor(B.R() * h.LOW.length)], 1, 1, 'x', h.SN.drogaria, Math.floor(B.R() * 4));
         h.kit(B, 'bicicletario', cx - 12.4, cz + 3.4, -Math.PI / 2);
-        B.spots.push({ x: bx0 - 2.0, z: bz + 3.4, h: plFacing(1, 0), anim: 'idle' }, { x: bx0 - 2.0, z: bz - 3.8, h: plFacing(1, 0), anim: 'holding-both' }, { x: cx - 10.0, z: cz + 5.4, h: plFacing(0, -1), anim: 'idle' });
+        // the people by the door stand against the glass (x 10.9), past the bay's curb opening (x 6 to 10.5) and clear of the car's way out
+        B.spots.push({ x: bx0 - 0.6, z: bz + 3.4, h: plFacing(1, 0), anim: 'idle' }, { x: bx0 - 0.6, z: bz - 3.8, h: plFacing(1, 0), anim: 'holding-both' }, { x: cx - 10.0, z: cz + 5.4, h: plFacing(0, -1), anim: 'idle' });
         return { skipSide: avenueSide, noLamp: function (sd) { return sd.dx === -1; }, curbGaps: [plGap(cx - 15.0, cx - 10.5, bz)], clear: [{ x0: cx - 14.2, x1: cx - 10.5, z0: bz - 6, z1: bz + 6 }] };
       };
     }
@@ -4536,7 +4537,7 @@ button kbd { min-width: 0; margin: 0 0 0 0.3em; line-height: 1; padding: 0 0.32e
       c.fillStyle = JR.col === 2 && !JR.mv && JR.picks > 0 ? COL_GREEN : '#e8dcc8'; plFit(c, DB.sub, "600 #px 'IBM Plex Mono', monospace", 700, 40); c.fillText(DB.sub, 384, 208);
       DC.tex.needsUpdate = true; DB.draws++;
     }
-    lb.scale.set(7.4, 2.47, 1); lb.position.set(DROP.x, DY + 9.6, CZ); /* R4: 1 m higher than it was, its bottom over the board's top seen from the dock's arrival */ lb.name = 'placar-da-doca'; LABELS.push(lb); grp.add(lb); overlayMark(lb, board); dockPaint(); DB.sig = JR.deliveries + '|' + JR.picks + '|' + JR.col + '|' + JR.mv;
+    lb.scale.set(7.4, 2.47, 1); lb.position.set(DROP.x, DY + 9.9, CZ); /* R4: 1.3 m higher than it was, its bottom over the board's top seen from the dock's arrival (a phone lying down touched it at 9.6) */ lb.name = 'placar-da-doca'; LABELS.push(lb); grp.add(lb); overlayMark(lb, board); dockPaint(); DB.sig = JR.deliveries + '|' + JR.picks + '|' + JR.col + '|' + JR.mv;
     K.upd.push(function () { const sg = JR.deliveries + '|' + JR.picks + '|' + JR.col + '|' + JR.mv; if (sg !== DB.sig) { DB.sig = sg; dockPaint(); } });
     const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: softDot, color: 0xffb347, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0.35, fog: false })); glow.position.set(X0 - 2, 4.5, cz); glow.scale.set(24, 10, 1); grp.add(glow);
     // roof units and a sign on the roof edge
@@ -5693,14 +5694,22 @@ button kbd { min-width: 0; margin: 0 0 0 0.3em; line-height: 1; padding: 0 0.32e
   const S = { mode: 'world', eraIdx: 0, era: ERAS[0], car: { x: 0, z: 66, y: 0, vy: 0, h: 0, speed: 0, lat: 0, w: 0, air: false }, zoom: 1, parked: 0, bayOut: 0, bayH: 0, bayX: 0, bayZ: 0, wp: 0, dwell: 0, demo: true, idle: 0, jump: -1, hwSpeed: 0, hwX: 0, hwLatV: 0, lights: true, shake: 0, t: 0, flash: 0, flashOut: 0, lastDate: '--- ----', plu: 0, eraPlu: 0, neon: false, live: false, carrying: false, migr: 0, finaleT: 0, photo: false, steer: 0, transit: -1, stuck: 0, unstick: 0, hwVx: 0, draft: false, arrive: 0, stats: { knocks: 0, hwHits: 0, propHits: 0, trainHits: 0, trench: 0, ringMiss: 0, wallHits: 0, jumps: 0 }, course: null, delivered: 0, sla: 0, inMud: false, inTrench: false, lastTrainHit: -9, portalMissT: -9, jam: null, spBanner: 0, stopK: 0, drill: { phase: 'idle', t: 0 }, trip: null };
   S.trip = tripNew();
   const keys = new Set(); let active = false;
-  const TEXT_LOG = []; /* what the toast and the mission said, by era (the hook textLog), the last 400 */
-  function logText(kind, text) { if (TEXT_LOG.length >= 400) TEXT_LOG.shift(); TEXT_LOG.push({ era: S.era.id, kind: kind, text: String(text) }); }
+  const TEXT_LOG = []; let TEXT_AT = 0; /* what the toast and the mission said, by era (the hook textLog): a ring of the last 400 */
+  function logText(kind, text) { const e = { era: S.era.id, kind: kind, text: String(text) }; if (TEXT_LOG.length < 400) TEXT_LOG.push(e); else { TEXT_LOG[TEXT_AT] = e; TEXT_AT = (TEXT_AT + 1) % 400; } }
+  // a and b say the same once their numbers are set aside (a mission redrawn every frame with its clock or its metres), compared in place, nothing allocated
+  function sameShape(a, b) {
+    let i = 0, j = 0; const n = a.length, m = b.length;
+    for (;;) {
+      while (i < n && a.charCodeAt(i) >= 48 && a.charCodeAt(i) <= 57) i++; while (j < m && b.charCodeAt(j) >= 48 && b.charCodeAt(j) <= 57) j++;
+      if (i >= n || j >= m) return i >= n && j >= m; if (a.charCodeAt(i) !== b.charCodeAt(j)) return false; i++; j++;
+    }
+  }
   let toastTimer = 0; function toast(msg, secs) { if (S.spBanner > 0 || (cardShown && innerHeight <= 500)) return; logText('toast', msg); const t = $('toast'); t.textContent = msg; t.style.opacity = 1; toastTimer = secs || 2.2; }
   // The mission line has a short variant for a phone in portrait (under 500 px wide and over 500 px tall): the strip there is 351 px wide, two lines hold about 85 characters. The long text is the desktop's and the landscape phone's;
   // the short one is given by the caller (setMission(long, short)) or looked up by the long text in MSHORT (the static lines of the eras). The line shows one of the two (never both), and turns when the window turns.
   const MISSION = { long: '', short: '', shown: null }, PORTRAIT = window.matchMedia('(max-width: 500px) and (min-height: 501px)');
   function renderMission() { const m = $('mission'); if (!MISSION.long) { if (MISSION.shown !== '') { MISSION.shown = ''; m.hidden = true; } return; } const t = PORTRAIT.matches && MISSION.short ? MISSION.short : MISSION.long; if (MISSION.shown === t && !m.hidden) return; MISSION.shown = t; m.hidden = false; m.innerHTML = t; }
-  function setMission(html, short) { if (html) logText('mission', html); MISSION.long = html || ''; MISSION.short = short !== undefined ? short : (MSHORT[html] || ''); renderMission(); }
+  function setMission(html, short) { if (html && !sameShape(html, MISSION.long)) logText('mission', html); MISSION.long = html || ''; MISSION.short = short !== undefined ? short : (MSHORT[html] || ''); renderMission(); }
   if (PORTRAIT.addEventListener) PORTRAIT.addEventListener('change', renderMission); else if (PORTRAIT.addListener) PORTRAIT.addListener(renderMission);
   MSHORT[MISSION_OFFICE] = 'Front-end na RedBit: pare na vaga do <b>escritório</b>, à direita.';
   MSHORT[MISSION_VALIANT] = 'Pare no <b>escritório</b> e nos <b>clientes</b>; depois, a <b>praça dos telões</b>.';
@@ -5983,8 +5992,8 @@ button kbd { min-width: 0; margin: 0 0 0 0.3em; line-height: 1; padding: 0 0.32e
     const R = rng(((B.i * 73856093) ^ (B.j * 19349663) ^ era.seed ^ 0x51ed270b) >>> 0); R(); const cnt = TYPE_PEOPLE[B.type || 'distrito'] || [5, 6], n = cnt[0] + Math.floor(R() * (cnt[1] - cnt[0] + 1)), nWalk = n >= 6 ? 3 : 2, kinds = PEOPLE_LIB.list;
     const free = function (x, z, r) { const near = queryStatics(x, z, r + 1.5); for (let i = 0; i < near.length; i++) { const o = near[i]; if (o.name === 'meio-fio' || o.y0 > 1.7 || o.y1 < 0.1) continue; if (circleVs(o, x, z, r)) return false; } return true; };
     const faceOf = function (nx, nz) { return Math.atan2(-nx, -nz); }, away = function (x, z) { return Math.abs(x - B.cx) > Math.abs(z - B.cz) ? [Math.sign(x - B.cx), 0] : [0, Math.sign(z - B.cz)]; };
-    // nobody stands in a bay's curb opening (B.gaps: the sidewalk from the road to the bay and 6 m either side), unless a place put them there: one stood in the RedBit's bay,
-    // inside the parked car and in front of the kiosk's camera
+    // nobody stands in a bay's curb opening (B.gaps: the sidewalk from the road to the bay and 6 m either side) but on a solid spot (a seat, a step): one stood in the RedBit's
+    // bay, inside the parked car and in front of the kiosk's camera
     const inBay = function (x, z) { return !!B.gaps && B.gaps.some(function (g) { return x > g.x0 && x < g.x1 && z > g.z0 && z < g.z1; }); };
     const spots = [], used = [], take = function (x, z, h, anim, y, solid) { if (!solid && inBay(x, z)) return; for (let i = 0; i < used.length; i++) if (Math.hypot(used[i][0] - x, used[i][1] - z) < 0.9) return; used.push([x, z]); spots.push({ x: x, z: z, h: h, anim: anim || 'idle', y: y || 0, solid: !!solid }); };
     if (B.spotsFirst) (B.spots || []).forEach(function (q) { take(q.x, q.z, q.h, q.anim || 'idle', q.y, q.solid); }); // the places' own people first (a block with a place has the people of its scene before the bench and the shelter)
@@ -6059,6 +6068,7 @@ button kbd { min-width: 0; margin: 0 0 0 0.3em; line-height: 1; padding: 0 0.32e
   // group that owns the painted bay (the era's world group, disposed with it). showCard(card) and hideCard() are what the stop uses, and what the chapter lines use to open a card by passing.
   const STOPS = []; let cardShown = null, cardTtl = 0;
   function showCard(card, o) {
+    hintReplace();
     if (innerHeight <= 500) { toastTimer = 0; $('toast').style.opacity = 0; }
     const el = $('card'); cardTtl = o && o.ttl > 0 ? o.ttl : 0; $('cardTitle').textContent = card.title || ''; $('cardPeriod').textContent = card.period || ''; $('cardText').textContent = card.text || '';
     const v = $('cardVals'); v.textContent = ''; (card.values || []).forEach(function (x) { const c = document.createElement('span'); c.textContent = x; v.appendChild(c); });
@@ -6078,7 +6088,7 @@ button kbd { min-width: 0; margin: 0 0 0 0.3em; line-height: 1; padding: 0 0.32e
     for (let i = LCQ.q.length - 1; i >= 0; i--) { LCQ.q[i].left -= dt; if (LCQ.q[i].left <= 0) LCQ.q.splice(i, 1); }
     if (LCQ.q.length && active && (toastTimer <= 0 || innerHeight > 500) && (!LCQ.cur || LCQ.shown >= 4)) { const e = LCQ.q.shift(); LCQ.cur = e.card; LCQ.shown = 0; showCard(e.card, { ttl: e.ttl }); }
   }
-  function hideCard(card) { if (card && cardShown !== card) return; $('card').hidden = true; stage.classList.remove('card-open'); cardShown = null; cardTtl = 0; }
+  function hideCard(card) { if (card && cardShown !== card) return; hintReplace(); $('card').hidden = true; stage.classList.remove('card-open'); cardShown = null; cardTtl = 0; }
   function addStop(g, o) {
     const col = '#' + new THREE.Color(S.era.color).getHexString(), grp = new THREE.Group();
     const tex = canvasTex(128, 236, function (c, w, h) { c.fillStyle = col + '2a'; c.fillRect(0, 0, w, h); c.setLineDash([26, 14]); c.strokeStyle = 'rgba(12,8,22,0.5)'; c.lineWidth = 13; c.strokeRect(6, 6, w - 12, h - 12); c.strokeStyle = col; c.lineWidth = 8; c.strokeRect(6, 6, w - 12, h - 12); c.setLineDash([]); c.lineWidth = 5; [[6, 6, 1, 1], [w - 6, 6, -1, 1], [6, h - 6, 1, -1], [w - 6, h - 6, -1, -1]].forEach(function (k) { c.beginPath(); c.moveTo(k[0] + k[2] * 22, k[1]); c.lineTo(k[0], k[1]); c.lineTo(k[0], k[1] + k[3] * 22); c.stroke(); }); });
@@ -6223,9 +6233,9 @@ button kbd { min-width: 0; margin: 0 0 0 0.3em; line-height: 1; padding: 0 0.32e
   // bay's own 3 s wait ran out (after, the route had already moved on to the way out; a release there must not skip it)
   function demoRelease() { S.dwell = 0; if (world && world.demoWps && world.demoExit !== undefined) S.wp = Math.max(S.wp, world.demoExit); }
   function openKiosk(st, auto) {
-    if (!TOUCH) keyHint('kiosk', '<kbd>Enter</kbd> próximo · <kbd>Esc</kbd> dirigir', function () { return HINT_KEYS.has('Enter') || HINT_KEYS.has('NumpadEnter') || HINT_KEYS.has('Escape') || !KS.open; }, true);
     const d = KIOSK_DATA.KIOSK[st.id] || { head: null, period: null, bullets: [], cases: [], video: null, highlight: true }, card = st.card || { title: '', period: '', text: '' }, L = KIOSK_DATA.LABELS;
     if (S.tour && S.tour.target === st) tourStop('arrived');
+    if (!TOUCH && !auto) keyHint('kiosk', '<kbd>Enter</kbd> próximo · <kbd>Esc</kbd> dirigir', function () { return HINT_KEYS.has('Enter') || HINT_KEYS.has('NumpadEnter') || HINT_KEYS.has('Escape') || !KS.open; }, true);
     KS.open = true; KS.st = st; KS.t = 0; KS.armed = false; kioskFrame();
     if (!st.visited) { st.visited = true; st.mark.children[1].material.color.lerp(new THREE.Color(0x555566), 0.6); } // a stop seen: its pointer greys
     $('kTitle').textContent = d.head || card.title; $('kPer').textContent = d.period || card.period || '';
@@ -6236,13 +6246,13 @@ button kbd { min-width: 0; margin: 0 0 0 0.3em; line-height: 1; padding: 0 0.32e
     $('kNext').textContent = L.next; $('kDrive').textContent = L.drive;
     beatsOff(); const bt = d.beats || [];
     if (bt.length) { KB.on = true; KB.list = bt; KB.n = bt.length; KB.els = bt.map(function (b) { return b.kind === 'bullet' ? ul.children[b.index] : b.kind === 'case' ? cs.children[b.index] : v; }); KB.els.forEach(function (e, j) { if (e) e.dataset.beat = j; }); }
-    const el = $('kiosk'); el.hidden = false; el.classList.toggle('photo-off', !!S.photo); el.scrollTop = 0; stage.classList.add('kiosk-open'); layoutKiosk();
+    const el = $('kiosk'); el.hidden = false; el.classList.toggle('photo-off', !!S.photo); el.scrollTop = 0; stage.classList.add('kiosk-open'); layoutKiosk(); hintReplace();
     if (KB.on) { KB.auto = !!auto; if (KB.auto) S.dwell = Math.max(S.dwell, 999); beatGo(0); } // the demo's kiosk holds it at the bay while it is open (the bay's own wait is 3 s, so a hold no kiosk takes up never strands it)
     $('kNext').focus({ preventScroll: true });
   }
   function closeKiosk(how) {
     if (!KS.open) return; KS.open = false; beatsOff();
-    const el = $('kiosk'), refocus = el.contains(document.activeElement); el.hidden = true; stage.classList.remove('kiosk-open'); $('kVid').pause();
+    const el = $('kiosk'), refocus = el.contains(document.activeElement); el.hidden = true; stage.classList.remove('kiosk-open'); hintReplace(); $('kVid').pause();
     if (refocus) canvas.focus({ preventScroll: true });
     if (how === 'next') tourStart();
   }
@@ -6403,7 +6413,7 @@ button kbd { min-width: 0; margin: 0 0 0 0.3em; line-height: 1; padding: 0 0.32e
     const next = ERAS[(idx + 1) % CYCLE];
     world = S.era.kind === 'nature' ? buildExercito(S.era, next) : S.era.kind === 'space' ? buildEvig(S.era, next) : S.era.kind === 'finale' ? buildFinale(S.era) : buildCity(S.era, next);
     world.goal = GOALS[S.era.id] || null;
-    if (world.flight) keyHint('fly', TOUCH ? 'Use ▲ e ▼ para subir e descer' : '<kbd>E</kbd> sobe · <kbd>Q</kbd> desce', function () { return (HINT_KEYS.has('KeyE') || HINT_KEYS.has('Space')) && (HINT_KEYS.has('KeyQ') || HINT_KEYS.has('ShiftLeft') || HINT_KEYS.has('ShiftRight')); });
+    KH.cur = null; HINT_Q.length = 0; if (world.flight) keyHint('fly', TOUCH ? 'Use ▲ e ▼ para subir e descer' : '<kbd>E</kbd> sobe · <kbd>Q</kbd> desce', function () { return (HINT_KEYS.has('KeyE') || HINT_KEYS.has('Space')) && (HINT_KEYS.has('KeyQ') || HINT_KEYS.has('ShiftLeft') || HINT_KEYS.has('ShiftRight')); });
     { const tp = world.group.getObjectByName('portal-do-tempo'); world.portal3 = tp ? tp.userData.portal : null; world.portalLabel = tp ? tp.userData.labelSprite : null; if (tp) world.updates.push(tp.userData.update); }
     // floating screens block what flies or jumps into them
     world.group.children.forEach(function (o) { const ss = o.userData.screenSize; if (!ss) return; const sc = addBoxCol(o.position.x, o.position.z, (ss[0] + 0.5) / 2, 0.3, o.rotation.y, o.position.y - ss[1] / 2 - 0.25, o.position.y + ss[1] / 2 + 0.25); sc.name = 'telão'; sc.tag = 'telão'; });
@@ -6546,7 +6556,7 @@ button kbd { min-width: 0; margin: 0 0 0 0.3em; line-height: 1; padding: 0 0.32e
     // The way out of a bay (S.bayOut: a stop active or left less than 3 s ago, the car within 6 m of it): a car that runs into the curb, a facade or a prop beside the bay turns
     // back to the bay's own heading (S.bayH, the way out that is always clear) and scrapes on (spec 2026-10-29 R6). It used to grind into it with the wheel turned, turning on
     // the spot, wedged between the facade and the RedBit's ecoponto or the Valiant's tree and bench, until the stop opened again under the keys.
-    if (S.bayOut > 0 && CAR_HIT.on && inp.thr > 0 && Math.hypot(c.x - S.bayX, c.z - S.bayZ) < 6) c.h += clamp(wrap(S.bayH - c.h), -6 * dt, 6 * dt);
+    if (S.bayOut > 0 && CAR_HIT.on && inp.thr > 0 && Math.hypot(c.x - S.bayX, c.z - S.bayZ) < 6) { const bh = Math.abs(wrap(S.bayH - c.h)) <= Math.PI / 2 ? S.bayH : S.bayH + Math.PI; c.h += clamp(wrap(bh - c.h), -6 * dt, 6 * dt); } /* the bay's line either way: a car parked the other way round is not swung round */
     if (Math.abs(c.lat) > 2.2 && !c.air && !world.hover) [-0.9, 0.9].forEach(function (s) { emitTrail(c.x + rx * s - fx * 1.4, c.y, c.z + rz * s - fz * 1.4, c.h, S.neon ? 0xc8ff3d : S.era.color, 2.6, false); });
     stepBodies(dt);
     // The exit is a ring you drive through (P6): the car crosses the portal's plane from larger z with its nose forward (backing through it does nothing). Above the ring's centre
@@ -6824,24 +6834,24 @@ button kbd { min-width: 0; margin: 0 0 0 0.3em; line-height: 1; padding: 0 0.32e
     if (visible && (!reduce || active)) requestAnimationFrame(frame); else running = false;
   }
   function kick() { if (!world) return; if (!running && visible && (!reduce || active)) { running = true; last = performance.now(); requestAnimationFrame(frame); } }
-  function size() { const w = canvas.clientWidth, h = canvas.clientHeight; if (!w || !h) return; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); if (!running && world) { updateCamera(1); renderer.render(scene, camera); } }
+  function size() { const w = canvas.clientWidth, h = canvas.clientHeight; if (!w || !h) return; hintReplace(); renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); if (!running && world) { updateCamera(1); renderer.render(scene, camera); } }
 
   /* ------------------------------------------------ input & ui ------------------------------------------------ */
   // P3-4: the game opens in attract mode (the demo car crosses the EsPCEx gate 0.4 s after the load). The first activation (Start, a key, a tap) restarts era 0 from the arrival, so every player sees the
   // gate, the sentinel, the bugle and the chapter card; later activations (after Esc) leave the game where it is.
   let started = false;
-  function activate() { if (active) return; active = true; soundCue(); if (!TOUCH) keyHint('drift', '<kbd>Espaço</kbd> derrapa', function () { return HINT_KEYS.has('Space'); }); stage.classList.add('active'); canvas.tabIndex = 0; canvas.focus({ preventScroll: true }); if (!started) { started = true; if (world) { S.lastDate = '--- ----'; S.plu = 0; S.trip = tripNew(); tripRender(); S.photo = false; enterEra(0); S.car.speed = 6; $('plu').textContent = '☢ 0/25'; } } S.demo = false; S.idle = 0; kick(); }
+  function activate() { if (active) return; active = true; stage.classList.add('active'); canvas.tabIndex = 0; canvas.focus({ preventScroll: true }); if (!started) { started = true; if (world) { S.lastDate = '--- ----'; S.plu = 0; S.trip = tripNew(); tripRender(); S.photo = false; enterEra(0); S.car.speed = 6; $('plu').textContent = '☢ 0/25'; } } S.demo = false; S.idle = 0; soundCue(); if (!TOUCH) keyHint('drift', '<kbd>Espaço</kbd> derrapa', function () { return HINT_KEYS.has('Space'); }); kick(); }
   /* ------------------------------------------------ keys in context and the sound cue (spec 2026-10-29 §3.2 and §3.3) ------------------------------------------------ */
   // TOUCH: a finger (a coarse pointer) draws no key and gets bigger buttons with words; it follows the pointer, never the screen's size, so turning a phone changes nothing.
   const touchMQ = window.matchMedia('(pointer: coarse)'); let TOUCH = touchMQ.matches;
   function applyTouch() { stage.classList.toggle('touch', TOUCH); $('upBtn').innerHTML = TOUCH ? '▲ Subir' : '▲<kbd>E</kbd>'; $('downBtn').innerHTML = TOUCH ? '▼ Descer' : '▼<kbd>Q</kbd>'; }
   if (touchMQ.addEventListener) touchMQ.addEventListener('change', function (e) { TOUCH = e.matches; applyTouch(); }); applyTouch();
   // A key hint: one at a time, at most once a visit (HINTS_SEEN, the page's memory), gone when done() turns true or after 8 s on screen, the next one queued; never in the demo, the
-  // tour, photo mode or the showroom. HINT_KEYS: the keys (and touch buttons) used since the current hint showed. Over the kiosk or the card it moves to the free part of the screen.
-  const HINTS_SEEN = new Set(), HINT_Q = [], HINT_KEYS = new Set(), KH = { cur: null, t: 0, shown: false, carry: false, hornT: 0 };
+  // tour, photo mode or the showroom, nor queued there (a kiosk the demo opens or a flight era it passes left its hint for the visitor, spent or out of place); a new era empties the queue. HINT_KEYS: the keys (and touch buttons) used since the current hint showed. Over the kiosk or the card it moves to the free part of the screen.
+  const HINTS_SEEN = new Set(), HINT_Q = [], HINT_KEYS = new Set(), KH = { cur: null, t: 0, shown: false, carry: false, hornT: 0, placed: false };
   // urgent (the kiosk's and the package's, the mission's own): it goes first, and the hint on screen goes back to the queue's head
   function keyHint(id, html, done, urgent) {
-    if (HINTS_SEEN.has(id) || (KH.cur && KH.cur.id === id) || HINT_Q.some(function (q) { return q.id === id; })) return; const h = { id: id, html: html, done: done };
+    if (hintBlocked() || HINTS_SEEN.has(id) || (KH.cur && KH.cur.id === id) || HINT_Q.some(function (q) { return q.id === id; })) return; const h = { id: id, html: html, done: done };
     if (!urgent) { HINT_Q.push(h); return; } if (KH.cur) { HINT_Q.unshift(KH.cur); KH.cur = null; } HINT_Q.unshift(h);
   }
   function hintBlocked() { return S.demo || S.tour || S.photo || S.era.kind === 'finale'; }
@@ -6860,14 +6870,16 @@ button kbd { min-width: 0; margin: 0 0 0 0.3em; line-height: 1; padding: 0 0.32e
     KH.carry = S.carrying;
     const block = hintBlocked();
     if (KH.cur && !block) { KH.t += dt; if (KH.cur.done() || KH.t >= 8) { HINTS_SEEN.add(KH.cur.id); KH.cur = null; } }
-    if (!KH.cur && HINT_Q.length && !block) { KH.cur = HINT_Q.shift(); KH.t = 0; HINT_KEYS.clear(); el.innerHTML = KH.cur.html; el.classList.toggle('by-lift', TOUCH && KH.cur.id === 'fly'); el.classList.remove('top'); el.style.left = ''; }
+    if (!KH.cur && HINT_Q.length && !block) { KH.cur = HINT_Q.shift(); KH.t = 0; HINT_KEYS.clear(); el.innerHTML = KH.cur.html; el.classList.toggle('by-lift', TOUCH && KH.cur.id === 'fly'); KH.placed = false; }
     const show = !!KH.cur && !block; if (el.hidden === show) el.hidden = !show; KH.shown = show;
-    if (show && !el.classList.contains('by-lift')) { /* the free part of the screen when the kiosk or the card is in the way */
-      const sr = stage.getBoundingClientRect(), r = el.getBoundingClientRect(), hit = function (sel) { const e = document.querySelector(sel); if (!e || e.hidden || getComputedStyle(e).display === 'none') return null; const q = e.getBoundingClientRect(); return q.width && q.left < r.right && r.left < q.right && q.top < r.bottom && r.top < q.bottom ? q : null; };
-      const q = hit('#kiosk') || hit('#card');
+    if (show && !KH.placed && !el.classList.contains('by-lift')) { /* the free part of the screen when the kiosk or the card is in the way: placed once, again when one of them or the window changes (hintReplace) */
+      KH.placed = true; el.classList.remove('top'); el.style.left = '';
+      const sr = stage.getBoundingClientRect(), r = el.getBoundingClientRect(), q = hintHit('#kiosk', r) || hintHit('#card', r);
       if (q) { if (q.left - sr.left > r.width + 16) el.style.left = ((q.left - sr.left) / 2) + 'px'; else el.classList.add('top'); }
     }
   }
+  function hintHit(sel, r) { const e = document.querySelector(sel); if (!e || e.hidden || getComputedStyle(e).display === 'none') return null; const q = e.getBoundingClientRect(); return q.width && q.left < r.right && r.left < q.right && q.top < r.bottom && r.top < q.bottom ? q : null; }
+  function hintReplace() { KH.placed = false; }
   // the sound cue: on the first Dirigir of the visit, a big notice for 4 s and the Som button pulsing (a steady border with reduced motion) until it is used or 20 s go by
   const SCUE = { done: false, t: 0, pulse: 0, cls: '' };
   function soundCue() {
@@ -7046,7 +7058,8 @@ button kbd { min-width: 0; margin: 0 0 0 0.3em; line-height: 1; padding: 0 0.32e
       gallery: function () {
         const G = PLC && PLC.gallery; if (!G || S.era.id !== 'redbit') return null;
         const bytes = performance.getEntriesByType('resource').filter(function (r) { return /redbit-sites/.test(r.name); }).reduce(function (a, r) { return a + (r.encodedBodySize || r.transferSize || 0); }, 0);
-        return { loaded: G.loaded >= 2, rows: G.rows.length, meshes: G.rows.length, tiles: G.tiles, offsets: G.off.slice(), yaw: G.group.rotation.y, bytes: bytes };
+        let meshes = 0; G.group.traverse(function (o) { if (o.isMesh && o.visible) meshes++; }); /* every draw of the gallery: the rows, the back and the struts */
+        return { loaded: G.loaded >= 2, rows: G.rows.length, meshes: meshes, tiles: G.tiles, offsets: G.off.slice(), yaw: G.group.rotation.y, bytes: bytes };
       },
       // the scene rules from the camera (cam: { pos, look } fixes it; without, the camera as it is). R1: each marked sign in the frame and within 60 m, rays to 9 points of its
       // text area, hits = the rays nothing stops before it; R3: each subject, blocked = the rays something stops, by = what; R4: each overlay, the share of its rectangle on the
