@@ -3479,8 +3479,8 @@ button kbd { min-width: 0; margin: 0 0 0 0.3em; line-height: 1; padding: 0 0.32e
         // the other two lots: the bakery and the pharmacy, facing the east street
         const f1 = h.front(B, h.LOW[Math.floor(B.R() * h.LOW.length)], 1, -1, 'x', h.SN.pao, Math.floor(B.R() * 4)), f2 = h.front(B, h.LOW[Math.floor(B.R() * h.LOW.length)], 1, 1, 'x', h.SN.drogaria, Math.floor(B.R() * 4));
         h.kit(B, 'bicicletario', cx - 12.4, cz + 3.4, -Math.PI / 2);
-        // the people by the door stand against the glass (x 10.9), past the bay's curb opening (x 6 to 10.5) and clear of the car's way out
-        B.spots.push({ x: bx0 - 0.6, z: bz + 3.4, h: plFacing(1, 0), anim: 'idle' }, { x: bx0 - 0.6, z: bz - 3.8, h: plFacing(1, 0), anim: 'holding-both' }, { x: cx - 10.0, z: cz + 5.4, h: plFacing(0, -1), anim: 'idle' });
+        // the people by the door stand against the glass (x 10.9), past the bay's curb opening (x 6 to 10.5) and clear of the car's way out; the south one north of the ecoponto (z 52.8 to 54.8), or its spot is dropped
+        B.spots.push({ x: bx0 - 0.6, z: bz + 3.4, h: plFacing(1, 0), anim: 'idle' }, { x: bx0 - 0.6, z: bz - 2.0, h: plFacing(1, 0), anim: 'holding-both' }, { x: cx - 10.0, z: cz + 5.4, h: plFacing(0, -1), anim: 'idle' });
         return { skipSide: avenueSide, noLamp: function (sd) { return sd.dx === -1; }, curbGaps: [plGap(cx - 15.0, cx - 10.5, bz)], clear: [{ x0: cx - 14.2, x1: cx - 10.5, z0: bz - 6, z1: bz + 6 }] };
       };
     }
